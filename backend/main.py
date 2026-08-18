@@ -449,7 +449,8 @@ def chat(
         )
         path_generated = True
         reply, source = assistant.acknowledge_goal(
-            catalog, profile, path, interpretation, use_provider
+            catalog, profile, path, interpretation, use_provider,
+            all_paths=db.list_paths(profile.learner_id),
         )
     else:
         reply, source = assistant.answer(
@@ -459,6 +460,7 @@ def chat(
             message,
             history=db.get_conversation(profile.learner_id, limit=10)[:-1],
             use_provider=use_provider,
+            all_paths=db.list_paths(profile.learner_id),
         )
         # "I already know SQL" is an instruction, not small talk: credit the
         # skill and rebuild, so the plan shrinks instead of the learner being

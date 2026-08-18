@@ -23,7 +23,12 @@ from typing import Any, Optional
 from . import llm
 from .catalog import Catalog, Goal
 from .config import CHAT_MAX_TOKENS, EXTRACT_MAX_TOKENS
-from .models import GoalInterpretation, LearnerProfile, LearningPath
+from .models import (
+    MAX_ACTIVE_PATHS,
+    GoalInterpretation,
+    LearnerProfile,
+    LearningPath,
+)
 
 log = logging.getLogger("assistant")
 
@@ -676,9 +681,27 @@ def _progress_snapshot(path: Optional[LearningPath]) -> dict[str, Any]:
 
 
 def _context_block(
-    catalog: Catalog, profile: LearnerProfile, path: Optional[LearningPath]
+    catalog: Catalog,
+    profile: LearnerProfile,
+    path: Optional[LearningPath],
+    all_paths: Optional[list[LearningPath]] = None,
 ) -> str:
     lines = [
+        "WHAT THIS PRODUCT CAN DO — state these as fact, never guess at them:",
+        f"- A learner can run up to {MAX_ACTIVE_PATHS} goals at the same time, "
+        "each with its own roadmap and its own progress. Adding a goal does NOT "
+        "delete or replace the others; switching between them changes only what "
+        "is on screen. Never tell a learner they must abandon a path.",
+        "- They can add a course to a path by hand, or remove one, and the "
+        "planner re-places everything by prerequisite.",
+        "- Progress is recorded per course, so finishing one advances every path "
+        "it appears on.",
+        "",
+        "GOALS THIS CATALOGUE COVERS (there are no others — if a learner asks "
+        "for something not on this list, say plainly that it is not covered and "
+        "name the nearest ones, rather than offering to build it):",
+        *(f"- {goal.title}" for goal in catalog.goals.values()),
+        "",
         "LEARNER",
         f"- name: {profile.name}",
         f"- their own words: {profile.goal_text or '(none given)'}",
@@ -747,6 +770,7 @@ def answer(
     question: str,
     history: list[dict[str, str]] | None = None,
     use_provider: bool = True,
+    all_paths: list[LearningPath] | None = None,
 ) -> tuple[str, str]:
     """Answer a learner question. Returns (reply, source)."""
     if not use_provider:
@@ -774,6 +798,7 @@ def acknowledge_goal(
     path: LearningPath,
     interpretation: GoalInterpretation,
     use_provider: bool = True,
+    all_paths: list[LearningPath] | None = None,
 ) -> tuple[str, str]:
     """The reply sent right after a goal is captured and a path built."""
     if not use_provider:

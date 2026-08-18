@@ -141,14 +141,8 @@ async function boot() {
     const health = await api("/api/health");
     state.llm = health.llm_enabled;
     state.providerName = health.provider;
-    const badge = $("#engineBadge");
-    badge.textContent = health.llm_enabled
-      ? `${health.provider} · ${health.model}`
-      : "Rule engine (no provider)";
-    badge.className = "badge " + (health.llm_enabled ? "badge-live" : "badge-rules");
-    badge.title = health.llm_enabled
-      ? `${health.assistant_name} is running on ${health.provider} (${health.model}). Configured: ${health.configured_providers.join(", ")}.`
-      : `No provider credential found. ${health.assistant_name} is running on the deterministic rule engine — everything works, replies are just less fluent. Supported: ${(health.available_providers || []).join(", ")}.`;
+    state.modelName = health.model;
+    renderEngineSwitch();
   } catch (err) {
     toast("Cannot reach the API. Is the server running?");
     return;
@@ -183,44 +177,72 @@ function renderLearnerSelect(learners, activeId) {
 $("#learnerSelect").addEventListener("change", (e) => selectLearner(e.target.value));
 
 /* ---------------------------------------------------------- engine choice */
+/* Two engines answer the chat: the configured model, or the deterministic
+   Standard engine that ships with the app. The choice is per learner. */
+function engineLabel() {
+  return state.llm && state.providerName
+    ? state.providerName.charAt(0).toUpperCase() + state.providerName.slice(1)
+    : "AI model";
+}
+
 function renderEngineSwitch() {
   const chosen = state.profile?.assistant_engine || "auto";
   $$(".engine-switch .seg").forEach((btn) => {
-    btn.classList.toggle("is-on", btn.dataset.engine === chosen);
-    btn.setAttribute("aria-pressed", String(btn.dataset.engine === chosen));
+    const on = btn.dataset.engine === chosen;
+    btn.classList.toggle("is-on", on);
+    btn.setAttribute("aria-pressed", String(on));
   });
-  // Naming the live provider is more useful than the word "auto".
-  $("#engineAuto").textContent = state.llm && state.providerName
-    ? state.providerName
-    : "AI model";
-  $("#engineAuto").disabled = !state.llm;
-  $("#engineAuto").title = state.llm
-    ? "Answers come from the configured model, falling back to the rules if it fails"
+
+  const ai = $("#engineAuto");
+  ai.textContent = engineLabel();
+  ai.disabled = !state.llm;
+  ai.title = state.llm
+    ? `Answers come from ${engineLabel()}, falling back to the Standard engine if it fails`
     : "No provider configured — add a key in .env to enable this";
+
+  // The badge has to agree with the switch, or flipping it looks like nothing
+  // happened. It reports what will actually answer the next message.
+  const badge = $("#engineBadge");
+  if (chosen === "rules") {
+    badge.textContent = "Standard engine · offline";
+    badge.className = "badge badge-rules";
+    badge.title = "Deterministic answers computed from your path. No model call, "
+      + "no network, identical every time.";
+  } else if (state.llm) {
+    badge.textContent = `${engineLabel()} · ${state.modelName || ""}`.trim();
+    badge.className = "badge badge-live";
+    badge.title = `Answers come from ${engineLabel()}. If it is unavailable or out `
+      + "of quota, the Standard engine answers instead and the reply says so.";
+  } else {
+    badge.textContent = "Standard engine · no provider";
+    badge.className = "badge badge-rules";
+    badge.title = "No provider credential found, so the Standard engine answers "
+      + "everything. The product works fully without one.";
+  }
 }
 
-$$(".engine-switch .seg").forEach((btn) => {
-  btn.addEventListener("click", async () => {
-    const engine = btn.dataset.engine;
-    if (!state.profile || state.profile.assistant_engine === engine) return;
-    try {
-      state.profile = await api(`/api/learners/${state.learnerId}/profile?regenerate=false`, {
-        method: "PATCH", body: JSON.stringify({ assistant_engine: engine }),
-      });
-      renderEngineSwitch();
-      toast(engine === "rules"
-        ? "Switched to the rule engine — instant, offline, fully deterministic."
-        : "Switched to the AI model — replies will be more conversational.", 3600);
-    } catch (err) { toast(err.message); }
-  });
-});
-
-$("#newLearnerBtn").addEventListener("click", async () => {
-  const profile = await api("/api/learners", { method: "POST", body: "{}" });
-  const learners = await api("/api/learners");
-  renderLearnerSelect(learners, profile.learner_id);
-  await selectLearner(profile.learner_id);
-  toast("New learner created. Describe a goal to begin.");
+/* Delegated, so the handler cannot be missed however the header is rebuilt. */
+document.addEventListener("click", async (event) => {
+  const btn = event.target.closest?.(".engine-switch .seg");
+  if (!btn || btn.disabled) return;
+  const engine = btn.dataset.engine;
+  if (!state.learnerId) return;
+  if (state.profile?.assistant_engine === engine) {
+    toast(engine === "rules"
+      ? "Already using the Standard engine."
+      : `Already using ${engineLabel()}.`);
+    return;
+  }
+  try {
+    state.profile = await api(
+      `/api/learners/${state.learnerId}/profile?regenerate=false`,
+      { method: "PATCH", body: JSON.stringify({ assistant_engine: engine }) },
+    );
+    renderEngineSwitch();
+    toast(engine === "rules"
+      ? "Standard engine — instant, offline, and identical every time."
+      : `${engineLabel()} — replies will be more conversational.`, 3600);
+  } catch (err) { toast(err.message); }
 });
 
 async function selectLearner(id) {
@@ -296,7 +318,7 @@ $("#chatForm").addEventListener("submit", async (event) => {
     pending.appendChild(el("div", {
       class: "msg-meta",
       text: res.source === "rules"
-        ? "Answered by the rule engine"
+        ? "Answered by the Standard engine"
         : `Answered by ${res.source}`,
     }));
     state.profile = res.profile;
