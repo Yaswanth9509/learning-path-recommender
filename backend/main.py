@@ -1,0 +1,845 @@
+"""HTTP API and static hosting for the Personalised Learning Path Recommender."""
+
+from __future__ import annotations
+
+import logging
+import uuid
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Optional
+
+from fastapi import Body, Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
+
+from . import (
+    assistant,
+    dashboard as dashboard_engine,
+    insights,
+    llm,
+    profiling,
+    recommender,
+    security,
+)
+from .catalog import Catalog, CatalogError, get_catalog
+from .db import Database, get_db
+from .gap import analyze
+from .models import (
+    Achievements,
+    ChatRequest,
+    ChatResponse,
+    Dashboard,
+    FeedbackEntry,
+    FeedbackRequest,
+    LearnerProfile,
+    LearningPath,
+    PaceReport,
+    ProfileUpdate,
+    ProgressUpdate,
+    Recommendation,
+    SkillGraph,
+    WeeklyPlan,
+)
+from .pathgen import generate_path
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+log = logging.getLogger("api")
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+app = FastAPI(
+    title="AI-Powered Personalised Learning Path Recommender",
+    description=(
+        "Conversational goal capture, learner profiling, prerequisite-aware "
+        "path generation, explainable recommendations, and progress tracking."
+    ),
+    version="1.0.0",
+)
+
+# Optional API key, per-caller rate limiting, and response hardening. All of it
+# is off or generous by default so the local demo needs no configuration; see
+# `security.py` for the environment variables that tighten it for a deployment.
+app.middleware("http")(security.gate_request)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=security.allowed_origins(),
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.exception_handler(Exception)
+async def unhandled_error(request, exc: Exception) -> JSONResponse:
+    """Log the traceback server-side; never return internals to the caller."""
+    log.exception("unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "internal server error"})
+
+
+def catalog_dep() -> Catalog:
+    try:
+        return get_catalog()
+    except CatalogError as exc:  # pragma: no cover - fails at startup if ever
+        raise HTTPException(status_code=500, detail=f"catalog error: {exc}") from exc
+
+
+def db_dep() -> Database:
+    return get_db()
+
+
+# ------------------------------------------------------------------- helpers
+def _load_profile(db: Database, learner_id: str) -> LearnerProfile:
+    profile = db.get_profile(learner_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail=f"unknown learner '{learner_id}'")
+    return profile
+
+
+def _resolve_goal(catalog: Catalog, profile: LearnerProfile) -> str:
+    if not profile.goal_id:
+        raise HTTPException(
+            status_code=400,
+            detail="This learner has no goal yet. Describe a goal in the chat, "
+            "or set goal_id on the profile first.",
+        )
+    if profile.goal_id not in catalog.goals:
+        raise HTTPException(
+            status_code=400, detail=f"unknown goal '{profile.goal_id}'"
+        )
+    return profile.goal_id
+
+
+def _regenerate(
+    catalog: Catalog,
+    db: Database,
+    profile: LearnerProfile,
+    notes: list[str] | None = None,
+) -> LearningPath:
+    """Rebuild the path from the current profile, preserving progress."""
+    goal_id = _resolve_goal(catalog, profile)
+    profiling.sync_completions(
+        catalog,
+        profile,
+        db.completed_items(profile.learner_id),
+        tracked_item_ids=list(db.get_progress(profile.learner_id)),
+    )
+    db.save_profile(profile)
+
+    derived = profiling.derive(catalog, profile)
+    previous = db.get_path(profile.learner_id)
+    revision = (previous.revision + 1) if previous else 1
+
+    path = generate_path(
+        catalog=catalog,
+        derived=derived,
+        goal_id=goal_id,
+        progress=db.get_progress(profile.learner_id),
+        adaptation_notes=notes or [],
+        revision=revision,
+    )
+    db.save_path(path)
+    return path
+
+
+# -------------------------------------------------------------------- system
+@app.get("/api/health")
+def health() -> dict:
+    status = llm.status()
+    catalog = get_catalog()
+    return {
+        "status": "ok",
+        "llm_enabled": status["enabled"],
+        "provider": status["provider"],
+        "model": status["model"],
+        "assistant_mode": status["mode"],
+        "assistant_name": assistant.ASSISTANT_NAME,
+        "configured_providers": status["configured_providers"],
+        "available_providers": list(llm.DEFAULT_MODELS),
+        "catalog": {
+            "skills": len(catalog.skills),
+            "items": len(catalog.items),
+            "goals": len(catalog.goals),
+        },
+        "security": security.status(),
+    }
+
+
+# ------------------------------------------------------------------- catalog
+@app.get("/api/catalog/goals")
+def list_goals(catalog: Catalog = Depends(catalog_dep)) -> list[dict]:
+    return [
+        {
+            "id": goal.id,
+            "title": goal.title,
+            "domain": goal.domain,
+            "description": goal.description,
+            "typical_roles": list(goal.typical_roles),
+            "target_skills": list(goal.target_skills),
+            "target_skill_names": [catalog.skill_name(s) for s in goal.target_skills],
+        }
+        for goal in catalog.goals.values()
+    ]
+
+
+@app.get("/api/catalog/skills")
+def list_skills(catalog: Catalog = Depends(catalog_dep)) -> list[dict]:
+    return [
+        {
+            "id": s.id,
+            "name": s.name,
+            "domain": s.domain,
+            "level": s.level,
+            "description": s.description,
+            "prerequisites": list(s.prerequisites),
+            "prerequisite_names": [catalog.skill_name(p) for p in s.prerequisites],
+        }
+        for s in catalog.skills.values()
+    ]
+
+
+@app.get("/api/catalog/items")
+def list_items(
+    catalog: Catalog = Depends(catalog_dep),
+    item_type: Optional[str] = Query(None, alias="type"),
+) -> list[dict]:
+    items = catalog.items.values()
+    if item_type:
+        items = [i for i in items if i.type == item_type]
+    return [
+        {
+            "id": i.id,
+            "title": i.title,
+            "provider": i.provider,
+            "type": i.type,
+            "level": i.level,
+            "hours": i.hours,
+            "rating": i.rating,
+            "format": i.format,
+            "cost": i.cost,
+            "domain": i.domain,
+            "description": i.description,
+            "url": i.url,
+            "teaches": list(i.teaches),
+            "teaches_names": [catalog.skill_name(s) for s in i.teaches],
+        }
+        for i in items
+    ]
+
+
+# ------------------------------------------------------------------ learners
+@app.post("/api/learners", response_model=LearnerProfile, status_code=201)
+def create_learner(
+    payload: ProfileUpdate = Body(default_factory=ProfileUpdate),
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearnerProfile:
+    profile = LearnerProfile(learner_id=uuid.uuid4().hex[:10])
+    _apply_update(catalog, profile, payload)
+    return db.save_profile(profile)
+
+
+@app.get("/api/learners", response_model=list[LearnerProfile])
+def list_learners(db: Database = Depends(db_dep)) -> list[LearnerProfile]:
+    return db.list_profiles()
+
+
+@app.get("/api/learners/{learner_id}/profile", response_model=LearnerProfile)
+def get_profile(
+    learner_id: str, db: Database = Depends(db_dep)
+) -> LearnerProfile:
+    return _load_profile(db, learner_id)
+
+
+@app.get("/api/learners/{learner_id}/profile/summary")
+def profile_summary(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    profile = _load_profile(db, learner_id)
+    derived = profiling.derive(catalog, profile)
+    return {
+        "summary": profiling.summarize(catalog, derived),
+        "direct_skills": sorted(derived.direct_skills),
+        "direct_skill_names": sorted(
+            catalog.skill_name(s) for s in derived.direct_skills
+        ),
+        "implied_skills": sorted(derived.implied_skills),
+        "implied_skill_names": sorted(
+            catalog.skill_name(s) for s in derived.implied_skills
+        ),
+        "interest_domains": sorted(derived.interest_domains),
+        "target_level": profile.target_level,
+    }
+
+
+def _apply_update(
+    catalog: Catalog, profile: LearnerProfile, payload: ProfileUpdate
+) -> None:
+    data = payload.model_dump(exclude_unset=True, exclude_none=True)
+
+    if "goal_id" in data and data["goal_id"] not in catalog.goals:
+        raise HTTPException(status_code=400, detail=f"unknown goal '{data['goal_id']}'")
+
+    for field in ("declared_skills", "extra_target_skills"):
+        if field in data:
+            unknown = [s for s in data[field] if s not in catalog.skills]
+            if unknown:
+                raise HTTPException(
+                    status_code=400, detail=f"unknown skill ids in {field}: {unknown}"
+                )
+
+    if "completed_item_ids" in data:
+        unknown = [i for i in data["completed_item_ids"] if i not in catalog.items]
+        if unknown:
+            raise HTTPException(
+                status_code=400, detail=f"unknown item ids: {unknown}"
+            )
+
+    if "preferred_formats" in data:
+        allowed = {"video", "interactive", "reading", "project"}
+        bad = [f for f in data["preferred_formats"] if f not in allowed]
+        if bad:
+            raise HTTPException(status_code=400, detail=f"unknown formats: {bad}")
+
+    for key, value in data.items():
+        setattr(profile, key, value)
+
+
+@app.patch("/api/learners/{learner_id}/profile", response_model=LearnerProfile)
+def update_profile(
+    learner_id: str,
+    payload: ProfileUpdate,
+    regenerate: bool = Query(True, description="Rebuild the path after updating"),
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearnerProfile:
+    profile = _load_profile(db, learner_id)
+    _apply_update(catalog, profile, payload)
+    db.save_profile(profile)
+
+    if regenerate and profile.goal_id:
+        _regenerate(catalog, db, profile, notes=["Path rebuilt after a profile change."])
+    return profile
+
+
+@app.delete("/api/learners/{learner_id}", status_code=204)
+def delete_learner(learner_id: str, db: Database = Depends(db_dep)) -> None:
+    _load_profile(db, learner_id)
+    db.delete_learner(learner_id)
+
+
+# ---------------------------------------------------------------------- chat
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(
+    payload: ChatRequest,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> ChatResponse:
+    """Conversational entry point.
+
+    A message either (a) states a goal, in which case the profile is updated and
+    a path generated, or (b) asks a question, which is answered against the
+    learner's existing path.
+    """
+    message = payload.message.strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="message must not be empty")
+
+    profile = db.get_profile(payload.learner_id)
+    if profile is None:
+        profile = LearnerProfile(learner_id=payload.learner_id)
+        db.save_profile(profile)
+
+    db.add_message(profile.learner_id, "user", message)
+    existing_path = db.get_path(profile.learner_id)
+
+    interpretation = assistant.interpret_goal(catalog, message)
+
+    # A learner with no goal yet who says something the rules cannot pin to one
+    # goal gets asked, not guessed at — a wrong roadmap costs them months. A
+    # provider that identified a goal confidently is trusted over the keywords.
+    if profile.goal_id is None and existing_path is None:
+        ambiguous = assistant.clarification(catalog, message)
+        if ambiguous is not None and (
+            interpretation.goal_id is None
+            or interpretation.confidence < assistant.CLARIFY_TRUST_CONFIDENCE
+        ):
+            question, options = ambiguous
+            db.add_message(profile.learner_id, "assistant", question)
+            return ChatResponse(
+                reply=question,
+                interpretation=interpretation,
+                profile=db.get_profile(profile.learner_id),
+                path_generated=False,
+                source="rules",
+                suggested_replies=options,
+                needs_clarification=True,
+            )
+
+    # Treat the message as a goal statement only when it identifies a goal we
+    # do not already have, or the learner is explicitly switching goals.
+    switching = any(
+        phrase in message.lower()
+        for phrase in ("instead", "switch", "change my goal", "actually i want", "now i want")
+    )
+    is_goal_statement = interpretation.goal_id is not None and (
+        profile.goal_id is None
+        or existing_path is None
+        or (switching and interpretation.goal_id != profile.goal_id)
+    )
+
+    path_generated = False
+    if is_goal_statement:
+        profile.goal_id = interpretation.goal_id
+        profile.goal_text = message
+        if interpretation.experience_level:
+            profile.experience_level = interpretation.experience_level
+        if interpretation.weekly_hours:
+            profile.weekly_hours = interpretation.weekly_hours
+        if interpretation.interests:
+            profile.interests = sorted(
+                set(profile.interests) | set(interpretation.interests)
+            )
+        if interpretation.declared_skills:
+            profile.declared_skills = sorted(
+                set(profile.declared_skills) | set(interpretation.declared_skills)
+            )
+        if interpretation.extra_target_skills:
+            profile.extra_target_skills = sorted(
+                set(profile.extra_target_skills)
+                | set(interpretation.extra_target_skills)
+            )
+        if interpretation.preferred_formats:
+            profile.preferred_formats = interpretation.preferred_formats
+        db.save_profile(profile)
+
+        path = _regenerate(
+            catalog, db, profile, notes=["Path created from your goal description."]
+        )
+        path_generated = True
+        reply, source = assistant.acknowledge_goal(
+            catalog, profile, path, interpretation
+        )
+    else:
+        reply, source = assistant.answer(
+            catalog,
+            profile,
+            existing_path,
+            message,
+            history=db.get_conversation(profile.learner_id, limit=10)[:-1],
+        )
+
+    db.add_message(profile.learner_id, "assistant", reply)
+    updated_profile = db.get_profile(profile.learner_id)
+    return ChatResponse(
+        reply=reply,
+        interpretation=interpretation,
+        profile=updated_profile,
+        path_generated=path_generated,
+        source=source,
+        suggested_replies=assistant.suggested_replies(
+            catalog, db.get_path(profile.learner_id), updated_profile
+        ),
+    )
+
+
+@app.get("/api/learners/{learner_id}/conversation")
+def get_conversation(
+    learner_id: str, db: Database = Depends(db_dep), limit: int = 50
+) -> list[dict]:
+    _load_profile(db, learner_id)
+    return db.get_conversation(learner_id, limit=limit)
+
+
+@app.delete("/api/learners/{learner_id}/conversation", status_code=204)
+def clear_conversation(learner_id: str, db: Database = Depends(db_dep)) -> None:
+    _load_profile(db, learner_id)
+    db.clear_conversation(learner_id)
+
+
+# ---------------------------------------------------------------------- path
+@app.post("/api/learners/{learner_id}/path", response_model=LearningPath)
+def create_path(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    profile = _load_profile(db, learner_id)
+    return _regenerate(catalog, db, profile, notes=["Path generated on request."])
+
+
+@app.get("/api/learners/{learner_id}/path", response_model=LearningPath)
+def get_path(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    profile = _load_profile(db, learner_id)
+    path = db.get_path(learner_id)
+    if path is None:
+        path = _regenerate(catalog, db, profile)
+    return path
+
+
+@app.get("/api/learners/{learner_id}/gap")
+def get_gap(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    profile = _load_profile(db, learner_id)
+    goal_id = _resolve_goal(catalog, profile)
+    derived = profiling.derive(catalog, profile)
+    report, _ = analyze(catalog, derived, goal_id)
+    from .gap import explain as explain_gap
+
+    return {"report": report.model_dump(), "explanation": explain_gap(catalog, report)}
+
+
+# ----------------------------------------------------------- recommendations
+@app.get(
+    "/api/learners/{learner_id}/recommendations",
+    response_model=list[Recommendation],
+)
+def get_recommendations(
+    learner_id: str,
+    limit: int = Query(10, ge=1, le=50),
+    item_type: Optional[str] = Query(None, alias="type"),
+    ready_only: bool = Query(False, description="Only items you can start today"),
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> list[Recommendation]:
+    profile = _load_profile(db, learner_id)
+    goal_id = _resolve_goal(catalog, profile)
+    derived = profiling.derive(catalog, profile)
+    report, missing = analyze(catalog, derived, goal_id)
+    required = set(report.target_skills) | set(report.known_skills) | set(missing)
+    ctx = recommender.build_context(catalog, derived, missing, required)
+
+    types = {item_type} if item_type else None
+    if types and item_type not in ("course", "project", "assessment", "resource"):
+        raise HTTPException(status_code=400, detail=f"unknown type '{item_type}'")
+
+    return recommender.recommend(
+        ctx, limit=limit, item_types=types, require_ready=ready_only
+    )
+
+
+@app.get("/api/learners/{learner_id}/explain/{item_id}")
+def explain_item(
+    learner_id: str,
+    item_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Full, itemised justification for one recommendation."""
+    profile = _load_profile(db, learner_id)
+    if item_id not in catalog.items:
+        raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
+    goal_id = _resolve_goal(catalog, profile)
+    derived = profiling.derive(catalog, profile)
+    report, missing = analyze(catalog, derived, goal_id)
+    required = set(report.target_skills) | set(report.known_skills) | set(missing)
+    ctx = recommender.build_context(catalog, derived, missing, required)
+    rec = recommender.to_recommendation(ctx, catalog.items[item_id])
+
+    path = db.get_path(learner_id)
+    placement = None
+    if path:
+        for milestone in path.milestones:
+            for entry in milestone.items:
+                if entry.item_id == item_id:
+                    placement = {
+                        "milestone": milestone.title,
+                        "order": milestone.order,
+                        "rationale": entry.rationale,
+                    }
+    return {
+        "recommendation": rec.model_dump(),
+        "weights": recommender.WEIGHTS,
+        "placement": placement,
+    }
+
+
+# ------------------------------------------------------------------ progress
+@app.post("/api/learners/{learner_id}/progress")
+def set_progress(
+    learner_id: str,
+    payload: ProgressUpdate,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    profile = _load_profile(db, learner_id)
+    if payload.item_id not in catalog.items:
+        raise HTTPException(status_code=404, detail=f"unknown item '{payload.item_id}'")
+
+    db.set_progress(learner_id, payload.item_id, payload.status)
+    profiling.sync_completions(
+        catalog,
+        profile,
+        db.completed_items(learner_id),
+        tracked_item_ids=list(db.get_progress(learner_id)),
+    )
+    db.save_profile(profile)
+
+    # Reflect the new status in the stored path without reshuffling it: the
+    # learner's plan should not move under them just because they ticked a box.
+    path = db.get_path(learner_id)
+    if path is not None:
+        for milestone in path.milestones:
+            for item in milestone.items:
+                if item.item_id == payload.item_id:
+                    item.status = payload.status
+        db.save_path(path)
+
+    return {
+        "item_id": payload.item_id,
+        "status": payload.status,
+        "completed_items": db.completed_items(learner_id),
+    }
+
+
+@app.get("/api/learners/{learner_id}/progress")
+def get_progress(learner_id: str, db: Database = Depends(db_dep)) -> dict:
+    _load_profile(db, learner_id)
+    return {
+        item_id: entry.model_dump()
+        for item_id, entry in db.get_progress(learner_id).items()
+    }
+
+
+# ------------------------------------------------------------------ feedback
+@app.post("/api/learners/{learner_id}/feedback")
+def submit_feedback(
+    learner_id: str,
+    payload: FeedbackRequest,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Record feedback, adapt the profile, and regenerate the path."""
+    profile = _load_profile(db, learner_id)
+    if payload.item_id not in catalog.items:
+        raise HTTPException(status_code=404, detail=f"unknown item '{payload.item_id}'")
+
+    entry = FeedbackEntry(
+        item_id=payload.item_id, signal=payload.signal, note=payload.note
+    )
+    db.add_feedback(learner_id, entry)
+
+    profile, note = profiling.apply_feedback(catalog, profile, entry)
+    db.save_profile(profile)
+
+    path = None
+    if profile.goal_id:
+        path = _regenerate(catalog, db, profile, notes=[note] if note else [])
+
+    return {
+        "applied": note,
+        "effect": profiling.FEEDBACK_EFFECTS.get(payload.signal, ""),
+        "difficulty_offset": profile.difficulty_offset,
+        "excluded_items": profile.excluded_item_ids,
+        "path_revision": path.revision if path else None,
+    }
+
+
+@app.get("/api/learners/{learner_id}/feedback")
+def list_feedback(learner_id: str, db: Database = Depends(db_dep)) -> list[dict]:
+    _load_profile(db, learner_id)
+    return [e.model_dump() for e in db.get_feedback(learner_id)]
+
+
+# ----------------------------------------------------------------- dashboard
+@app.get("/api/learners/{learner_id}/dashboard", response_model=Dashboard)
+def get_dashboard(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> Dashboard:
+    profile = _load_profile(db, learner_id)
+    path = db.get_path(learner_id)
+    if path is None:
+        path = _regenerate(catalog, db, profile)
+    derived = profiling.derive(catalog, profile)
+    progress = db.get_progress(learner_id)
+    return dashboard_engine.build(
+        catalog,
+        derived,
+        path,
+        progress,
+        pace=insights.build_pace(catalog, profile, path, progress),
+    )
+
+
+# ------------------------------------------------------ graph / plan / badges
+def _path_and_profile(
+    catalog: Catalog, db: Database, learner_id: str
+) -> tuple[LearnerProfile, LearningPath]:
+    profile = _load_profile(db, learner_id)
+    path = db.get_path(learner_id)
+    if path is None:
+        path = _regenerate(catalog, db, profile)
+    return profile, path
+
+
+@app.get("/api/learners/{learner_id}/graph", response_model=SkillGraph)
+def get_skill_graph(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> SkillGraph:
+    """The prerequisite DAG this learner's path was generated from."""
+    profile, path = _path_and_profile(catalog, db, learner_id)
+    derived = profiling.derive(catalog, profile)
+    return insights.build_graph(
+        catalog, derived, path, db.get_progress(learner_id)
+    )
+
+
+@app.get("/api/learners/{learner_id}/pace", response_model=PaceReport)
+def get_pace(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> PaceReport:
+    """How fast the learner is actually going, versus what they planned."""
+    profile, path = _path_and_profile(catalog, db, learner_id)
+    return insights.build_pace(catalog, profile, path, db.get_progress(learner_id))
+
+
+@app.post("/api/learners/{learner_id}/replan")
+def replan_to_pace(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Rebuild the schedule around the learner's observed rate, not their hopes.
+
+    Progress alone never reshuffles the plan — a learner's roadmap should not
+    move under them because they ticked a box. This is the explicit opposite:
+    they asked for the schedule to be refitted to how they actually study.
+    """
+    profile, path = _path_and_profile(catalog, db, learner_id)
+    progress = db.get_progress(learner_id)
+    pace = insights.build_pace(catalog, profile, path, progress)
+
+    if pace.suggested_weekly_hours is None:
+        return {
+            "changed": False,
+            "pace": pace.model_dump(),
+            "weekly_hours": profile.weekly_hours,
+            "path_revision": path.revision,
+            "message": (
+                pace.message
+                if pace.status != "unknown"
+                else "Not enough history yet — nothing to re-plan around."
+            ),
+        }
+
+    previous = profile.weekly_hours
+    profile.weekly_hours = pace.suggested_weekly_hours
+    db.save_profile(profile)
+    rebuilt = _regenerate(
+        catalog,
+        db,
+        profile,
+        notes=[
+            f"Schedule re-planned around your real pace: {previous}h/week "
+            f"→ {profile.weekly_hours}h/week."
+        ],
+    )
+    return {
+        "changed": True,
+        "pace": pace.model_dump(),
+        "weekly_hours": profile.weekly_hours,
+        "previous_weekly_hours": previous,
+        "path_revision": rebuilt.revision,
+        "total_weeks": rebuilt.total_weeks,
+        "message": (
+            f"Rebuilt at {profile.weekly_hours}h a week — "
+            f"{rebuilt.total_weeks} weeks to finish."
+        ),
+    }
+
+
+@app.get("/api/learners/{learner_id}/plan", response_model=WeeklyPlan)
+def get_weekly_plan(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> WeeklyPlan:
+    """The roadmap resolved against the learner's actual weekly hours."""
+    _, path = _path_and_profile(catalog, db, learner_id)
+    return insights.build_weekly_plan(path, db.get_progress(learner_id))
+
+
+@app.get("/api/learners/{learner_id}/achievements", response_model=Achievements)
+def get_achievements(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> Achievements:
+    _, path = _path_and_profile(catalog, db, learner_id)
+    return insights.build_achievements(catalog, path, db.get_progress(learner_id))
+
+
+@app.get("/api/learners/{learner_id}/export", response_class=PlainTextResponse)
+def export_path(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> PlainTextResponse:
+    """The whole roadmap as shareable Markdown."""
+    _, path = _path_and_profile(catalog, db, learner_id)
+    progress = db.get_progress(learner_id)
+    achievements = insights.build_achievements(catalog, path, progress)
+    markdown = insights.export_markdown(path, achievements)
+    filename = f"learning-path-{path.goal_id}.md"
+    return PlainTextResponse(
+        markdown,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+# -------------------------------------------------------------------- static
+if FRONTEND_DIR.exists():
+    app.mount(
+        "/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static"
+    )
+
+    @app.get("/", include_in_schema=False)
+    def index() -> FileResponse:
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI):
+    catalog = get_catalog()  # validates; raises loudly if the data is broken
+    gate = security.configure()  # re-read the environment after .env is loaded
+    status = llm.status()
+    log.info(
+        "catalog loaded: %d skills, %d items, %d goals",
+        len(catalog.skills),
+        len(catalog.items),
+        len(catalog.goals),
+    )
+    log.info(
+        "assistant: %s",
+        f"{status['provider']} ({status['model']})"
+        if status["enabled"]
+        else "rule engine — no provider credential found",
+    )
+    log.info(
+        "gates: auth %s, rate limiting %s (%d/min, chat %d/min)",
+        "required" if gate.api_key else "off",
+        "on" if gate.enabled else "off",
+        gate.general.limit,
+        gate.chat.limit,
+    )
+    yield
+
+
+app.router.lifespan_context = _lifespan

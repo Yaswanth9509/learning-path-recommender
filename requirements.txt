@@ -1,0 +1,14 @@
+# Runtime dependencies. Upper bounds are deliberate: a major release of any of
+# these has broken applications before, and this project is meant to still run
+# unchanged a year from now.
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pydantic>=2.7,<3.0
+
+# Optional. Every LLM provider in backend/llm.py speaks HTTP through stdlib
+# urllib, so none of them needs a package. Install this only if you want the
+# Anthropic SDK path (native structured outputs and refusal handling):
+#
+#     pip install "anthropic>=0.40,<1.0"
+#
+# Development and test dependencies live in requirements-dev.txt.
