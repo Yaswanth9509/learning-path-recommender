@@ -1,0 +1,1769 @@
+[
+  {
+    "id": "c-prog-101",
+    "title": "Programming Foundations with Python",
+    "provider": "OpenLearn",
+    "type": "course",
+    "level": 1,
+    "hours": 30,
+    "rating": 4.7,
+    "learners": 184000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "prog-fundamentals",
+      "python"
+    ],
+    "requires": [],
+    "description": "Build core programming intuition and write real Python from day one."
+  },
+  {
+    "id": "c-python-alt",
+    "title": "Python for Everybody",
+    "provider": "CampusX",
+    "type": "course",
+    "level": 1,
+    "hours": 22,
+    "rating": 4.8,
+    "learners": 412000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "python"
+    ],
+    "requires": [
+      "prog-fundamentals"
+    ],
+    "description": "A gentle, widely loved introduction to Python for non-specialists."
+  },
+  {
+    "id": "c-cli-git",
+    "title": "Command Line and Git Essentials",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 1,
+    "hours": 12,
+    "rating": 4.6,
+    "learners": 96000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "cli-git"
+    ],
+    "requires": [],
+    "description": "Work confidently in the shell and collaborate with Git branching workflows."
+  },
+  {
+    "id": "c-sql-101",
+    "title": "SQL for Data Work",
+    "provider": "OpenLearn",
+    "type": "course",
+    "level": 1,
+    "hours": 20,
+    "rating": 4.7,
+    "learners": 221000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "sql"
+    ],
+    "requires": [],
+    "description": "Query, join, and aggregate relational data with confidence."
+  },
+  {
+    "id": "c-sql-alt",
+    "title": "Advanced SQL for Analytics",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.5,
+    "learners": 58000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Foundations",
+    "teaches": [
+      "sql"
+    ],
+    "requires": [],
+    "description": "Window functions, CTEs, and query tuning for analytical workloads."
+  },
+  {
+    "id": "c-stats",
+    "title": "Statistics & Probability for Data",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 2,
+    "hours": 35,
+    "rating": 4.6,
+    "learners": 132000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Foundations",
+    "teaches": [
+      "math-stats"
+    ],
+    "requires": [],
+    "description": "Inference, distributions, and experiment design grounded in real datasets."
+  },
+  {
+    "id": "c-dsa",
+    "title": "Data Structures & Algorithms in Python",
+    "provider": "CampusX",
+    "type": "course",
+    "level": 2,
+    "hours": 45,
+    "rating": 4.5,
+    "learners": 149000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Foundations",
+    "teaches": [
+      "data-structures"
+    ],
+    "requires": [
+      "python"
+    ],
+    "description": "Complexity analysis and the data structures behind efficient systems."
+  },
+  {
+    "id": "c-testing",
+    "title": "Automated Testing Fundamentals",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.4,
+    "learners": 47000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "testing"
+    ],
+    "requires": [
+      "prog-fundamentals"
+    ],
+    "description": "Write tests that catch regressions without slowing delivery."
+  },
+  {
+    "id": "c-pandas",
+    "title": "Data Wrangling with pandas",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 25,
+    "rating": 4.7,
+    "learners": 163000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "data-wrangling"
+    ],
+    "requires": [
+      "python"
+    ],
+    "description": "Reshape messy real-world data into analysis-ready tables."
+  },
+  {
+    "id": "c-viz",
+    "title": "Data Visualization & Storytelling",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.6,
+    "learners": 88000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "data-viz"
+    ],
+    "requires": [
+      "data-wrangling"
+    ],
+    "description": "Choose the right chart and build a narrative decision-makers act on."
+  },
+  {
+    "id": "c-eda",
+    "title": "Exploratory Data Analysis in Practice",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.5,
+    "learners": 71000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "eda"
+    ],
+    "requires": [
+      "data-wrangling",
+      "math-stats"
+    ],
+    "description": "Profile unfamiliar datasets and surface the questions worth asking."
+  },
+  {
+    "id": "c-bi",
+    "title": "Building BI Dashboards",
+    "provider": "MetricLab",
+    "type": "course",
+    "level": 2,
+    "hours": 24,
+    "rating": 4.4,
+    "learners": 52000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "bi-dashboards"
+    ],
+    "requires": [
+      "sql",
+      "data-viz"
+    ],
+    "description": "Model metrics and ship dashboards teams actually use."
+  },
+  {
+    "id": "c-ml-found",
+    "title": "Machine Learning Foundations",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 2,
+    "hours": 40,
+    "rating": 4.8,
+    "learners": 298000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "ml-foundations"
+    ],
+    "requires": [
+      "math-stats",
+      "python"
+    ],
+    "description": "The concepts every practitioner needs before touching a model."
+  },
+  {
+    "id": "c-supervised",
+    "title": "Supervised Learning: Regression & Classification",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 2,
+    "hours": 35,
+    "rating": 4.7,
+    "learners": 186000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "supervised-ml"
+    ],
+    "requires": [
+      "ml-foundations"
+    ],
+    "description": "Train, tune, and reason about predictive models on labelled data."
+  },
+  {
+    "id": "c-ml-alt",
+    "title": "Applied Machine Learning End-to-End",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 45,
+    "rating": 4.6,
+    "learners": 94000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "ml-foundations",
+      "supervised-ml"
+    ],
+    "requires": [
+      "python",
+      "math-stats"
+    ],
+    "description": "One project-led path from raw data through to a deployed prediction."
+  },
+  {
+    "id": "c-unsupervised",
+    "title": "Unsupervised Learning & Clustering",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 2,
+    "hours": 25,
+    "rating": 4.4,
+    "learners": 64000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "unsupervised-ml"
+    ],
+    "requires": [
+      "ml-foundations"
+    ],
+    "description": "Find structure in unlabelled data with clustering and decomposition."
+  },
+  {
+    "id": "c-feature",
+    "title": "Feature Engineering at Scale",
+    "provider": "DataForge",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 41000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "feature-engineering"
+    ],
+    "requires": [
+      "supervised-ml",
+      "data-wrangling"
+    ],
+    "description": "Turn raw signals into features that measurably move model performance."
+  },
+  {
+    "id": "c-modeleval",
+    "title": "Model Evaluation & Validation",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.6,
+    "learners": 57000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "model-evaluation"
+    ],
+    "requires": [
+      "supervised-ml"
+    ],
+    "description": "Pick honest metrics, validate properly, and diagnose failure modes."
+  },
+  {
+    "id": "c-exp",
+    "title": "Experiment Tracking & Reproducible ML",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.3,
+    "learners": 29000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "experiment-tracking"
+    ],
+    "requires": [
+      "ml-foundations",
+      "cli-git"
+    ],
+    "description": "Version data, code, and runs so any result can be reproduced."
+  },
+  {
+    "id": "c-respai",
+    "title": "Responsible AI & Model Governance",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 2,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 33000,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "responsible-ai"
+    ],
+    "requires": [
+      "model-evaluation"
+    ],
+    "description": "Fairness, interpretability, and the documentation reviewers ask for."
+  },
+  {
+    "id": "c-dl",
+    "title": "Deep Learning Specialisation",
+    "provider": "NeuralSchool",
+    "type": "course",
+    "level": 3,
+    "hours": 60,
+    "rating": 4.8,
+    "learners": 312000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "deep-learning"
+    ],
+    "requires": [
+      "supervised-ml",
+      "data-structures"
+    ],
+    "description": "Neural architectures and the training craft behind modern models."
+  },
+  {
+    "id": "c-nlp",
+    "title": "NLP with Transformers",
+    "provider": "NeuralSchool",
+    "type": "course",
+    "level": 3,
+    "hours": 45,
+    "rating": 4.7,
+    "learners": 128000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "nlp"
+    ],
+    "requires": [
+      "deep-learning"
+    ],
+    "description": "Tokenisation through fine-tuning for production language tasks."
+  },
+  {
+    "id": "c-cv",
+    "title": "Computer Vision with Deep Learning",
+    "provider": "NeuralSchool",
+    "type": "course",
+    "level": 3,
+    "hours": 45,
+    "rating": 4.6,
+    "learners": 86000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "computer-vision"
+    ],
+    "requires": [
+      "deep-learning"
+    ],
+    "description": "Convolutional and vision-transformer models for image understanding."
+  },
+  {
+    "id": "c-vector",
+    "title": "Embeddings & Vector Search",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 3,
+    "hours": 18,
+    "rating": 4.5,
+    "learners": 38000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "vector-search"
+    ],
+    "requires": [
+      "nlp"
+    ],
+    "description": "Embedding models, similarity metrics, and ANN indexes that stay fast."
+  },
+  {
+    "id": "c-llm",
+    "title": "Building LLM Applications",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 3,
+    "hours": 30,
+    "rating": 4.8,
+    "learners": 121000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "llm-engineering"
+    ],
+    "requires": [
+      "nlp",
+      "rest-api"
+    ],
+    "description": "Prompting, tool use, evaluation harnesses, and shipping an LLM service."
+  },
+  {
+    "id": "c-rag",
+    "title": "Retrieval-Augmented Generation Systems",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 3,
+    "hours": 26,
+    "rating": 4.7,
+    "learners": 67000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "rag-systems"
+    ],
+    "requires": [
+      "llm-engineering",
+      "vector-search"
+    ],
+    "description": "Chunking, retrieval quality, grounding, and citation-backed answers."
+  },
+  {
+    "id": "c-mlops",
+    "title": "MLOps: Deploying & Monitoring Models",
+    "provider": "MLWorks",
+    "type": "course",
+    "level": 3,
+    "hours": 40,
+    "rating": 4.6,
+    "learners": 74000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Data & AI",
+    "teaches": [
+      "mlops"
+    ],
+    "requires": [
+      "model-evaluation",
+      "docker",
+      "ci-cd"
+    ],
+    "description": "Serve models reliably and catch drift before your users do."
+  },
+  {
+    "id": "c-htmlcss",
+    "title": "HTML & CSS from Scratch",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 1,
+    "hours": 22,
+    "rating": 4.6,
+    "learners": 276000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "html-css"
+    ],
+    "requires": [],
+    "description": "Semantic markup and modern layout with Flexbox and Grid."
+  },
+  {
+    "id": "c-js",
+    "title": "Modern JavaScript",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 1,
+    "hours": 30,
+    "rating": 4.7,
+    "learners": 341000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "javascript"
+    ],
+    "requires": [
+      "prog-fundamentals"
+    ],
+    "description": "The language, the DOM, and async patterns as used in real codebases."
+  },
+  {
+    "id": "c-ts",
+    "title": "TypeScript in Depth",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.7,
+    "learners": 112000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "typescript"
+    ],
+    "requires": [
+      "javascript"
+    ],
+    "description": "Types, generics, and architecture that scales past a few thousand lines."
+  },
+  {
+    "id": "c-react",
+    "title": "React Fundamentals",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 32,
+    "rating": 4.7,
+    "learners": 268000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "react"
+    ],
+    "requires": [
+      "javascript",
+      "html-css"
+    ],
+    "description": "Components, hooks, and how React actually decides to re-render."
+  },
+  {
+    "id": "c-react-alt",
+    "title": "React: Hooks & Composition Patterns",
+    "provider": "FrontierUI",
+    "type": "course",
+    "level": 2,
+    "hours": 24,
+    "rating": 4.6,
+    "learners": 73000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "react"
+    ],
+    "requires": [
+      "javascript",
+      "html-css"
+    ],
+    "description": "A patterns-first take on React for developers who know the basics."
+  },
+  {
+    "id": "c-state",
+    "title": "Frontend State Management",
+    "provider": "FrontierUI",
+    "type": "course",
+    "level": 2,
+    "hours": 16,
+    "rating": 4.4,
+    "learners": 44000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "state-management"
+    ],
+    "requires": [
+      "react"
+    ],
+    "description": "Server state, client state, caching, and invalidation without the mess."
+  },
+  {
+    "id": "c-a11y",
+    "title": "Accessible & Responsive Interfaces",
+    "provider": "FrontierUI",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.6,
+    "learners": 39000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "ui-accessibility"
+    ],
+    "requires": [
+      "html-css"
+    ],
+    "description": "WCAG in practice: keyboard, screen readers, and responsive layout."
+  },
+  {
+    "id": "c-node",
+    "title": "Node.js & Express",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 26,
+    "rating": 4.5,
+    "learners": 157000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "nodejs"
+    ],
+    "requires": [
+      "javascript"
+    ],
+    "description": "Server-side JavaScript, middleware, and the request lifecycle."
+  },
+  {
+    "id": "c-rest",
+    "title": "REST API Design & Documentation",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.6,
+    "learners": 81000,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "rest-api"
+    ],
+    "requires": [
+      "nodejs"
+    ],
+    "description": "Resources, versioning, pagination, and errors that clients can rely on."
+  },
+  {
+    "id": "c-dbdesign",
+    "title": "Database Design & Data Modelling",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.5,
+    "learners": 63000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "data-modeling"
+    ],
+    "requires": [
+      "sql"
+    ],
+    "description": "Normalisation, indexing, and migrations that survive production."
+  },
+  {
+    "id": "c-authsec",
+    "title": "Web Authentication & Application Security",
+    "provider": "SecureStack",
+    "type": "course",
+    "level": 2,
+    "hours": 24,
+    "rating": 4.7,
+    "learners": 58000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "auth-security"
+    ],
+    "requires": [
+      "rest-api"
+    ],
+    "description": "Sessions, OAuth/OIDC, and the OWASP Top 10 with hands-on labs."
+  },
+  {
+    "id": "c-perf",
+    "title": "Web Performance Optimisation",
+    "provider": "FrontierUI",
+    "type": "course",
+    "level": 3,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 31000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "web-performance"
+    ],
+    "requires": [
+      "react"
+    ],
+    "description": "Core Web Vitals, bundle budgets, and rendering strategy tradeoffs."
+  },
+  {
+    "id": "c-next",
+    "title": "Full-Stack Apps with Next.js",
+    "provider": "WebCraft",
+    "type": "course",
+    "level": 3,
+    "hours": 34,
+    "rating": 4.7,
+    "learners": 97000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Web Development",
+    "teaches": [
+      "nextjs"
+    ],
+    "requires": [
+      "react",
+      "rest-api"
+    ],
+    "description": "Server components, data fetching, and deploying a real application."
+  },
+  {
+    "id": "c-net",
+    "title": "Networking Fundamentals",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 1,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 88000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "networking"
+    ],
+    "requires": [],
+    "description": "TCP/IP, DNS, HTTP, and TLS explained for engineers who deploy things."
+  },
+  {
+    "id": "c-linux",
+    "title": "Linux Administration Essentials",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 1,
+    "hours": 28,
+    "rating": 4.6,
+    "learners": 142000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "linux"
+    ],
+    "requires": [
+      "cli-git"
+    ],
+    "description": "Processes, permissions, services, and shell scripting for real servers."
+  },
+  {
+    "id": "c-docker",
+    "title": "Containers with Docker",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.7,
+    "learners": 176000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "docker"
+    ],
+    "requires": [
+      "linux"
+    ],
+    "description": "Images, layers, networking, and multi-stage builds that stay small."
+  },
+  {
+    "id": "c-cicd",
+    "title": "CI/CD Pipelines",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 69000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "ci-cd"
+    ],
+    "requires": [
+      "cli-git",
+      "testing"
+    ],
+    "description": "Automate build, test, and release with safe deployment strategies."
+  },
+  {
+    "id": "c-cloud",
+    "title": "Cloud Fundamentals on AWS",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 2,
+    "hours": 35,
+    "rating": 4.6,
+    "learners": 204000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "cloud-fundamentals"
+    ],
+    "requires": [
+      "linux",
+      "networking"
+    ],
+    "description": "Compute, storage, identity, and the cost model behind them."
+  },
+  {
+    "id": "c-k8s",
+    "title": "Kubernetes in Production",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 3,
+    "hours": 40,
+    "rating": 4.7,
+    "learners": 113000,
+    "format": "project",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "kubernetes"
+    ],
+    "requires": [
+      "docker",
+      "networking"
+    ],
+    "description": "Workloads, services, scheduling, and day-two cluster operations."
+  },
+  {
+    "id": "c-iac",
+    "title": "Infrastructure as Code with Terraform",
+    "provider": "CloudBridge",
+    "type": "course",
+    "level": 3,
+    "hours": 26,
+    "rating": 4.6,
+    "learners": 78000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "iac"
+    ],
+    "requires": [
+      "cloud-fundamentals"
+    ],
+    "description": "Declarative provisioning, modules, and state you can reason about."
+  },
+  {
+    "id": "c-obs",
+    "title": "Observability & Monitoring",
+    "provider": "SignalOps",
+    "type": "course",
+    "level": 3,
+    "hours": 22,
+    "rating": 4.5,
+    "learners": 42000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "observability"
+    ],
+    "requires": [
+      "cloud-fundamentals"
+    ],
+    "description": "Metrics, logs, traces, and alerts that page a human only when needed."
+  },
+  {
+    "id": "c-cloudsec",
+    "title": "Cloud Security Engineering",
+    "provider": "SecureStack",
+    "type": "course",
+    "level": 3,
+    "hours": 28,
+    "rating": 4.6,
+    "learners": 49000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "cloud-security"
+    ],
+    "requires": [
+      "cloud-fundamentals",
+      "auth-security"
+    ],
+    "description": "Identity boundaries, network isolation, secrets, and compliance controls."
+  },
+  {
+    "id": "c-sre",
+    "title": "Site Reliability Engineering",
+    "provider": "SignalOps",
+    "type": "course",
+    "level": 3,
+    "hours": 30,
+    "rating": 4.7,
+    "learners": 54000,
+    "format": "reading",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "sre"
+    ],
+    "requires": [
+      "observability",
+      "kubernetes"
+    ],
+    "description": "Error budgets, capacity planning, and incident response that scales."
+  },
+  {
+    "id": "c-sysdesign",
+    "title": "System Design for Engineers",
+    "provider": "DevPath",
+    "type": "course",
+    "level": 3,
+    "hours": 30,
+    "rating": 4.8,
+    "learners": 167000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "system-design"
+    ],
+    "requires": [
+      "rest-api",
+      "data-modeling",
+      "cloud-fundamentals"
+    ],
+    "description": "Scaling, consistency tradeoffs, queues, caching, and failure modes."
+  },
+  {
+    "id": "pr-eda",
+    "title": "Project: End-to-End Analysis of a Public Dataset",
+    "provider": "DataForge",
+    "type": "project",
+    "level": 2,
+    "hours": 12,
+    "rating": 4.6,
+    "learners": 34000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "eda",
+      "data-viz"
+    ],
+    "description": "Take a raw public dataset to a written, chart-backed set of findings."
+  },
+  {
+    "id": "pr-dashboard",
+    "title": "Project: Business KPI Dashboard",
+    "provider": "MetricLab",
+    "type": "project",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.4,
+    "learners": 18000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "bi-dashboards",
+      "sql"
+    ],
+    "description": "Model a metric layer and ship a dashboard against a live warehouse."
+  },
+  {
+    "id": "pr-ml-pipeline",
+    "title": "Project: Predictive Model Pipeline",
+    "provider": "QuantAcademy",
+    "type": "project",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.7,
+    "learners": 41000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "supervised-ml",
+      "feature-engineering",
+      "model-evaluation"
+    ],
+    "description": "Build a reproducible pipeline from raw features to a validated model."
+  },
+  {
+    "id": "pr-dl-classifier",
+    "title": "Project: Image Classifier from Scratch",
+    "provider": "NeuralSchool",
+    "type": "project",
+    "level": 3,
+    "hours": 22,
+    "rating": 4.6,
+    "learners": 27000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "deep-learning",
+      "computer-vision"
+    ],
+    "description": "Train, evaluate, and error-analyse a vision model on a real dataset."
+  },
+  {
+    "id": "pr-rag",
+    "title": "Project: RAG Knowledge Assistant",
+    "provider": "MLWorks",
+    "type": "project",
+    "level": 3,
+    "hours": 24,
+    "rating": 4.8,
+    "learners": 36000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "rag-systems",
+      "llm-engineering"
+    ],
+    "description": "Ship a grounded question-answering assistant with citations and evals."
+  },
+  {
+    "id": "pr-mlops",
+    "title": "Project: Deploy a Model to Production",
+    "provider": "MLWorks",
+    "type": "project",
+    "level": 3,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 22000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "mlops",
+      "docker"
+    ],
+    "description": "Containerise, serve, and monitor a model behind a real endpoint."
+  },
+  {
+    "id": "pr-portfolio",
+    "title": "Project: Responsive Portfolio Site",
+    "provider": "WebCraft",
+    "type": "project",
+    "level": 1,
+    "hours": 10,
+    "rating": 4.5,
+    "learners": 88000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "html-css",
+      "ui-accessibility"
+    ],
+    "description": "Build and ship an accessible, responsive site you can show employers."
+  },
+  {
+    "id": "pr-spa",
+    "title": "Project: React Dashboard SPA",
+    "provider": "FrontierUI",
+    "type": "project",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.6,
+    "learners": 52000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "react",
+      "state-management"
+    ],
+    "description": "A multi-view React app with real data fetching and cache invalidation."
+  },
+  {
+    "id": "pr-api",
+    "title": "Project: Secure REST API with Auth",
+    "provider": "DevPath",
+    "type": "project",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.6,
+    "learners": 37000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "rest-api",
+      "auth-security",
+      "data-modeling"
+    ],
+    "description": "Design the schema, build the API, and secure it end to end."
+  },
+  {
+    "id": "pr-fullstack",
+    "title": "Project: Full-Stack SaaS Starter",
+    "provider": "WebCraft",
+    "type": "project",
+    "level": 3,
+    "hours": 26,
+    "rating": 4.7,
+    "learners": 29000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "nextjs",
+      "typescript"
+    ],
+    "description": "Auth, billing, and a typed data layer in one deployable application."
+  },
+  {
+    "id": "pr-pipeline",
+    "title": "Project: CI/CD Pipeline for a Web Service",
+    "provider": "DevPath",
+    "type": "project",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.4,
+    "learners": 21000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "ci-cd",
+      "docker"
+    ],
+    "description": "Automate test, build, and staged rollout for a containerised service."
+  },
+  {
+    "id": "pr-k8s",
+    "title": "Project: Microservice on Kubernetes",
+    "provider": "CloudBridge",
+    "type": "project",
+    "level": 3,
+    "hours": 22,
+    "rating": 4.6,
+    "learners": 24000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "kubernetes",
+      "observability"
+    ],
+    "description": "Deploy, scale, and instrument a service on a real cluster."
+  },
+  {
+    "id": "pr-iac",
+    "title": "Project: Provision Cloud Infrastructure as Code",
+    "provider": "CloudBridge",
+    "type": "project",
+    "level": 3,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 19000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "iac",
+      "cloud-fundamentals"
+    ],
+    "description": "Stand up a reproducible environment entirely from version control."
+  },
+  {
+    "id": "a-python",
+    "title": "Assessment: Python Proficiency Check",
+    "provider": "OpenLearn",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "rating": 4.4,
+    "learners": 64000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [],
+    "requires": [
+      "python"
+    ],
+    "description": "Timed exercises confirming you can write Python unaided."
+  },
+  {
+    "id": "a-sql",
+    "title": "Assessment: SQL Skills Check",
+    "provider": "OpenLearn",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "rating": 4.3,
+    "learners": 51000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [],
+    "requires": [
+      "sql"
+    ],
+    "description": "Query-writing tasks against a realistic schema."
+  },
+  {
+    "id": "a-stats",
+    "title": "Assessment: Statistics Readiness",
+    "provider": "QuantAcademy",
+    "type": "assessment",
+    "level": 2,
+    "hours": 2,
+    "rating": 4.2,
+    "learners": 28000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [],
+    "requires": [
+      "math-stats"
+    ],
+    "description": "Check your inference and probability grounding before modelling."
+  },
+  {
+    "id": "a-ml",
+    "title": "Assessment: ML Fundamentals Exam",
+    "provider": "QuantAcademy",
+    "type": "assessment",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.5,
+    "learners": 39000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "ml-foundations",
+      "supervised-ml"
+    ],
+    "description": "Concept and applied questions covering the core ML workflow."
+  },
+  {
+    "id": "a-dl",
+    "title": "Assessment: Deep Learning Concepts Exam",
+    "provider": "NeuralSchool",
+    "type": "assessment",
+    "level": 3,
+    "hours": 3,
+    "rating": 4.4,
+    "learners": 17000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "deep-learning"
+    ],
+    "description": "Architecture, optimisation, and debugging questions."
+  },
+  {
+    "id": "a-llm",
+    "title": "Assessment: LLM Engineering Capstone Review",
+    "provider": "MLWorks",
+    "type": "assessment",
+    "level": 3,
+    "hours": 3,
+    "rating": 4.6,
+    "learners": 12000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "llm-engineering",
+      "rag-systems"
+    ],
+    "description": "Peer-reviewed evaluation of a retrieval-grounded application you built."
+  },
+  {
+    "id": "a-frontend",
+    "title": "Assessment: Frontend Engineering Exam",
+    "provider": "FrontierUI",
+    "type": "assessment",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.5,
+    "learners": 26000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "react",
+      "typescript"
+    ],
+    "description": "Component design, typing, and rendering-behaviour questions."
+  },
+  {
+    "id": "a-backend",
+    "title": "Assessment: Backend & API Exam",
+    "provider": "DevPath",
+    "type": "assessment",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.4,
+    "learners": 23000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [],
+    "requires": [
+      "rest-api",
+      "data-modeling",
+      "auth-security"
+    ],
+    "description": "API design, schema, and security scenarios under time pressure."
+  },
+  {
+    "id": "a-cloud",
+    "title": "Assessment: Cloud Practitioner Mock Exam",
+    "provider": "CloudBridge",
+    "type": "assessment",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.6,
+    "learners": 61000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "cloud-fundamentals"
+    ],
+    "description": "Full-length practice exam mirroring the certification blueprint."
+  },
+  {
+    "id": "a-k8s",
+    "title": "Assessment: Kubernetes Administrator Mock",
+    "provider": "CloudBridge",
+    "type": "assessment",
+    "level": 3,
+    "hours": 3,
+    "rating": 4.7,
+    "learners": 18000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "kubernetes"
+    ],
+    "description": "Hands-on cluster tasks scored against the CKA objectives."
+  },
+  {
+    "id": "a-devops",
+    "title": "Assessment: DevOps Pipeline Exam",
+    "provider": "DevPath",
+    "type": "assessment",
+    "level": 3,
+    "hours": 3,
+    "rating": 4.4,
+    "learners": 14000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [],
+    "requires": [
+      "ci-cd",
+      "iac"
+    ],
+    "description": "Pipeline design and infrastructure automation scenarios."
+  },
+  {
+    "id": "r-python-docs",
+    "title": "The Python Tutorial",
+    "provider": "Python Software Foundation",
+    "type": "resource",
+    "level": 2,
+    "hours": 4,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "python"
+    ],
+    "requires": [],
+    "description": "The official language tutorial — the reference the rest of the Python world defers to.",
+    "url": "https://docs.python.org/3/tutorial/"
+  },
+  {
+    "id": "r-mdn-js",
+    "title": "MDN JavaScript Guide",
+    "provider": "MDN Web Docs",
+    "type": "resource",
+    "level": 2,
+    "hours": 6,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "javascript"
+    ],
+    "requires": [],
+    "description": "Mozilla's language guide: the standard reference for JavaScript semantics and browser APIs.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide"
+  },
+  {
+    "id": "r-mdn-css",
+    "title": "MDN HTML & CSS Reference",
+    "provider": "MDN Web Docs",
+    "type": "resource",
+    "level": 2,
+    "hours": 5,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "html-css"
+    ],
+    "requires": [],
+    "description": "Element-by-element and property-by-property reference for the web platform.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/CSS"
+  },
+  {
+    "id": "r-mdn-a11y",
+    "title": "MDN Accessibility Guide",
+    "provider": "MDN Web Docs",
+    "type": "resource",
+    "level": 2,
+    "hours": 4,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "ui-accessibility"
+    ],
+    "requires": [],
+    "description": "WAI-ARIA patterns, keyboard behaviour, and the accessibility tree explained with examples.",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/Accessibility"
+  },
+  {
+    "id": "r-postgres-docs",
+    "title": "PostgreSQL Documentation",
+    "provider": "PostgreSQL Global Development Group",
+    "type": "resource",
+    "level": 2,
+    "hours": 5,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "sql"
+    ],
+    "requires": [],
+    "description": "SQL reference and query-planning documentation from the database itself.",
+    "url": "https://www.postgresql.org/docs/current/"
+  },
+  {
+    "id": "r-sklearn-guide",
+    "title": "scikit-learn User Guide",
+    "provider": "scikit-learn",
+    "type": "resource",
+    "level": 2,
+    "hours": 8,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "supervised-ml"
+    ],
+    "requires": [],
+    "description": "Model families, cross-validation and metrics, each with the maths and a worked example.",
+    "url": "https://scikit-learn.org/stable/user_guide.html"
+  },
+  {
+    "id": "r-pandas-docs",
+    "title": "pandas User Guide",
+    "provider": "pandas",
+    "type": "resource",
+    "level": 2,
+    "hours": 6,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "data-wrangling"
+    ],
+    "requires": [],
+    "description": "Reshaping, joining, grouping and time series, from the library's own maintainers.",
+    "url": "https://pandas.pydata.org/docs/user_guide/index.html"
+  },
+  {
+    "id": "r-d2l",
+    "title": "Dive into Deep Learning",
+    "provider": "D2L.ai",
+    "type": "resource",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "deep-learning"
+    ],
+    "requires": [],
+    "description": "An open interactive textbook: every chapter is runnable code beside the derivation.",
+    "url": "https://d2l.ai/"
+  },
+  {
+    "id": "r-git-book",
+    "title": "Pro Git",
+    "provider": "Git SCM",
+    "type": "resource",
+    "level": 2,
+    "hours": 8,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "cli-git"
+    ],
+    "requires": [],
+    "description": "The complete Git book, free online — branching and history models rather than command recipes.",
+    "url": "https://git-scm.com/book/en/v2"
+  },
+  {
+    "id": "r-docker-docs",
+    "title": "Docker Documentation",
+    "provider": "Docker",
+    "type": "resource",
+    "level": 2,
+    "hours": 5,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "docker"
+    ],
+    "requires": [],
+    "description": "Image building, layer caching and Compose, from the source.",
+    "url": "https://docs.docker.com/"
+  },
+  {
+    "id": "r-k8s-docs",
+    "title": "Kubernetes Concepts",
+    "provider": "The Kubernetes Authors",
+    "type": "resource",
+    "level": 2,
+    "hours": 8,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Cloud & DevOps",
+    "teaches": [
+      "kubernetes"
+    ],
+    "requires": [],
+    "description": "Workloads, services and the controller model — the concepts before the YAML.",
+    "url": "https://kubernetes.io/docs/concepts/"
+  },
+  {
+    "id": "r-owasp-top10",
+    "title": "OWASP Top 10",
+    "provider": "OWASP Foundation",
+    "type": "resource",
+    "level": 2,
+    "hours": 4,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "auth-security"
+    ],
+    "requires": [],
+    "description": "The ten risks that account for most real breaches, each with prevention guidance.",
+    "url": "https://owasp.org/www-project-top-ten/"
+  },
+  {
+    "id": "r-web-vitals",
+    "title": "Web Vitals",
+    "provider": "Google Chrome Developers",
+    "type": "resource",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Web Development",
+    "teaches": [
+      "web-performance"
+    ],
+    "requires": [],
+    "description": "What LCP, CLS and INP measure, how they are collected, and what moves them.",
+    "url": "https://web.dev/articles/vitals"
+  },
+  {
+    "id": "r-google-mlops",
+    "title": "MLOps: Continuous Delivery for ML",
+    "provider": "Google Cloud Architecture Center",
+    "type": "resource",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "mlops"
+    ],
+    "requires": [],
+    "description": "The maturity-level paper that named the practice: pipelines, retraining, and drift.",
+    "url": "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"
+  },
+  {
+    "id": "r-arxiv-rag",
+    "title": "Retrieval-Augmented Generation (Lewis et al.)",
+    "provider": "arXiv",
+    "type": "resource",
+    "level": 2,
+    "hours": 2,
+    "rating": 4.8,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [
+      "rag-systems"
+    ],
+    "requires": [],
+    "description": "The original RAG paper — read it before building your third retrieval pipeline.",
+    "url": "https://arxiv.org/abs/2005.11401"
+  }
+]

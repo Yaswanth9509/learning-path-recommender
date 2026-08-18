@@ -1,0 +1,83 @@
+[
+{
+  "id": "goal-data-analyst",
+  "title": "Data Analyst",
+  "domain": "Data & AI",
+  "description": "Turn business questions into queries, analyses, and dashboards that drive decisions.",
+  "typical_roles": ["Data Analyst", "Business Intelligence Analyst", "Product Analyst"],
+  "keywords": ["data analyst", "analytics", "business intelligence", "bi", "dashboard", "reporting", "excel", "tableau", "power bi", "insights", "metrics"],
+  "target_skills": ["sql", "data-wrangling", "data-viz", "eda", "bi-dashboards", "math-stats"]
+},
+{
+  "id": "goal-data-scientist",
+  "title": "Data Scientist",
+  "domain": "Data & AI",
+  "description": "Frame problems statistically, build models, and communicate findings with rigour.",
+  "typical_roles": ["Data Scientist", "Quantitative Analyst", "Research Analyst"],
+  "keywords": ["data scientist", "data science", "statistics", "statistical modelling", "predictive analytics", "experimentation", "a/b testing"],
+  "target_skills": ["math-stats", "eda", "supervised-ml", "unsupervised-ml", "model-evaluation", "data-viz", "responsible-ai"]
+},
+{
+  "id": "goal-ml-engineer",
+  "title": "Machine Learning Engineer",
+  "domain": "Data & AI",
+  "description": "Build, evaluate, and operate machine learning systems that run reliably in production.",
+  "typical_roles": ["Machine Learning Engineer", "Applied Scientist", "MLOps Engineer"],
+  "keywords": ["machine learning", "ml engineer", "deep learning", "neural network", "model deployment", "mlops", "pytorch", "tensorflow"],
+  "target_skills": ["supervised-ml", "unsupervised-ml", "feature-engineering", "model-evaluation", "deep-learning", "experiment-tracking", "mlops"]
+},
+{
+  "id": "goal-ai-engineer",
+  "title": "AI / LLM Application Engineer",
+  "domain": "Data & AI",
+  "description": "Build production applications on top of large language models, with retrieval and evaluation.",
+  "typical_roles": ["AI Engineer", "LLM Application Engineer", "Applied AI Developer"],
+  "keywords": ["ai engineer", "llm", "large language model", "genai", "generative ai", "rag", "retrieval augmented", "chatbot", "prompt engineering", "agents", "embeddings", "vector database", "ai application"],
+  "target_skills": ["nlp", "rest-api", "vector-search", "llm-engineering", "rag-systems", "responsible-ai"]
+},
+{
+  "id": "goal-frontend",
+  "title": "Frontend Engineer",
+  "domain": "Web Development",
+  "description": "Build fast, accessible user interfaces with a modern component-based stack.",
+  "typical_roles": ["Frontend Engineer", "UI Engineer", "Web Developer"],
+  "keywords": ["frontend", "front end", "front-end", "ui", "react", "javascript", "css", "web design", "user interface", "spa"],
+  "target_skills": ["html-css", "javascript", "typescript", "react", "state-management", "ui-accessibility", "testing", "web-performance"]
+},
+{
+  "id": "goal-fullstack",
+  "title": "Full-Stack Engineer",
+  "domain": "Web Development",
+  "description": "Own a feature end to end: interface, API, data model, and the security around it.",
+  "typical_roles": ["Full-Stack Engineer", "Software Engineer", "Product Engineer"],
+  "keywords": ["full stack", "fullstack", "full-stack", "web developer", "backend", "back end", "api", "node", "next.js", "end to end"],
+  "target_skills": ["react", "typescript", "nodejs", "rest-api", "data-modeling", "auth-security", "testing", "nextjs"]
+},
+{
+  "id": "goal-devops",
+  "title": "DevOps Engineer",
+  "domain": "Cloud & DevOps",
+  "description": "Automate delivery and run containerised workloads with confidence.",
+  "typical_roles": ["DevOps Engineer", "Platform Engineer", "Build & Release Engineer"],
+  "keywords": ["devops", "ci/cd", "cicd", "pipeline", "docker", "kubernetes", "k8s", "container", "automation", "terraform", "platform engineering"],
+  "target_skills": ["linux", "docker", "ci-cd", "cloud-fundamentals", "kubernetes", "iac", "observability"]
+},
+{
+  "id": "goal-cloud-architect",
+  "title": "Cloud Architect",
+  "domain": "Cloud & DevOps",
+  "description": "Design secure, scalable cloud systems and the operational practice around them.",
+  "typical_roles": ["Cloud Architect", "Solutions Architect", "Infrastructure Engineer"],
+  "keywords": ["cloud", "aws", "azure", "gcp", "architect", "solutions architect", "infrastructure", "cloud security", "system design", "scalability"],
+  "target_skills": ["networking", "cloud-fundamentals", "iac", "kubernetes", "cloud-security", "observability", "system-design"]
+},
+{
+  "id": "goal-sre",
+  "title": "Site Reliability Engineer",
+  "domain": "Cloud & DevOps",
+  "description": "Keep production healthy with observability, error budgets, and incident discipline.",
+  "typical_roles": ["Site Reliability Engineer", "Production Engineer", "Infrastructure SRE"],
+  "keywords": ["sre", "site reliability", "reliability", "on call", "oncall", "incident", "uptime", "slo", "monitoring", "observability"],
+  "target_skills": ["linux", "kubernetes", "observability", "ci-cd", "sre", "system-design"]
+}
+]
