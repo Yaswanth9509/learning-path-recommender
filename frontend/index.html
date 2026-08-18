@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Learning Path Recommender</title>
+<link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">◈</span>
+    <div>
+      <h1>Learning Path Recommender</h1>
+      <p class="brand-sub">Goal-aware, prerequisite-ordered, explainable</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
+    <select id="learnerSelect" aria-label="Select learner"></select>
+    <button id="newLearnerBtn" class="btn btn-ghost" type="button">New learner</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab is-active" role="tab" data-tab="chat">Chat</button>
+  <button class="tab" role="tab" data-tab="path">Path</button>
+  <button class="tab" role="tab" data-tab="graph">Skill graph</button>
+  <button class="tab" role="tab" data-tab="plan">Weekly plan</button>
+  <button class="tab" role="tab" data-tab="dashboard">Dashboard</button>
+  <button class="tab" role="tab" data-tab="explore">Recommendations</button>
+  <button class="tab" role="tab" data-tab="profile">Profile</button>
+</nav>
+
+<main>
+  <!-- ------------------------------------------------------------ CHAT -->
+  <section id="panel-chat" class="panel is-active" role="tabpanel">
+    <div class="chat-wrap">
+      <div id="chatLog" class="chat-log" aria-live="polite"></div>
+      <div id="suggestions" class="suggestions"></div>
+      <form id="chatForm" class="chat-form">
+        <input id="chatInput" type="text" autocomplete="off"
+               placeholder="Describe your goal — e.g. “I want to become an AI engineer, I know Python, 10 hours a week”" />
+        <button class="btn btn-primary" type="submit">Send</button>
+      </form>
+    </div>
+    <aside class="chat-side">
+      <h3>How this works</h3>
+      <ol class="steps">
+        <li><strong>Describe your goal</strong> in plain language.</li>
+        <li>The <strong>profiling engine</strong> reads your level, hours, and existing skills.</li>
+        <li>A <strong>gap analysis</strong> compares that against everything the goal requires.</li>
+        <li>The <strong>path generator</strong> topologically sorts the remaining skills so nothing is ever scheduled before its prerequisites.</li>
+        <li>Milestones are capped with <strong>projects and assessments</strong>.</li>
+      </ol>
+      <div id="interpretBox" class="interpret"></div>
+    </aside>
+  </section>
+
+  <!-- ------------------------------------------------------------ PATH -->
+  <section id="panel-path" class="panel" role="tabpanel">
+    <div id="pathHeader" class="path-header"></div>
+    <div id="gapBox" class="gap-box"></div>
+    <div id="milestones" class="milestones"></div>
+  </section>
+
+  <!-- ----------------------------------------------------- SKILL GRAPH -->
+  <section id="panel-graph" class="panel" role="tabpanel">
+    <div class="card">
+      <h3>Prerequisite graph</h3>
+      <p class="hint">
+        This is the structure your roadmap was generated from. Every arrow is a
+        dependency: a skill can only be scheduled once everything pointing into
+        it is covered. Columns are dependency depth — left to right is the order
+        you learn in.
+      </p>
+      <div class="legend" id="graphLegend"></div>
+      <div id="graphHost" class="graph-host"></div>
+      <div id="graphDetail" class="graph-detail"></div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------- WEEKLY PLAN -->
+  <section id="panel-plan" class="panel" role="tabpanel">
+    <div id="planHeader" class="path-header"></div>
+    <div id="planWeeks" class="plan-weeks"></div>
+  </section>
+
+  <!-- ------------------------------------------------------- DASHBOARD -->
+  <section id="panel-dashboard" class="panel" role="tabpanel">
+    <div id="dashKpis" class="kpi-row"></div>
+    <div id="paceCard" class="card pace-card"></div>
+    <div class="card">
+      <h3>Achievements</h3>
+      <div id="xpBar" class="xp-wrap"></div>
+      <div id="badgeGrid" class="badge-grid"></div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <h3>Milestone progress</h3>
+        <div id="dashMilestones" class="timeline"></div>
+      </div>
+      <div class="card">
+        <h3>Next recommended actions</h3>
+        <div id="dashNext" class="next-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Skill development</h3>
+      <div id="dashDomains" class="domain-bars"></div>
+      <div id="dashSkills" class="skill-grid"></div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- EXPLORE -->
+  <section id="panel-explore" class="panel" role="tabpanel">
+    <div class="filters">
+      <label>Type
+        <select id="recType">
+          <option value="">All</option>
+          <option value="course">Courses</option>
+          <option value="project">Projects</option>
+          <option value="assessment">Assessments</option>
+          <option value="resource">Reference resources</option>
+        </select>
+      </label>
+      <label class="checkbox">
+        <input type="checkbox" id="recReady" /> Only what I can start today
+      </label>
+      <button id="recRefresh" class="btn btn-ghost" type="button">Refresh</button>
+    </div>
+    <div id="recList" class="rec-list"></div>
+  </section>
+
+  <!-- --------------------------------------------------------- PROFILE -->
+  <section id="panel-profile" class="panel" role="tabpanel">
+    <div class="dash-grid">
+      <div class="card">
+        <h3>Learner profile</h3>
+        <form id="profileForm" class="profile-form">
+          <label>Name <input type="text" id="pfName" /></label>
+          <label>Goal
+            <select id="pfGoal"></select>
+          </label>
+          <label>Experience level
+            <select id="pfLevel">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <label>Study hours per week <input type="number" id="pfHours" min="1" max="60" /></label>
+          <label>Cost preference
+            <select id="pfCost">
+              <option value="any">Any</option>
+              <option value="free">Free only</option>
+            </select>
+          </label>
+          <fieldset>
+            <legend>Preferred formats</legend>
+            <div class="chips" id="pfFormats"></div>
+          </fieldset>
+          <button class="btn btn-primary" type="submit">Save &amp; rebuild path</button>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Skills you already have</h3>
+        <p class="hint">Tick anything you already know. Prerequisites are inferred automatically.</p>
+        <div id="pfSkills" class="skill-picker"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Courses you have already completed</h3>
+      <p class="hint">
+        Your learning history. Anything ticked here is treated as done — its
+        skills leave the gap and it is never scheduled again, even if you have
+        never opened this app before today.
+      </p>
+      <input id="pfHistorySearch" type="search" placeholder="Filter by title or provider…" />
+      <div id="pfHistory" class="skill-picker"></div>
+    </div>
+    <div class="card">
+      <h3>Profiling engine output</h3>
+      <div id="profileSummary" class="summary-box"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Full justification for one item: /api/learners/{id}/explain/{item_id} -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-backdrop" data-close="1"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h3 id="modalTitle"></h3>
+      <button id="modalClose" class="btn btn-ghost" type="button" aria-label="Close">✕</button>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
