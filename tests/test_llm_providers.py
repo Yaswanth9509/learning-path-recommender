@@ -75,13 +75,13 @@ def test_gemini_request_shape(monkeypatch):
     monkeypatch.setattr(llm, "_post_json", recorder)
 
     provider = llm.GeminiProvider(
-        name="gemini", model="gemini-2.0-flash", api_key="k",
+        name="gemini", model="gemini-3.6-flash", api_key="k",
         base_url="https://example.test",
     )
     assert provider.complete("SYS", MESSAGES, 100, SCHEMA) == "hi"
 
     assert recorder.url == (
-        "https://example.test/v1beta/models/gemini-2.0-flash:generateContent"
+        "https://example.test/v1beta/models/gemini-3.6-flash:generateContent"
     )
     assert recorder.headers["x-goog-api-key"] == "k"
     instruction = recorder.payload["systemInstruction"]["parts"][0]["text"]

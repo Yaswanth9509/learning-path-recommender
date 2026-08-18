@@ -40,7 +40,7 @@ PRIORITY = ("anthropic", "gemini", "groq", "openrouter", "ollama")
 #: rather than breaking the app.
 DEFAULT_MODELS = {
     "anthropic": "claude-opus-5",
-    "gemini": "gemini-2.0-flash",
+    "gemini": "gemini-3.6-flash",
     "groq": "llama-3.3-70b-versatile",
     "openrouter": "meta-llama/llama-3.3-70b-instruct:free",
     "ollama": "llama3.1",
