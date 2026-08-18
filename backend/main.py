@@ -448,7 +448,9 @@ def chat(
 
 @app.get("/api/learners/{learner_id}/conversation")
 def get_conversation(
-    learner_id: str, db: Database = Depends(db_dep), limit: int = 50
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    limit: int = Query(50, ge=1, le=200),
 ) -> list[dict]:
     _load_profile(db, learner_id)
     return db.get_conversation(learner_id, limit=limit)

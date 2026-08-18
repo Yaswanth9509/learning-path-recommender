@@ -200,6 +200,20 @@ def test_oversized_profile_fields_are_rejected(client):
     assert out_of_range.status_code == 422
 
 
+def test_conversation_limit_is_bounded(client):
+    """An unbounded limit would let one caller pull an entire history at once."""
+    learner_id = _new_learner(client)
+    assert client.get(
+        f"/api/learners/{learner_id}/conversation?limit=999999"
+    ).status_code == 422
+    assert client.get(
+        f"/api/learners/{learner_id}/conversation?limit=0"
+    ).status_code == 422
+    assert client.get(
+        f"/api/learners/{learner_id}/conversation?limit=200"
+    ).status_code == 200
+
+
 def test_oversized_feedback_note_is_rejected(client):
     learner_id = _new_learner(client)
     response = client.post(f"/api/learners/{learner_id}/feedback", json={
