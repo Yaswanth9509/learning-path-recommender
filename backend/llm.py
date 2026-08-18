@@ -40,7 +40,11 @@ PRIORITY = ("anthropic", "gemini", "groq", "openrouter", "ollama")
 #: rather than breaking the app.
 DEFAULT_MODELS = {
     "anthropic": "claude-opus-5",
-    "gemini": "gemini-3.6-flash",
+    # The `-latest` alias tracks Google's current lite model, so a retirement
+    # cannot silently break the app — and the lite tier's free quota is large
+    # enough for a public demo, where the flagship model allows only a handful
+    # of requests a day.
+    "gemini": "gemini-flash-lite-latest",
     "groq": "llama-3.3-70b-versatile",
     "openrouter": "meta-llama/llama-3.3-70b-instruct:free",
     "ollama": "llama3.1",

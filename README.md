@@ -222,6 +222,20 @@ sound like a coach, not a form letter: it varies phrasing, names the learner, an
 cites their actual stage. The variation is seeded from the input, so it stays
 fully deterministic and testable.
 
+That fallback is not a rare path. Free tiers run out, networks fail, keys expire
+— so the rule engine is what a real user meets sooner or later, and it is built
+to survive how people actually type:
+
+| They send | It does |
+|---|---|
+| `i wnat to be data analist` | Builds the Data Analyst path — shorthand is expanded, and remaining typos are matched fuzzily |
+| `hi` | Welcomes them and asks for a goal, with an example |
+| `help`, `what is this` | Explains what the product does and what to type |
+| `i dont know what i want` | Offers the domains and asks what they'd enjoy doing, not for a job title |
+| `i already know sql` | Credits the skill and **rebuilds the path around it** |
+| `i want to be a frontend enginer` | Switches goal outright — while `should i be a frontend engineer?` does not |
+| `this is useless` | Names the two levers that would actually change the plan |
+
 | Provider | Env var | Cost |
 |---|---|---|
 | **Google Gemini** | `GEMINI_API_KEY` | **Free tier, no card** — recommended |
@@ -293,12 +307,12 @@ Interactive docs at `/docs` while the server runs.
 
 ## Testing
 
-**318 tests at 90% branch coverage**, all offline and deterministic — no
+**350 tests at 90% branch coverage**, all offline and deterministic — no
 network, no API key, no tokens.
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest          # ~3s
+python -m pytest          # ~4s
 python -m ruff check .
 ```
 
@@ -319,6 +333,7 @@ skills it requires. It runs across all 9 goals × 3 experience levels.
 | `test_insights.py` | Graph edges point forward, weekly plans never exceed capacity, achievements are monotonic |
 | `test_adaptation.py` | History survives rebuilds, pace is measured and re-planned around, resources are never scheduled, vague goals are asked about |
 | `test_security.py` | The limiter's sliding window, the API-key gate, payload bounds, response headers |
+| `test_conversation.py` | Typos, greetings, meta questions, goal switching, and mid-chat skill claims — all against the rule engine |
 | `test_frontend.py` | Every selector resolves, every endpoint called exists, nothing loads from a remote host |
 | `test_api.py` | Every endpoint, validation errors, and a full journey: chat → path → progress → feedback → dashboard |
 
@@ -373,7 +388,7 @@ backend/
   models.py  db.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               318 tests, all offline
+tests/                               350 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py

@@ -3,6 +3,40 @@
 All notable changes to this project are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] — 2026-08-18
+
+Deployment readiness, and a conversation layer that survives real users.
+
+### Added
+
+- **Typo and shorthand tolerance.** Messages are normalised (shorthand expanded,
+  punctuation stripped) and goal keywords matched fuzzily, so
+  "i wnat to be data analist" builds the right path. Clean spelling still scores
+  higher than a fuzzy hit.
+- **Small talk that is actually useful.** Greetings, "help", "what is this",
+  "i don't know what i want", thanks, and frustration each get a specific answer
+  instead of the goal-clarification question.
+- **Goal switching from a plain statement.** Naming a different goal switches to
+  it; *asking* about one ("should I be a data analyst?") does not.
+- **Skill claims mid-conversation.** "I already know SQL" credits the skill and
+  rebuilds the path, rather than telling the learner to go and edit a form.
+- **An answer for "is this too much for me"**, grounded in real hours and the two
+  levers that change the plan.
+- `render.yaml` — a one-click Render blueprint with the gates tightened for a
+  public demo.
+- `tests/test_conversation.py` — 32 tests, all against the rule engine.
+
+### Changed
+
+- **The default Gemini model is now `gemini-flash-lite-latest`.** The flagship
+  model allows roughly twenty free requests a day, which a public demo exhausts
+  immediately; the lite tier is far larger, and the `-latest` alias cannot be
+  retired out from under the app the way a pinned id can.
+- **The container honours `$PORT`.** It hardcoded 8000, so every hosting
+  platform would have started it and then failed the health check.
+- Replies no longer read "Priya, Start with …" — the opener lowercases after a
+  name.
+
 ## [1.2.0] — 2026-08-18
 
 Closes the four capabilities the brief names that a static roadmap does not

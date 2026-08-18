@@ -385,10 +385,19 @@ def chat(
         phrase in message.lower()
         for phrase in ("instead", "switch", "change my goal", "actually i want", "now i want")
     )
+    # Naming a different goal outright is itself a switch — a learner who says
+    # "I want to be a data analyst" should not be told to go and edit a form.
+    # Questions about a goal ("should I be a data analyst?") are not switches.
+    restated = (
+        interpretation.goal_id is not None
+        and interpretation.goal_id != profile.goal_id
+        and interpretation.confidence >= assistant.GOAL_SWITCH_CONFIDENCE
+        and assistant.reads_as_goal_statement(message)
+    )
     is_goal_statement = interpretation.goal_id is not None and (
         profile.goal_id is None
         or existing_path is None
-        or (switching and interpretation.goal_id != profile.goal_id)
+        or ((switching or restated) and interpretation.goal_id != profile.goal_id)
     )
 
     path_generated = False
@@ -431,6 +440,32 @@ def chat(
             message,
             history=db.get_conversation(profile.learner_id, limit=10)[:-1],
         )
+        # "I already know SQL" is an instruction, not small talk: credit the
+        # skill and rebuild, so the plan shrinks instead of the learner being
+        # told to go and edit their profile.
+        newly_declared = [
+            skill_id
+            for skill_id in interpretation.declared_skills
+            if skill_id not in profile.declared_skills and skill_id in catalog.skills
+        ]
+        if newly_declared and assistant.declares_existing_knowledge(message):
+            profile.declared_skills = sorted(
+                set(profile.declared_skills) | set(newly_declared)
+            )
+            db.save_profile(profile)
+            names = ", ".join(catalog.skill_name(s) for s in newly_declared)
+            if profile.goal_id:
+                rebuilt = _regenerate(
+                    catalog, db, profile,
+                    notes=[f"Marked {names} as already known and rebuilt the path."],
+                )
+                reply += (
+                    f"\n\nI have marked {names} as already known and rebuilt your "
+                    f"path around it — it is now {rebuilt.total_hours} hours "
+                    f"across {len(rebuilt.milestones)} stages."
+                )
+            else:
+                reply += f"\n\nNoted that you already know {names}."
 
     db.add_message(profile.learner_id, "assistant", reply)
     updated_profile = db.get_profile(profile.learner_id)

@@ -17,6 +17,7 @@ import json
 import logging
 import re
 import zlib
+from difflib import SequenceMatcher
 from typing import Any, Optional
 
 from . import llm
@@ -84,6 +85,18 @@ a different learner is a wasted sentence.
 never "let me know if you have any other questions".
 - Acknowledge effort when they have made some, and be honest when a stretch \
 ahead of them is genuinely hard. Do not manufacture enthusiasm.
+
+Who you are talking to: learners all over the world, many of whom are not \
+writing in their first language. Expect typos, shorthand ("wat shud i do"), \
+missing punctuation, and sentences that trail off. Read for intent and answer \
+the question they meant. Never correct their English, never comment on it, and \
+never ask them to rephrase unless you genuinely cannot tell which of two \
+different things they meant. Keep your own sentences short and plain — no \
+idioms, no jargon they have not already used.
+
+If a message is not about the roadmap at all — a greeting, "what is this", \
+thanks, or frustration — answer it briefly and naturally, then give them one \
+concrete thing they could ask or do next.
 
 Hard rules:
 - Ground every claim in the profile and path given to you. Never invent a \
@@ -207,19 +220,80 @@ def interpret_goal(catalog: Catalog, text: str) -> GoalInterpretation:
     )
 
 
+#: Chat shorthand and common misspellings, expanded before any matching. People
+#: type "i wnat to lern ml, wat shud i do" and mean something perfectly clear.
+_SHORTHAND: dict[str, str] = {
+    "u": "you", "ur": "your", "urs": "yours", "r": "are", "n": "and",
+    "im": "i am", "iam": "i am", "ive": "i have", "dnt": "dont", "cant": "cannot",
+    "wat": "what", "wht": "what", "wt": "what", "whts": "what is", "wats": "what is",
+    "shud": "should", "shld": "should", "cud": "could", "wud": "would",
+    "plz": "please", "pls": "please", "thx": "thanks", "ty": "thanks",
+    "wanna": "want to", "wana": "want to", "gonna": "going to", "gotta": "got to",
+    "wnat": "want", "wnt": "want",
+    "abt": "about", "bcz": "because", "coz": "because", "cuz": "because",
+    "kno": "know", "knw": "know", "hlp": "help", "hw": "how", "y": "why",
+    "gud": "good", "grt": "great", "nd": "and", "smthing": "something",
+    "smth": "something", "sumthing": "something", "wrk": "work", "jb": "job",
+    "lern": "learn", "lerning": "learning", "learing": "learning",
+    "machin": "machine", "analist": "analyst", "analyist": "analyst",
+    "engg": "engineering", "engnr": "engineer", "devlop": "develop",
+    "devloper": "developer", "developor": "developer", "programing": "programming",
+    "kubernets": "kubernetes", "javascrip": "javascript", "pyton": "python",
+}
+
+#: How close a word has to be to count as the same word once misspelled.
+_FUZZY_WORD = 0.84
+_FUZZY_PHRASE = 0.86
+
+
+def _normalise(text: str) -> str:
+    """Lowercase, strip punctuation, and expand shorthand — for matching only."""
+    cleaned = re.sub(r"[^a-z0-9+ ]+", " ", text.lower())
+    return " ".join(_SHORTHAND.get(word, word) for word in cleaned.split())
+
+
+def _fuzzy_contains(keyword: str, words: list[str]) -> bool:
+    """Is `keyword` present in `words`, allowing for a misspelling?"""
+    parts = keyword.split()
+    span = len(parts)
+    if span > len(words):
+        return False
+    threshold = _FUZZY_WORD if span == 1 else _FUZZY_PHRASE
+    for index in range(len(words) - span + 1):
+        window = " ".join(words[index : index + span])
+        if SequenceMatcher(None, keyword, window).ratio() >= threshold:
+            return True
+    return False
+
+
 def _score_goals(catalog: Catalog, text: str) -> list[tuple[Goal, float]]:
-    """Every goal the wording points at, best first. Ties break on id."""
+    """Every goal the wording points at, best first. Ties break on id.
+
+    Matching runs twice: exactly against the raw text, then fuzzily against a
+    normalised copy, so "i wnat to be a data analist" still finds Data Analyst.
+    A fuzzy hit scores lower than an exact one, so clean input always wins.
+    """
     lowered = f" {text.lower()} "
+    normalised = _normalise(text)
+    words = normalised.split()
     scored: list[tuple[Goal, float]] = []
+
     for goal in catalog.goals.values():
         score = 0.0
         for keyword in goal.keywords:
-            if keyword in lowered:
-                score += 1.0 + len(keyword.split()) * 0.5
-        if goal.title.lower() in lowered:
+            weight = 1.0 + len(keyword.split()) * 0.5
+            if keyword in lowered or keyword in normalised:
+                score += weight
+            elif _fuzzy_contains(keyword, words):
+                score += weight * 0.8
+        title = goal.title.lower()
+        if title in lowered or title in normalised:
             score += 3.0
+        elif _fuzzy_contains(title, words):
+            score += 2.4
         if score > 0:
-            scored.append((goal, score))
+            scored.append((goal, round(score, 3)))
+
     scored.sort(key=lambda pair: (-pair[1], pair[0].id))
     return scored
 
@@ -230,6 +304,48 @@ CLARIFY_MIN_SCORE = 2.0
 CLARIFY_CLOSE_RATIO = 0.7
 #: Above this, a provider's own reading is trusted over the keyword rules.
 CLARIFY_TRUST_CONFIDENCE = 0.6
+#: How sure we must be before swapping a learner's goal on their say-so.
+GOAL_SWITCH_CONFIDENCE = 0.6
+
+#: Wording that states an intention rather than asking about one.
+_WANT_PHRASES = (
+    "i want", "i wanna", "i would like", "i'd like", "i wish", "i plan",
+    "my goal", "i am aiming", "i aim", "i need to become", "i want to be",
+    "i hope to", "make me", "i am trying to become", "banna hai",
+)
+_QUESTION_STARTS = (
+    "what", "why", "how", "can", "could", "should", "is", "are", "do", "does",
+    "did", "will", "would", "if", "when", "which", "who", "shall", "may",
+)
+#: Wording that claims existing knowledge, used to update the profile mid-chat.
+_KNOWLEDGE_PHRASES = (
+    "i know", "i already know", "i already did", "i have done", "i did",
+    "familiar with", "comfortable with", "experience with", "i can use",
+    "i have used", "i studied", "i learned", "i learnt", "background in",
+    "good at", "i work with", "i use",
+)
+
+
+def reads_as_goal_statement(text: str) -> bool:
+    """Is this a learner stating what they want, rather than asking about it?
+
+    "I want to be a data analyst" changes their goal. "Should I be a data
+    analyst?" and "what does a data analyst do?" must not.
+    """
+    normalised = _normalise(text)
+    if not normalised:
+        return False
+    if "?" in text:
+        return False
+    if any(phrase in normalised for phrase in _WANT_PHRASES):
+        return True
+    return normalised.split()[0] not in _QUESTION_STARTS
+
+
+def declares_existing_knowledge(text: str) -> bool:
+    """Does the learner claim to already hold a skill they are naming?"""
+    normalised = _normalise(text)
+    return "?" not in text and any(p in normalised for p in _KNOWLEDGE_PHRASES)
 
 
 def _spread_of_goals(catalog: Catalog, seed: list[Goal], limit: int = 4) -> list[Goal]:
@@ -246,6 +362,127 @@ def _spread_of_goals(catalog: Catalog, seed: list[Goal], limit: int = 4) -> list
     return chosen[:limit]
 
 
+#: Messages that are not goals at all. A learner opening with "hi" deserves a
+#: welcome, not an interrogation about career outcomes.
+_GREETING_WORDS = frozenset({
+    "hi", "hii", "hiii", "hello", "helo", "hey", "heya", "yo", "hai",
+    "namaste", "hola", "greetings", "morning", "afternoon", "evening", "sup",
+})
+_HELP_PHRASES = (
+    "what is this", "what is that", "what can you do", "what do you do",
+    "how does this work", "how do you work", "how this works", "what are you",
+    "who are you", "who made you", "what should i type", "how to use",
+    "how do i use", "guide me", "explain this app", "what is atlas",
+)
+_UNSURE_PHRASES = (
+    "dont know", "do not know", "not sure", "no idea", "confused", "cant decide",
+    "cannot decide", "you decide", "you suggest", "suggest me", "anything is fine",
+    "whatever", "any option", "help me choose", "help me decide", "no clue",
+)
+_THANKS_PHRASES = ("thanks", "thank you", "thankyou", "ok", "okay", "got it", "cool", "fine")
+_UPSET_PHRASES = (
+    "useless", "not helpful", "unhelpful", "waste", "stupid", "terrible",
+    "doesnt help", "does not help", "bad", "wrong", "makes no sense", "confusing",
+)
+
+
+def _mentions(normalised: str, phrases: tuple[str, ...]) -> bool:
+    return any(phrase in normalised for phrase in phrases)
+
+
+def _is_greeting(normalised: str) -> bool:
+    words = normalised.split()
+    return bool(words) and len(words) <= 4 and words[0] in _GREETING_WORDS
+
+
+def small_talk(catalog: Catalog, text: str, has_path: bool) -> Optional[str]:
+    """A useful answer to a message that is not about the roadmap itself.
+
+    Returns `None` when the message is ordinary and should be handled normally.
+    Everything here has to work with no LLM configured, because this is exactly
+    the sort of message a rule engine usually handles badly.
+    """
+    normalised = _normalise(text)
+    goal_count = len(catalog.goals)
+
+    if _is_greeting(normalised):
+        if has_path:
+            return (
+                "Hello again. Your roadmap is on the Path tab — ask me what to "
+                "start next, why something sits where it does, or how long the "
+                "rest will take."
+            )
+        return (
+            "Hello. I build learning roadmaps: tell me what you want to be able "
+            "to do, and I work out the order to learn it in.\n\n"
+            "The more you tell me the better the plan — the role you want, "
+            "anything you already know, and how many hours a week you have. "
+            "Something like “I want to become a data analyst, I know a little "
+            "Excel, about 8 hours a week” is plenty. Rough English is fine; I "
+            "only need the gist."
+        )
+
+    if normalised in {"help", "help me", "need help", "i need help", "please help",
+                      "help please", "guide me", "i need guidance"}:
+        return (
+            "Happy to. Tell me what you want to be able to do — a role you are "
+            "aiming for, or something you want to build — and I will work out "
+            "which skills it needs and what order to take them in.\n\n"
+            "If you also mention what you already know and how many hours a week "
+            "you have, the plan comes back with real dates on it."
+        )
+
+    if _mentions(normalised, _HELP_PHRASES):
+        return (
+            f"I turn a goal into an ordered plan. I know {goal_count} career "
+            f"goals and {len(catalog.skills)} skills, and how those skills "
+            "depend on each other — so I can work out not just what to learn but "
+            "what has to come first.\n\n"
+            "Tell me what you want to be able to do when you are finished, plus "
+            "anything you already know and the time you can give it each week. "
+            "I will lay out stages, courses, projects and checks, and explain why "
+            "each item sits where it does."
+        )
+
+    if _mentions(normalised, _UNSURE_PHRASES) and not has_path:
+        domains = sorted({goal.domain for goal in catalog.goals.values()})
+        listed = ", ".join(domains[:-1]) + f" and {domains[-1]}" if len(domains) > 1 else domains[0]
+        return (
+            "That is a fair place to start — most people arrive knowing the "
+            f"feeling, not the job title. The goals I cover sit in {listed}.\n\n"
+            "Rather than picking a title, tell me what you would enjoy doing all "
+            "day: finding patterns in data, building things people click on, or "
+            "keeping systems running. I will turn that into a concrete goal and "
+            "you can change it later — nothing here is locked in."
+        )
+
+    if _mentions(normalised, _UPSET_PHRASES):
+        if has_path:
+            return (
+                "Fair enough — tell me which part is wrong and I will change it. "
+                "If the plan is too long, raise your weekly hours in Profile and "
+                "every estimate updates. If an item is off, the too easy, too "
+                "hard and not relevant buttons rebuild the path around it. If the "
+                "goal itself is wrong, say what you actually want and I will "
+                "start over."
+            )
+        return (
+            "Let me try a different way. Skip the job titles and just tell me "
+            "one thing you want to be able to build or do. I will work backwards "
+            "from that to the skills you need and the order to take them in."
+        )
+
+    if _mentions(normalised, _THANKS_PHRASES) and len(normalised.split()) <= 3:
+        return (
+            "Any time. If you want something concrete next, ask me what to start "
+            "first or why a particular item is where it is."
+            if has_path
+            else "Any time. Whenever you are ready, tell me what you want to be "
+            "able to do and I will build the roadmap."
+        )
+    return None
+
+
 def clarification(catalog: Catalog, text: str) -> tuple[str, list[str]] | None:
     """Ask instead of guessing when the wording does not name one goal.
 
@@ -259,6 +496,16 @@ def clarification(catalog: Catalog, text: str) -> tuple[str, list[str]] | None:
         runner_up = ranked[1][1] if len(ranked) > 1 else 0.0
         if runner_up < ranked[0][1] * CLARIFY_CLOSE_RATIO:
             return None  # one clear reading — no need to ask
+
+    # "hi", "what is this", "i don't know" — answer the message that was
+    # actually sent, then offer the same starting points.
+    opener = small_talk(catalog, text, has_path=False)
+    if opener is not None:
+        return opener, [
+            f"I want to become {'an' if goal.title[:1].upper() in 'AEIOU' else 'a'} "
+            f"{goal.title}"
+            for goal in _spread_of_goals(catalog, [])
+        ]
 
     near = [goal for goal, _ in ranked[:2]]
     options = _spread_of_goals(catalog, near)
@@ -635,8 +882,15 @@ def _answer_with_rules(
     question: str,
 ) -> str:
     """Deterministic answers, written to sound like a person."""
-    q = question.lower().strip()
+    # Two views of the message: `q` for intent keywords (shorthand expanded,
+    # punctuation gone) and `raw` for matching titles, which contain "." and "&".
+    q = _normalise(question)
+    raw = question.lower().strip()
     name = profile.name if profile.name and profile.name != "Learner" else ""
+
+    aside = small_talk(catalog, question, has_path=path is not None)
+    if aside is not None:
+        return aside
 
     if path is None:
         return _pick(
@@ -658,7 +912,12 @@ def _answer_with_rules(
     for milestone in path.milestones:
         for item in milestone.items:
             title = item.title.lower()
-            if title in q or (len(title) > 12 and title[:18] in q):
+            normalised_title = _normalise(item.title)
+            if (
+                title in raw
+                or normalised_title in q
+                or (len(title) > 12 and title[:18] in raw)
+            ):
                 teaches = (
                     ", ".join(item.teaches_names)
                     if item.teaches_names
@@ -728,6 +987,10 @@ def _answer_with_rules(
             ],
             question,
         )
+        # Lowercase the opener when a name precedes it, so it reads as one
+        # sentence rather than "Priya, Start with …".
+        if name and opener[:1].isupper() and not opener.startswith("“"):
+            opener = opener[:1].lower() + opener[1:]
         prefix = f"{name}, " if name else ""
         return (
             f"{prefix}{opener} It's {nxt.hours} hours from {nxt.provider}, in "
@@ -799,6 +1062,28 @@ def _answer_with_rules(
             "They're placed deliberately — each one lands right after the stage "
             "that teaches what it needs, so you're applying material while it's "
             "still fresh rather than at the very end."
+        )
+
+    if any(k in q for k in (
+        "too much", "too long", "too big", "overwhelm", "hard for me", "can i do",
+        "am i able", "is it possible", "doubt", "scared", "give up", "difficult",
+    )):
+        first = snap["next"]
+        opening = (
+            f"The whole path is {path.total_hours} hours, which is a real "
+            f"commitment — but you never do it in one go."
+        )
+        step = (
+            f" The only thing that matters now is “{first.title}”: {first.hours} "
+            f"hours, and every prerequisite for it is already met."
+            if first
+            else " There is nothing outstanding on it right now."
+        )
+        return (
+            opening + step + "\n\nTwo levers if the pace feels wrong. Change your "
+            "weekly hours in Profile and every date recalculates honestly. Or "
+            "mark anything too hard and I will pull the difficulty down and put "
+            "more foundational material in front of it."
         )
 
     if any(k in q for k in ("progress", "how am i", "doing", "far")):
