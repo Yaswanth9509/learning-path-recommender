@@ -226,3 +226,52 @@ def test_changing_a_password_requires_signing_in(client):
     assert client.patch("/api/auth/password", json={
         "current": "x", "new": "a whole new password",
     }).status_code == 401
+
+
+# ------------------------------------------------------ guest becomes real
+def test_a_guest_keeps_everything_when_they_create_an_account(client):
+    """The whole point of guest mode: trying it first must not cost you the work."""
+    client.post("/api/auth/guest")
+    learner = client.post("/api/learners", json={"name": "Built as a guest"}).json()
+    client.patch(f"/api/learners/{learner['learner_id']}/profile",
+                 json={"goal_id": "goal-data-analyst"})
+
+    upgraded = client.post("/api/auth/upgrade", json={
+        "email": "real@example.com", "password": "a real password",
+    })
+    assert upgraded.status_code == 200
+    assert upgraded.json()["is_guest"] is False
+
+    # Same learner, same path, still signed in.
+    assert [p["name"] for p in client.get("/api/learners").json()] == ["Built as a guest"]
+    assert client.get(
+        f"/api/learners/{learner['learner_id']}/path"
+    ).json()["goal_id"] == "goal-data-analyst"
+
+    # And the new credentials work after signing out.
+    client.post("/api/auth/logout")
+    assert client.post("/api/auth/login", json={
+        "email": "real@example.com", "password": "a real password",
+    }).status_code == 200
+    assert [p["name"] for p in client.get("/api/learners").json()] == ["Built as a guest"]
+
+
+def test_a_registered_account_cannot_be_upgraded_again(client):
+    _register(client)
+    response = client.post("/api/auth/upgrade", json={
+        "email": "other@example.com", "password": "another password",
+    })
+    assert response.status_code == 400
+    assert "already registered" in response.json()["detail"]
+
+
+def test_upgrading_to_a_taken_email_is_refused(client):
+    _register(client, email="taken@example.com")
+    client.post("/api/auth/logout")
+    client.post("/api/auth/guest")
+
+    response = client.post("/api/auth/upgrade", json={
+        "email": "taken@example.com", "password": "a real password",
+    })
+    assert response.status_code == 400
+    assert "already exists" in response.json()["detail"]

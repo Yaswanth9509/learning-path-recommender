@@ -176,6 +176,22 @@ def guest(response: Response, db: Database = Depends(db_dep)):
     return _user_view(user, db)
 
 
+@app.post("/api/auth/upgrade")
+def upgrade_guest(
+    payload: dict = Body(...),
+    user=Depends(require_user),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Keep a guest's work by giving the same account real credentials."""
+    try:
+        upgraded = db.accounts.upgrade_guest(
+            user.id, str(payload.get("email", "")), str(payload.get("password", ""))
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _user_view(upgraded, db)
+
+
 @app.post("/api/auth/logout", status_code=204)
 def logout(request: Request, response: Response, db: Database = Depends(db_dep)):
     db.accounts.end_session(request.cookies.get(accounts.SESSION_COOKIE, ""))
@@ -228,19 +244,28 @@ def _resolve_goal(catalog: Catalog, profile: LearnerProfile) -> str:
     return profile.goal_id
 
 
-def _track_goal(profile: LearnerProfile, goal_id: str) -> None:
+def _track_goal(profile: LearnerProfile, goal_id: str, db: Database) -> list[str]:
     """Make `goal_id` the active one, keeping it in the learner's goal list.
 
     At the cap, the goal being replaced is the one currently active — a learner
     who names a fourth goal is swapping what they are working on now, not
-    silently dropping something they set up days ago.
+    silently dropping something they set up days ago. Whatever is dropped has
+    its roadmap deleted too: leaving the row behind made the stored paths and
+    the profile disagree, and the cap stopped meaning anything.
     """
-    goals = [g for g in profile.goal_ids if g != goal_id]
-    if len(goals) >= MAX_ACTIVE_PATHS:
-        dropped = profile.goal_id if profile.goal_id in goals else goals[-1]
-        goals = [g for g in goals if g != dropped]
+    stored = [p.goal_id for p in db.list_paths(profile.learner_id)]
+    goals = [g for g in dict.fromkeys(stored + profile.goal_ids) if g != goal_id]
+    dropped: list[str] = []
+    while len(goals) >= MAX_ACTIVE_PATHS:
+        victim = profile.goal_id if profile.goal_id in goals else goals[0]
+        goals = [g for g in goals if g != victim]
+        dropped.append(victim)
+
+    for goal in dropped:
+        db.delete_path(profile.learner_id, goal)
     profile.goal_ids = goals + [goal_id]
     profile.goal_id = goal_id
+    return dropped
 
 
 def _regenerate(
@@ -251,7 +276,7 @@ def _regenerate(
 ) -> LearningPath:
     """Rebuild the path from the current profile, preserving progress."""
     goal_id = _resolve_goal(catalog, profile)
-    _track_goal(profile, goal_id)
+    dropped = _track_goal(profile, goal_id, db)
     profiling.sync_completions(
         catalog,
         profile,
@@ -264,12 +289,21 @@ def _regenerate(
     previous = db.get_path(profile.learner_id, goal_id)
     revision = (previous.revision + 1) if previous else 1
 
+    messages = list(notes or [])
+    if dropped:
+        names = ", ".join(
+            catalog.goals[g].title for g in dropped if g in catalog.goals
+        )
+        messages.append(
+            f"You can run {MAX_ACTIVE_PATHS} paths at once, so {names} made room "
+            "for this one. Your progress on its courses is kept."
+        )
     path = generate_path(
         catalog=catalog,
         derived=derived,
         goal_id=goal_id,
         progress=db.get_progress(profile.learner_id),
-        adaptation_notes=notes or [],
+        adaptation_notes=messages,
         revision=revision,
     )
     db.save_path(path)

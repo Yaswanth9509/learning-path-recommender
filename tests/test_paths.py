@@ -273,3 +273,44 @@ def test_a_harmless_removal_carries_no_warning(client):
     after = client.delete(f"/api/learners/{learner_id}/path/items/{victim}").json()
     assert not after["uncovered_skills"]
     assert not any("only course" in n.lower() for n in after["adaptation_notes"])
+
+
+def test_the_cap_holds_in_storage_not_just_on_the_profile(client):
+    """A fourth goal must remove a third path, not quietly add a fourth row."""
+    learner_id = _with_goal(client, "goal-data-analyst")
+    for goal in ("goal-frontend", "goal-devops"):
+        _add(client, learner_id, goal)
+
+    # Naming a fourth goal in chat is the route that used to leak rows.
+    client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "actually i want to be a cloud architect",
+    })
+
+    paths = client.get(f"/api/learners/{learner_id}/paths").json()
+    assert len(paths) == MAX_ACTIVE_PATHS, [p["goal_title"] for p in paths]
+    goal_ids = {p["goal_id"] for p in paths}
+    assert "goal-cloud-architect" in goal_ids
+
+    # The profile and the stored paths agree about what exists.
+    profile = client.get(f"/api/learners/{learner_id}/profile").json()
+    assert set(profile["goal_ids"]) == goal_ids
+    assert profile["goal_id"] == "goal-cloud-architect"
+
+
+def test_making_room_is_explained_rather_than_silent(client):
+    learner_id = _with_goal(client, "goal-data-analyst")
+    for goal in ("goal-frontend", "goal-devops"):
+        _add(client, learner_id, goal)
+
+    # Adding explicitly is refused at the cap; naming a new goal in chat swaps
+    # the active one — and says which roadmap it displaced.
+    assert _add(client, learner_id, "goal-ml-engineer").status_code == 400
+
+    client.post("/api/chat", json={
+        "learner_id": learner_id,
+        "message": "actually i want to be a machine learning engineer",
+    })
+    path = client.get(f"/api/learners/{learner_id}/path").json()
+    notes = " ".join(path["adaptation_notes"]).lower()
+    assert "made room" in notes
+    assert "progress" in notes

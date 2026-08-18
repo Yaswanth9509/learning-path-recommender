@@ -110,6 +110,8 @@ function showTab(name, { updateHash = true } = {}) {
   if (updateHash && window.location.hash.slice(1) !== name) {
     window.location.hash = name;
   }
+  // Land at the top of the new view rather than halfway down the last one.
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (name === "path") renderPath();
   if (name === "graph") loadGraph();
   if (name === "plan") loadPlan();
@@ -197,6 +199,20 @@ $("#signOutBtn").addEventListener("click", async () => {
   window.location.reload();
 });
 
+async function upgradeGuest() {
+  const email = (window.prompt("Email for your new account") || "").trim();
+  if (!email) return;
+  const password = (window.prompt("Choose a password (at least 8 characters)") || "").trim();
+  if (!password) return;
+  try {
+    state.user = await api("/api/auth/upgrade", {
+      method: "POST", body: JSON.stringify({ email, password }),
+    });
+    renderUserChip();
+    toast("Account created. Everything you have done so far is saved to it.", 5000);
+  } catch (err) { toast(err.message, 5000); }
+}
+
 function renderUserChip() {
   const chip = $("#userChip");
   const out = $("#signOutBtn");
@@ -205,8 +221,13 @@ function renderUserChip() {
   out.hidden = false;
   chip.textContent = state.user.is_guest ? "Guest" : state.user.display_name;
   chip.title = state.user.is_guest
-    ? "A throwaway account. Create a real one to keep this work."
+    ? "A throwaway account — save your work by creating a real one."
     : `${state.user.email} · ${state.user.learners} of ${state.user.max_learners} learners`;
+
+  // A guest is offered a way to keep their work, not just a way out.
+  const keep = $("#keepWorkBtn");
+  keep.hidden = !state.user.is_guest;
+  $("#signOutBtn").textContent = state.user.is_guest ? "Discard" : "Sign out";
 }
 
 /* --------------------------------------------------------------- bootstrap */
@@ -424,6 +445,7 @@ $("#chatForm").addEventListener("submit", async (event) => {
 
     if (res.path_generated) {
       state.path = await api(`/api/learners/${state.learnerId}/path`);
+      await loadPaths();
       renderPath();
       renderProfileTab();
       const learners = await api("/api/learners");
@@ -460,6 +482,20 @@ function renderInterpretation(interp) {
 /* A link for an item. Catalogue entries that publish a canonical URL link
    straight to it; the sample catalogue's fictional providers do not, so those
    get an honest search rather than a fabricated dead link. */
+function videoLink(item) {
+  const skills = (item.teaches_names || []).join(" ");
+  const query = `${item.title} ${skills} tutorial`.trim();
+  return el("a", {
+    class: "item-link item-link-video",
+    text: "Videos ↗",
+    attrs: {
+      href: `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`,
+      target: "_blank", rel: "noopener noreferrer",
+      title: "Free video tutorials covering the same skills",
+    },
+  });
+}
+
 function itemLink(item) {
   const url = item.url
     || `https://duckduckgo.com/?q=${encodeURIComponent(`${item.title} ${item.provider} course`)}`;
@@ -703,7 +739,9 @@ function renderPathItem(item) {
   row.appendChild(el("span", { class: `item-role role-${item.role}`, text: item.role }));
 
   const body = el("div");
-  body.appendChild(el("div", { class: "item-title" }, [item.title, itemLink(item)]));
+  body.appendChild(el("div", { class: "item-title" }, [
+    item.title, itemLink(item), videoLink(item),
+  ]));
   body.appendChild(el("div", { class: "item-sub", text:
     `${item.provider} · ${item.hours}h · level ${item.level} · ${item.format} · ${item.cost} · rated ${item.rating}/5` }));
   if (item.teaches_names.length) {
@@ -1486,7 +1524,7 @@ function renderRecommendation(r, index = 0) {
 
   const head = el("div", { class: "rec-head" });
   head.appendChild(el("div", {}, [
-    el("div", { class: "item-title" }, [r.title, itemLink(r)]),
+    el("div", { class: "item-title" }, [r.title, itemLink(r), videoLink(r)]),
     el("div", { class: "item-sub", text:
       `${r.provider} · ${r.type} · ${r.hours}h · level ${r.level} · ${r.format} · ${r.cost} · ${r.rating}/5` }),
   ]));

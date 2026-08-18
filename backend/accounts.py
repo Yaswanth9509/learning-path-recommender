@@ -185,6 +185,37 @@ class Accounts:
             ).fetchall()
         return self._row_to_user(rows[0]) if rows else None
 
+    def upgrade_guest(self, user_id: str, email: str, password: str) -> User:
+        """Turn a throwaway account into a real one, in place.
+
+        The user id never changes, so every learner, path and progress row that
+        already points at it stays exactly where it is. That is the whole point:
+        someone who tried the product as a guest keeps their work.
+        """
+        address = normalise_email(email)
+        check_password_strength(password)
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT is_guest FROM users WHERE id = ?", (user_id,)
+            ).fetchall()
+            if not rows:
+                raise AuthError("no such account")
+            if not rows[0]["is_guest"]:
+                raise AuthError("this account is already registered")
+            try:
+                self._conn.execute(
+                    "UPDATE users SET email = ?, password_hash = ?, is_guest = 0, "
+                    "display_name = ? WHERE id = ?",
+                    (address, hash_password(password), address.split("@")[0][:80],
+                     user_id),
+                )
+                self._conn.commit()
+            except sqlite3.IntegrityError as exc:
+                raise AuthError("an account with that email already exists") from exc
+        user = self.get_user(user_id)
+        assert user is not None
+        return user
+
     def set_display_name(self, user_id: str, name: str) -> None:
         with self._lock:
             self._conn.execute(
