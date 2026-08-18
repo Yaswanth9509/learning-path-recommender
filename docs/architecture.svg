@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 560" width="980" height="560" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="Architecture: a natural-language goal flows through the assistant, profiling, gap analysis and path generation into a prerequisite-ordered roadmap, with recommendation, dashboard, insights and persistence layers around it.">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8892a4"/>
+    </marker>
+    <style>
+      .box { fill: none; stroke: #8892a4; stroke-width: 1.4; rx: 10; }
+      .accent { stroke: #6b8afd; stroke-width: 1.8; }
+      .title { fill: #6b8afd; font-size: 14px; font-weight: 640; }
+      .name { fill: #8892a4; font-size: 13px; font-weight: 600; }
+      .note { fill: #8892a4; font-size: 11.5px; }
+      .flow { stroke: #8892a4; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .flow-soft { stroke: #8892a4; stroke-width: 1.2; fill: none; stroke-dasharray: 4 4; marker-end: url(#arrow); }
+      .edge-label { fill: #8892a4; font-size: 11px; font-style: italic; }
+    </style>
+  </defs>
+
+  <text x="24" y="34" class="title">Personalised Learning Path Recommender — request path</text>
+
+  <!-- edge / gate -->
+  <rect x="24" y="56" width="200" height="72" class="box accent"/>
+  <text x="40" y="82" class="name">HTTP edge</text>
+  <text x="40" y="101" class="note">main.py · security.py</text>
+  <text x="40" y="118" class="note">API key · rate limit · CORS</text>
+
+  <!-- conversational input -->
+  <rect x="24" y="164" width="200" height="86" class="box"/>
+  <text x="40" y="190" class="name">Natural-language goal</text>
+  <text x="40" y="209" class="note">"I want to build LLM apps,</text>
+  <text x="40" y="226" class="note">I know Python, 12h a week"</text>
+  <text x="40" y="243" class="note">POST /api/chat</text>
+
+  <!-- assistant -->
+  <rect x="278" y="164" width="212" height="86" class="box accent"/>
+  <text x="294" y="190" class="name">assistant.py · llm.py</text>
+  <text x="294" y="209" class="note">Claude / Gemini / Groq / Ollama</text>
+  <text x="294" y="226" class="note">— or the rule engine, always</text>
+  <text x="294" y="243" class="note">Asks when the goal is ambiguous</text>
+
+  <!-- profiling -->
+  <rect x="278" y="286" width="212" height="80" class="box"/>
+  <text x="294" y="312" class="name">profiling.py</text>
+  <text x="294" y="331" class="note">Declared skills + implied ones</text>
+  <text x="294" y="348" class="note">+ prior learning history</text>
+
+  <!-- gap -->
+  <rect x="278" y="398" width="212" height="72" class="box"/>
+  <text x="294" y="424" class="name">gap.py</text>
+  <text x="294" y="443" class="note">required = closure(goal targets)</text>
+  <text x="294" y="460" class="note">missing = required − known</text>
+
+  <!-- pathgen -->
+  <rect x="544" y="286" width="212" height="184" class="box accent"/>
+  <text x="560" y="312" class="name">pathgen.py</text>
+  <text x="560" y="333" class="note">topological_layers(missing)</text>
+  <text x="560" y="352" class="note">greedy course cover per layer</text>
+  <text x="560" y="371" class="note">chunk into 3–6 milestones</text>
+  <text x="560" y="390" class="note">cap each with a project</text>
+  <text x="560" y="409" class="note">and an assessment</text>
+  <text x="560" y="435" class="note">Nothing is ever scheduled</text>
+  <text x="560" y="452" class="note">before its prerequisites.</text>
+
+  <!-- catalog -->
+  <rect x="544" y="164" width="212" height="86" class="box"/>
+  <text x="560" y="190" class="name">catalog.py</text>
+  <text x="560" y="209" class="note">48 skills · 90 items · 9 goals</text>
+  <text x="560" y="226" class="note">Prerequisite DAG, validated at</text>
+  <text x="560" y="243" class="note">import: cycles fail loudly</text>
+
+  <!-- outputs -->
+  <rect x="810" y="164" width="146" height="86" class="box"/>
+  <text x="826" y="190" class="name">recommender.py</text>
+  <text x="826" y="209" class="note">Six weighted, </text>
+  <text x="826" y="226" class="note">independently computed</text>
+  <text x="826" y="243" class="note">score components</text>
+
+  <rect x="810" y="286" width="146" height="80" class="box"/>
+  <text x="826" y="312" class="name">dashboard.py</text>
+  <text x="826" y="331" class="note">Progress, skills,</text>
+  <text x="826" y="348" class="note">next actions, pace</text>
+
+  <rect x="810" y="398" width="146" height="72" class="box"/>
+  <text x="826" y="424" class="name">insights.py</text>
+  <text x="826" y="443" class="note">Graph · weekly plan</text>
+  <text x="826" y="460" class="note">badges · export</text>
+
+  <!-- persistence -->
+  <rect x="24" y="398" width="200" height="72" class="box"/>
+  <text x="40" y="424" class="name">db.py</text>
+  <text x="40" y="443" class="note">SQLite, stdlib only</text>
+  <text x="40" y="460" class="note">profile · path · progress</text>
+
+  <!-- feedback loop note -->
+  <rect x="24" y="286" width="200" height="80" class="box"/>
+  <text x="40" y="312" class="name">Adaptation</text>
+  <text x="40" y="331" class="note">feedback → rebuild</text>
+  <text x="40" y="348" class="note">observed pace → re-plan</text>
+
+  <!-- flows -->
+  <path d="M 124 128 L 124 158" class="flow"/>
+  <path d="M 224 207 L 272 207" class="flow"/>
+  <path d="M 384 250 L 384 280" class="flow"/>
+  <path d="M 384 366 L 384 392" class="flow"/>
+  <path d="M 490 434 L 538 402" class="flow"/>
+  <path d="M 650 250 L 650 280" class="flow"/>
+  <path d="M 756 378 L 804 330" class="flow"/>
+  <path d="M 756 330 L 804 250" class="flow-soft"/>
+  <path d="M 756 400 L 804 430" class="flow-soft"/>
+  <path d="M 224 434 L 272 434" class="flow-soft"/>
+  <path d="M 124 398 L 124 370" class="flow"/>
+  <path d="M 224 326 L 272 326" class="flow"/>
+
+  <text x="232" y="200" class="edge-label">goal, level, hours, skills</text>
+  <text x="392" y="274" class="edge-label">learner model</text>
+  <text x="500" y="500" class="edge-label">skills still missing, in dependency order</text>
+  <text x="560" y="500" class="edge-label"> </text>
+  <text x="24" y="530" class="note">Every stage is deterministic: identical input produces an identical path. The LLM improves how the goal is read and how replies sound — it is never on the correctness path.</text>
+</svg>

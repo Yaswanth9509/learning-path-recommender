@@ -1,0 +1,792 @@
+<title>Learning Path Recommender</title>
+<style>
+  /* ---------------------------------------------------------------- tokens */
+  :root {
+    --ground: #fbfbfd;
+    --panel: #f1f4f9;
+    --panel-2: #e8edf5;
+    --ink: #171b23;
+    --ink-muted: #5c6675;
+    --ink-faint: #8b95a5;
+    --rule: #e2e6ec;
+    --accent: #2f5bd0;
+    --accent-soft: #e7edfb;
+    --good: #17795e;
+    --good-soft: #ddf1ea;
+    --warn: #8a5300;
+    --warn-soft: #fbeeda;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #12151b;
+      --panel: #191e26;
+      --panel-2: #212832;
+      --ink: #e6eaf1;
+      --ink-muted: #98a2b3;
+      --ink-faint: #6d7787;
+      --rule: #262c37;
+      --accent: #8aa9ff;
+      --accent-soft: #1b2434;
+      --good: #58d1ab;
+      --good-soft: #122c26;
+      --warn: #e2a75a;
+      --warn-soft: #2e2513;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #12151b;
+    --panel: #191e26;
+    --panel-2: #212832;
+    --ink: #e6eaf1;
+    --ink-muted: #98a2b3;
+    --ink-faint: #6d7787;
+    --rule: #262c37;
+    --accent: #8aa9ff;
+    --accent-soft: #1b2434;
+    --good: #58d1ab;
+    --good-soft: #122c26;
+    --warn: #e2a75a;
+    --warn-soft: #2e2513;
+  }
+
+  /* ----------------------------------------------------------------- base */
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 1.5rem 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .doc { max-width: 74ch; margin: 0 auto; }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.2; }
+  h1 { font-size: 2.35rem; margin: 0 0 .5rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.5rem; margin: 0 0 .25rem; }
+  h3 { font-size: 1.08rem; margin: 2rem 0 .4rem; }
+  p { margin: 0 0 1rem; }
+  a { color: var(--accent); }
+  strong { font-weight: 640; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--panel); padding: .1em .35em; border-radius: 4px; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  /* --------------------------------------------------------------- header */
+  .cover { padding: 3.5rem 0 2rem; border-bottom: 2px solid var(--ink); }
+  .cover .thesis {
+    font-family: var(--serif); font-size: 1.22rem; line-height: 1.5;
+    color: var(--ink-muted); max-width: 60ch; margin: 1rem 0 1.75rem;
+  }
+  .byline {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem .85rem;
+    padding-bottom: 1.5rem; font-size: .9rem; color: var(--ink-muted);
+  }
+  .facts { display: flex; flex-wrap: wrap; gap: 1.75rem 2.75rem; padding-bottom: .5rem; }
+  .fact .n {
+    font-family: var(--mono); font-size: 1.45rem; font-weight: 600;
+    color: var(--accent); font-variant-numeric: tabular-nums;
+  }
+  .fact .l { font-size: .78rem; color: var(--ink-muted); }
+
+  /* -------------------------------------------------------------- sections */
+  section { padding-top: 3rem; }
+  .head { display: grid; grid-template-columns: 3.25rem 1fr; align-items: baseline; margin-bottom: 1.25rem; }
+  .head .num {
+    font-family: var(--mono); font-size: .82rem; color: var(--accent);
+    font-variant-numeric: tabular-nums; padding-top: .35rem;
+  }
+  .head .sub { grid-column: 2; font-size: .88rem; color: var(--ink-muted); margin-top: .15rem; }
+  section > *:not(.head) { margin-left: 3.25rem; }
+
+  /* Supporting sections carry no number: the numbered six are the required ones. */
+  .unnumbered .head { grid-template-columns: 3.25rem 1fr; }
+  .unnumbered .head .num { color: var(--ink-faint); }
+
+  /* ---------------------------------------------------------------- blocks */
+  .panel {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 1rem 1.15rem; margin: 0 0 1.25rem 3.25rem;
+  }
+  .panel h4 {
+    font-family: var(--sans); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 .6rem;
+  }
+  .callout {
+    border-left: 3px solid var(--accent); background: var(--accent-soft);
+    padding: .85rem 1.1rem; border-radius: 0 6px 6px 0; margin: 0 0 1.25rem 3.25rem;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  ul, ol { margin: 0 0 1rem; padding-left: 1.15rem; }
+  li { margin-bottom: .4rem; }
+  li::marker { color: var(--ink-faint); }
+
+  .table-wrap { overflow-x: auto; margin: 0 0 1.25rem 3.25rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-size: .72rem; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 600; border-bottom: 1.5px solid var(--rule);
+  }
+  td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .bar { display: block; height: 5px; border-radius: 999px; background: var(--accent); opacity: .85; }
+
+  pre {
+    font-family: var(--mono); font-size: .78rem; line-height: 1.55;
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 8px;
+    padding: .9rem 1rem; overflow-x: auto; margin: 0 0 1.25rem 3.25rem;
+  }
+
+  figure { margin: 0 0 1.5rem 3.25rem; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: .8rem; color: var(--ink-muted); margin-top: .55rem; }
+
+  /* SVG styling lives here, not in presentation attributes: browsers do not
+     substitute var() inside attributes like fill="…". */
+  .diagram .box { fill: none; stroke: var(--rule); stroke-width: 1.4; }
+  .diagram .box-key { fill: none; stroke: var(--accent); stroke-width: 1.8; }
+  .diagram .lbl { font-family: var(--mono); font-size: 11.5px; fill: var(--accent); }
+  .diagram .note { font-family: var(--sans); font-size: 11px; fill: var(--ink-muted); }
+  .diagram .flow { stroke: var(--ink-faint); stroke-width: 1.3; fill: none; marker-end: url(#a); }
+  .diagram .head-arrow { fill: var(--ink-faint); stroke: none; }
+
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: .7rem;
+    padding: .12rem .45rem; border-radius: 4px; background: var(--panel-2); color: var(--ink-muted);
+  }
+  .tag.good { background: var(--good-soft); color: var(--good); }
+  .tag.warn { background: var(--warn-soft); color: var(--warn); }
+
+  footer {
+    margin: 4rem auto 0; max-width: 74ch; padding-top: 1.25rem;
+    border-top: 1px solid var(--rule); font-size: .82rem; color: var(--ink-faint);
+  }
+
+  /* ---------------------------------------------------------------- print */
+  @page { margin: 17mm 16mm; }
+  @media print {
+    :root {
+      --ground: #ffffff; --panel: #f4f6fa; --panel-2: #eef1f6;
+      --ink: #14181f; --ink-muted: #4d5766; --ink-faint: #767f8d;
+      --rule: #d8dde5; --accent: #2a51bb; --accent-soft: #eef2fc;
+      --good: #14654f; --good-soft: #e7f3ef; --warn: #7a4900; --warn-soft: #faf0de;
+    }
+    body { font-size: 10.5pt; padding: 0; }
+    .doc { max-width: none; }
+    section { padding-top: 1.4rem; break-inside: auto; }
+    section.page-break { break-before: page; }
+    .head, figure, table, pre, .panel, .callout { break-inside: avoid; }
+    h2, h3 { break-after: avoid; }
+    footer { break-before: avoid; }
+  }
+
+  @media (max-width: 640px) {
+    .head { grid-template-columns: 2.25rem 1fr; }
+    section > *:not(.head), .panel, .callout, pre, figure, .table-wrap { margin-left: 0; }
+    h1 { font-size: 1.9rem; }
+  }
+</style>
+
+<div class="doc">
+
+  <header class="cover">
+    <div class="eyebrow">Solution documentation</div>
+    <h1>AI-Powered Personalised Learning Path Recommender</h1>
+    <p class="thesis">
+      Recommending relevant courses is easy, and it is not the problem. Learners
+      get stuck on <em>sequence</em>. This system generates a roadmap from a
+      prerequisite graph and a topological sort, so an item can never be
+      scheduled before the things it depends on — a property asserted in the
+      test suite for every goal and every learner shape.
+    </p>
+    <div class="byline">
+      <span class="eyebrow">Author</span>
+      <span>Vangara Yaswanth Sai</span>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="n">48 / 90 / 9</div><div class="l">Skills · learning items · career goals</div></div>
+      <div class="fact"><div class="n">315</div><div class="l">Tests, offline and deterministic</div></div>
+      <div class="fact"><div class="n">90.5%</div><div class="l">Branch coverage</div></div>
+      <div class="fact"><div class="n">3</div><div class="l">Runtime dependencies</div></div>
+    </div>
+  </header>
+
+  <!-- ------------------------------------------------------------------ 01 -->
+  <section>
+    <div class="head">
+      <div class="num">01</div>
+      <h2>Problem understanding</h2>
+      <div class="sub">What is actually broken, and for whom</div>
+    </div>
+
+    <p>
+      Online platforms already solve retrieval. Search "machine learning" and
+      thousands of credible courses come back, ranked by rating and popularity.
+      A learner who wants to become an ML engineer is not short of relevant
+      material — they are short of an <strong>order</strong> to consume it in.
+    </p>
+    <p>
+      That gap has a specific shape. Relevance is a property of a single item
+      against a query. A learning path is a property of a <em>set</em> of items
+      against a dependency structure: Deep Learning is relevant to the goal and
+      useless as a first step, because it rests on linear algebra, Python, and
+      classical ML that the learner may or may not already hold. A ranking
+      function cannot express that constraint, so platforms leave the sequencing
+      to the learner — precisely the judgement a newcomer to the field is least
+      equipped to make.
+    </p>
+
+    <div class="callout">
+      <p>
+        <strong>The reframe this project is built on:</strong> a personalised
+        learning path is not a ranked list. It is a topological ordering of a
+        dependency graph, filtered by what this individual already knows and
+        fitted to the time they actually have.
+      </p>
+    </div>
+
+    <p>Four things vary between learners, and all four change the answer:</p>
+    <ul>
+      <li><strong>Starting point.</strong> Two people with the same goal need different paths because they arrive holding different skills — and a declared skill implies everything beneath it.</li>
+      <li><strong>Objective.</strong> "Work with data" describes at least three careers whose first six months diverge sharply.</li>
+      <li><strong>Capacity.</strong> Six hours a week and twenty hours a week produce the same ordering and completely different schedules.</li>
+      <li><strong>Preference and response.</strong> Format, cost, difficulty — and how the learner reacts once material is in front of them.</li>
+    </ul>
+    <p>
+      A one-size answer fails all four. The system therefore has to model the
+      learner, not just the catalogue.
+    </p>
+  </section>
+
+  <!-- ------------------------------------------------------------------ 02 -->
+  <section class="page-break">
+    <div class="head">
+      <div class="num">02</div>
+      <h2>Solution approach</h2>
+      <div class="sub">From a sentence to an ordered roadmap</div>
+    </div>
+
+    <p>
+      The learner types a goal in plain language. Six stages turn it into a
+      roadmap, each one a pure function of the stage before it.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Stage</th><th>Input → output</th><th>Method</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Interpret</strong></td>
+            <td>Free text → goal id, level, weekly hours, known skills, format preferences</td>
+            <td>LLM structured extraction, with a deterministic keyword engine underneath</td>
+          </tr>
+          <tr>
+            <td><strong>Clarify</strong></td>
+            <td>Ambiguous text → a question, not a guess</td>
+            <td>Relative-ambiguity test over goal match scores</td>
+          </tr>
+          <tr>
+            <td><strong>Profile</strong></td>
+            <td>Declared skills → declared <em>plus implied</em> skills</td>
+            <td>Transitive closure over the prerequisite graph</td>
+          </tr>
+          <tr>
+            <td><strong>Analyse the gap</strong></td>
+            <td>Goal + profile → the skills still missing</td>
+            <td><code>closure(goal targets) − known</code></td>
+          </tr>
+          <tr>
+            <td><strong>Generate</strong></td>
+            <td>Missing skills → milestones of courses, projects, assessments</td>
+            <td>Layered topological sort, then greedy multi-skill cover per layer</td>
+          </tr>
+          <tr>
+            <td><strong>Explain &amp; adapt</strong></td>
+            <td>Roadmap → rationale, and a rebuilt roadmap on new evidence</td>
+            <td>Weighted scoring components reused as natural-language reasons</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Why implied skills matter</h3>
+    <p>
+      A learner who says "I know deep learning" is never sent back to learn
+      Python. Profiling walks the graph downward from every declared skill and
+      credits the whole subtree, so the gap contains only genuinely missing
+      material. This is one line of graph work that removes an entire class of
+      insulting recommendation.
+    </p>
+
+    <h3>Milestones, not a flat list</h3>
+    <p>
+      A 445-hour ordered list is technically correct and psychologically
+      useless. Selected courses are chunked into three to six milestones along
+      dependency boundaries, and each milestone is capped with a project that
+      exercises what it taught and an assessment that proves it. Every milestone
+      carries hours, estimated weeks, and a cumulative week number, so the
+      roadmap answers "when" as well as "what".
+    </p>
+
+    <h3>Honest failure</h3>
+    <p>
+      If the only course teaching a skill has been excluded by learner feedback,
+      that skill <em>and everything downstream of it</em> is reported as
+      uncovered rather than quietly scheduled anyway. Promising a course whose
+      prerequisite the path never teaches would be a worse answer than admitting
+      the gap.
+    </p>
+  </section>
+
+  <!-- ------------------------------------------------------------------ 03 -->
+  <section class="page-break">
+    <div class="head">
+      <div class="num">03</div>
+      <h2>System architecture</h2>
+      <div class="sub">FastAPI · SQLite · dependency-free frontend</div>
+    </div>
+
+    <figure>
+      <svg class="diagram" viewBox="0 0 860 430" role="img" aria-label="Request flow from the HTTP edge through the assistant, profiling, gap analysis and path generation, with the catalogue feeding generation and the recommender, dashboard and insights modules reading from the generated path.">
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path class="head-arrow" d="M 0 0 L 10 5 L 0 10 z"/>
+          </marker>
+        </defs>
+        <g>
+          <rect class="box" x="8" y="30" width="196" height="66" rx="8"/>
+          <rect class="box" x="8" y="130" width="196" height="80" rx="8"/>
+          <rect class="box" x="8" y="252" width="196" height="76" rx="8"/>
+          <rect class="box-key" x="248" y="130" width="200" height="80" rx="8"/>
+          <rect class="box" x="248" y="252" width="200" height="76" rx="8"/>
+          <rect class="box" x="248" y="352" width="200" height="62" rx="8"/>
+          <rect class="box" x="492" y="130" width="188" height="80" rx="8"/>
+          <rect class="box-key" x="492" y="252" width="188" height="162" rx="8"/>
+          <rect class="box" x="724" y="130" width="128" height="80" rx="8"/>
+          <rect class="box" x="724" y="252" width="128" height="72" rx="8"/>
+          <rect class="box" x="724" y="342" width="128" height="72" rx="8"/>
+        </g>
+        <g class="lbl">
+          <text x="24" y="54">HTTP edge</text>
+          <text x="264" y="154">assistant · llm</text>
+          <text x="508" y="154">catalog</text>
+          <text x="264" y="276">profiling</text>
+          <text x="508" y="276">pathgen</text>
+          <text x="264" y="376">gap</text>
+          <text x="740" y="154">recommender</text>
+          <text x="740" y="276">dashboard</text>
+          <text x="740" y="366">insights</text>
+          <text x="24" y="154">Learner request</text>
+          <text x="24" y="276">db · SQLite</text>
+        </g>
+        <g class="note">
+          <text x="24" y="74">main.py · security.py</text>
+          <text x="24" y="90">key · rate limit · CORS</text>
+          <text x="24" y="174">"I want to build LLM apps,</text>
+          <text x="24" y="190">I know Python, 12h a week"</text>
+          <text x="24" y="296">profile · path · progress</text>
+          <text x="24" y="312">feedback · conversation</text>
+          <text x="264" y="174">Claude / Gemini / Groq /</text>
+          <text x="264" y="190">Ollama — or the rule engine</text>
+          <text x="264" y="296">declared + implied skills</text>
+          <text x="264" y="312">+ prior learning history</text>
+          <text x="264" y="396">required − known</text>
+          <text x="508" y="174">48 skills · 90 items · 9 goals</text>
+          <text x="508" y="190">validated DAG, checked at import</text>
+          <text x="508" y="296">topological layers</text>
+          <text x="508" y="312">greedy course cover</text>
+          <text x="508" y="328">3–6 milestones</text>
+          <text x="508" y="344">+ project + assessment</text>
+          <text x="508" y="376">nothing scheduled before</text>
+          <text x="508" y="392">its prerequisites</text>
+          <text x="740" y="174">six weighted</text>
+          <text x="740" y="190">components</text>
+          <text x="740" y="296">progress · skills</text>
+          <text x="740" y="312">next actions · pace</text>
+          <text x="740" y="386">graph · plan</text>
+          <text x="740" y="402">badges · export</text>
+        </g>
+        <g class="flow">
+          <path class="flow" d="M 106 96 L 106 126"/>
+          <path class="flow" d="M 204 170 L 244 170"/>
+          <path class="flow" d="M 348 210 L 348 248"/>
+          <path class="flow" d="M 348 328 L 348 348"/>
+          <path class="flow" d="M 448 380 L 488 344"/>
+          <path class="flow" d="M 586 210 L 586 248"/>
+          <path class="flow" d="M 680 300 L 720 290"/>
+          <path class="flow" d="M 680 270 L 720 200"/>
+          <path class="flow" d="M 680 340 L 720 370"/>
+          <path class="flow" d="M 106 252 L 106 214"/>
+        </g>
+      </svg>
+      <figcaption>
+        Request flow. The catalogue is validated at import, so a broken graph
+        fails at startup rather than producing a subtly wrong roadmap. Every
+        engine is a pure function over the catalogue; only <code>main.py</code>
+        and <code>db.py</code> hold state.
+      </figcaption>
+    </figure>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>API</td><td>FastAPI + Pydantic</td><td>Schema validation at the boundary and generated OpenAPI docs for free</td></tr>
+          <tr><td>Engines</td><td>Plain Python modules, no framework</td><td>Pure functions over the catalogue — trivially unit-testable, no I/O</td></tr>
+          <tr><td>Persistence</td><td>SQLite via stdlib <code>sqlite3</code></td><td>Whole application state is one file; delete it to reset. No service to run</td></tr>
+          <tr><td>Assistant</td><td>Provider-agnostic layer over stdlib <code>urllib</code></td><td>Five providers, zero added dependencies, and a full fallback</td></tr>
+          <tr><td>Frontend</td><td>Vanilla JS, no build step, no CDN</td><td>Clone and run; nothing to install, nothing to compile, nothing fetched remotely</td></tr>
+          <tr><td>Edge</td><td>Optional API key, per-caller rate limiting</td><td>Off by default for the demo; one environment variable for a deployment</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      Three runtime dependencies in total — <code>fastapi</code>,
+      <code>uvicorn</code>, <code>pydantic</code>. The catalogue is three JSON
+      files. A reviewer needs two commands to see it running.
+    </p>
+  </section>
+
+  <!-- ------------------------------------------------------------------ 04 -->
+  <section class="page-break">
+    <div class="head">
+      <div class="num">04</div>
+      <h2>AI/ML techniques used</h2>
+      <div class="sub">Where the intelligence actually lives</div>
+    </div>
+
+    <p>
+      The system combines four techniques. The choice worth defending is what is
+      <em>not</em> here: there is no trained collaborative-filtering model, and
+      that is deliberate.
+    </p>
+
+    <h3>Graph algorithms — the core</h3>
+    <ul>
+      <li><strong>Transitive closure</strong> over the prerequisite DAG, in both directions: downward from the goal to compute everything required, and downward from declared skills to credit everything implied.</li>
+      <li><strong>Kahn's algorithm</strong> for cycle detection, run at import over all 48 skills. A cycle makes any ordering impossible, so it fails loudly at startup rather than silently at generation.</li>
+      <li><strong>Layered topological sort</strong> — not a single linear order, but dependency <em>levels</em>, so items that could be studied in parallel are grouped and can be scheduled together in one milestone.</li>
+      <li><strong>Greedy set cover</strong> per layer: a course teaching three outstanding skills covers all three, so a learner is never sent to two courses where one would do.</li>
+    </ul>
+
+    <h3>Multi-criteria scoring — explainable by construction</h3>
+    <p>
+      Every candidate item is scored as a weighted sum of six components, each
+      computed independently and all returned to the client.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th class="num">Weight</th><th>Measures</th><th style="width:22%"></th></tr></thead>
+        <tbody>
+          <tr><td><code>goal_relevance</code></td><td class="num">0.35</td><td>Share of the item's value landing on skills still missing</td><td><span class="bar" style="width:100%"></span></td></tr>
+          <tr><td><code>skill_readiness</code></td><td class="num">0.20</td><td>Share of its prerequisites already held</td><td><span class="bar" style="width:57%"></span></td></tr>
+          <tr><td><code>level_fit</code></td><td class="num">0.15</td><td>Distance from the difficulty target, adjusted by feedback</td><td><span class="bar" style="width:43%"></span></td></tr>
+          <tr><td><code>interest_match</code></td><td class="num">0.15</td><td>Domain overlap with stated interests</td><td><span class="bar" style="width:43%"></span></td></tr>
+          <tr><td><code>format_fit</code></td><td class="num">0.10</td><td>Format, cost, and provider preference</td><td><span class="bar" style="width:29%"></span></td></tr>
+          <tr><td><code>quality</code></td><td class="num">0.05</td><td>Rating, with popularity as a weak tiebreaker</td><td><span class="bar" style="width:14%"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      The same numbers that produce the ranking generate the human-readable
+      reasons, so "why was this recommended?" always has a precise, checkable
+      answer rather than a plausible-sounding one. The UI exposes the full
+      breakdown, weight by weight, for any item.
+    </p>
+
+    <h3>Natural-language understanding — hybrid, with the model on the outside</h3>
+    <p>
+      Goal interpretation and question answering are implemented
+      <strong>twice</strong>. A configured provider (Anthropic, Gemini, Groq,
+      OpenRouter, or a local Ollama model) performs structured extraction against
+      a JSON schema. Underneath sits a deterministic engine using keyword
+      scoring, regex extraction for hours, and phrase detection for declared
+      skills.
+    </p>
+    <p>
+      Everything a model returns is treated as untrusted: unknown goal and skill
+      ids are discarded, out-of-range hours rejected, invalid levels and formats
+      filtered, and JSON recovered from markdown fences or surrounding prose. Any
+      failure — no credential, network error, rate limit, refusal, malformed
+      output — degrades to the rule engine rather than surfacing an error. The
+      LLM improves how the goal is read and how replies sound; it is never on the
+      correctness path.
+    </p>
+    <p>
+      Ambiguity is handled by a relative test rather than an absolute confidence
+      floor: the assistant asks a clarifying question when nothing matches or
+      when a runner-up goal scores within 70% of the leader, and offers the
+      distinguishable readings as one-click replies.
+    </p>
+
+    <h3>Behavioural estimation</h3>
+    <p>
+      Every learner overestimates their available hours. The progress table
+      records when each item changed state, so the real rate is measurable:
+      completed hours over elapsed weeks, compared against the planned figure.
+      Below seven days of history it reports <span class="tag">unknown</span>
+      rather than inventing a trend; beyond that it reports
+      <span class="tag good">ahead</span>,
+      <span class="tag">on track</span>, or
+      <span class="tag warn">behind</span>, and offers to refit the schedule.
+    </p>
+
+    <div class="callout">
+      <p>
+        <strong>Why no trained recommender?</strong> Collaborative filtering
+        needs interaction data this system does not have on day one, and even
+        with it, a learned ranking cannot express "B requires A" — it can only
+        observe that people who took A often took B. That correlation collapses
+        exactly where learners need help most: rare goals and unusual starting
+        points. The graph encodes the constraint directly and is auditable by a
+        human. With real interaction data, the natural place for a learned model
+        is <em>re-ranking within a dependency layer</em> — choosing between three
+        courses that are all valid next steps — which is additive to this design
+        rather than a replacement for it.
+      </p>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------------ 05 -->
+  <section class="page-break">
+    <div class="head">
+      <div class="num">05</div>
+      <h2>Key features and workflows</h2>
+      <div class="sub">The six required capabilities, and what was built past them</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:38%">Required capability</th><th>How it is delivered</th></tr></thead>
+        <tbody>
+          <tr><td>Conversational interface for goals in natural language</td><td>Chat tab over <code>POST /api/chat</code>; multi-turn, with clarifying questions when the goal is ambiguous</td></tr>
+          <tr><td>Learner profiling engine</td><td>Interests, experience level, weekly hours, formats, declared skills, implied skills, and prior course history</td></tr>
+          <tr><td>Recommendation engine</td><td>Six-component weighted scoring across courses, projects, assessments, and reference resources</td></tr>
+          <tr><td>Path generator with prerequisites and milestones</td><td>Layered topological sort into 3–6 milestones, each capped with a project and an assessment</td></tr>
+          <tr><td>Assistant that explains and answers</td><td>Per-item breakdown of every score component and its placement rationale, plus free-form Q&amp;A grounded in the learner's own path</td></tr>
+          <tr><td>Dashboard of progress and next actions</td><td>Completion, hours, skills by domain, milestone timeline, pace, achievements, and the next three actions with reasons</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Primary workflow</h3>
+    <pre>state a goal ──▶ interpreted (or clarified) ──▶ profile built ──▶ gap computed
+                                                                      │
+              roadmap ◀── milestones ◀── greedy cover ◀── topological layers
+                 │
+                 ├─▶ mark progress ─────────▶ dashboard updates, plan unchanged
+                 ├─▶ give feedback ─────────▶ path rebuilt around the change
+                 └─▶ re-plan to real pace ──▶ schedule refitted to observed hours</pre>
+
+    <p>
+      The split in that last group is deliberate. Ticking a box never reshuffles
+      a learner's plan — a roadmap that moves underneath you is worse than a
+      slightly stale one. Feedback and an explicit re-plan request both do
+      trigger regeneration, because the learner asked for change.
+    </p>
+
+    <h3>Built beyond the brief</h3>
+    <ul>
+      <li><strong>Interactive skill graph.</strong> The actual prerequisite DAG rendered as an SVG in dependency columns. Every arrow is a constraint the planner obeyed; a test asserts each edge points strictly forward, so the drawing can never contradict the plan.</li>
+      <li><strong>Weekly plan.</strong> The remaining roadmap poured into fixed-capacity weeks, splitting long courses across them: "week 3 — wrap up Modern JavaScript, start Data Structures".</li>
+      <li><strong>Achievements.</strong> XP, seven levels, and nine badges tied to real milestones. Unearned badges show what would earn them.</li>
+      <li><strong>Markdown export.</strong> The whole roadmap as a shareable document with checkboxes and per-item rationale.</li>
+      <li><strong>Reference resources.</strong> Fifteen canonical links (MDN, the Python tutorial, Pro Git, the RAG paper) that are recommendable but never scheduled — path coverage is only ever satisfied by a course.</li>
+      <li><strong>Prior learning history.</strong> Tick what you finished before this app existed; those completions leave the gap and survive every rebuild.</li>
+    </ul>
+  </section>
+
+  <!-- ------------------------------------------------------------------ 06 -->
+  <section class="page-break">
+    <div class="head">
+      <div class="num">06</div>
+      <h2>Challenges faced</h2>
+      <div class="sub">The decisions that were not obvious</div>
+    </div>
+
+    <h3>An unfillable gap in the middle of a path</h3>
+    <p>
+      When learner feedback excludes the only course teaching a skill, the naive
+      options are both bad: schedule it anyway, or drop that skill and leave
+      later items with unmet prerequisites. The resolution was to propagate —
+      the skill and its entire downstream cone are reported as uncovered, and the
+      path is generated around them. The learner sees an honest "no available
+      course covers X" instead of a roadmap that quietly cannot work.
+    </p>
+
+    <h3>Completed work vanishing on rebuild</h3>
+    <p>
+      Finishing a course removes its skill from the gap, so the next rebuild
+      correctly drops that course from the plan — and the learner's completed
+      work disappeared with it. Progress and plan had to be decoupled: the
+      dashboard counts every completion regardless of whether the item is still
+      on the current path.
+    </p>
+    <p>
+      A second, subtler version of the same bug appeared when prior learning
+      history was added. The routine that syncs completions treated the progress
+      table as the only source of truth and overwrote everything else, silently
+      erasing courses a learner had declared as already finished. It now gives
+      the progress table ownership only of the items it actually tracks;
+      declared history is preserved. Both directions are covered by tests.
+    </p>
+
+    <h3>Staying useful with no API key</h3>
+    <p>
+      Requiring a paid credential to see the product work would have made it
+      unreviewable. Every AI-backed feature was therefore implemented twice, and
+      the rule-based version had to be genuinely good rather than a stub — it
+      varies phrasing, names the learner, and cites their actual stage and
+      progress. The variation is seeded from the input rather than randomness, so
+      it stays fully deterministic and testable.
+    </p>
+
+    <h3>Determinism versus useful variation</h3>
+    <p>
+      Identical inputs must produce an identical path, or the invariant tests
+      cannot exist. That meant every tie broken by an explicit sort key rather
+      than dict or set ordering — a constraint that touched course selection,
+      milestone chunking, and support-item choice.
+    </p>
+
+    <h3>"Adapt to progress" versus a stable plan</h3>
+    <p>
+      The brief asks the system to adapt to progress; usability argues that a
+      plan must not move under the learner. Resolved by separating them: progress
+      updates mutate status in place, while an explicit re-plan action refits the
+      schedule to the measured pace. The learner keeps a stable plan and gets
+      adaptation when they ask for it.
+    </p>
+
+    <h3>Treating model output as hostile</h3>
+    <p>
+      Early on, a provider returned a confident goal id that did not exist in the
+      catalogue. Everything crossing the model boundary is now validated against
+      the catalogue and clamped to legal ranges, with recovery for JSON wrapped
+      in prose or fences. The failure mode is always degradation to the rule
+      engine, never an error surfaced to the learner.
+    </p>
+  </section>
+
+  <!-- ------------------------------------------------------------- validation -->
+  <section class="unnumbered page-break">
+    <div class="head">
+      <div class="num">·</div>
+      <h2>How we know it works</h2>
+      <div class="sub">Validation strategy</div>
+    </div>
+
+    <p>
+      315 tests run in about three seconds with no network, no API key, and no
+      tokens spent, at 90.5% branch coverage. The load-bearing one is
+      <code>assert_prerequisites_respected</code>: it walks a generated path in
+      the exact order a learner would, accumulating taught skills, and fails if
+      any item is ever reached before the skills it requires. It runs across all
+      nine goals and three experience levels.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Suite</th><th>Proves</th></tr></thead>
+        <tbody>
+          <tr><td><code>test_catalog</code></td><td>Graph integrity, and that cycles, dangling references and unteachable skills each raise</td></tr>
+          <tr><td><code>test_pathgen</code></td><td>The prerequisite invariant, full gap coverage, no duplicates, determinism, exclusions</td></tr>
+          <tr><td><code>test_engines</code></td><td>Profiling, implied skills, gap analysis, score bounds, ranking, feedback adaptation</td></tr>
+          <tr><td><code>test_llm_providers</code></td><td>Each adapter's request shape and response parsing, JSON recovery, provider priority</td></tr>
+          <tr><td><code>test_assistant_llm</code></td><td>Hallucinated ids, out-of-range values, prose instead of JSON, and total API failure all degrade correctly</td></tr>
+          <tr><td><code>test_insights</code></td><td>Graph edges point forward, weekly plans never exceed capacity, achievements are monotonic</td></tr>
+          <tr><td><code>test_adaptation</code></td><td>History survives rebuilds, pace is measured and re-planned around, resources are never scheduled, vague goals are asked about</td></tr>
+          <tr><td><code>test_security</code></td><td>The rate limiter's sliding window, the API-key gate, payload bounds, response headers</td></tr>
+          <tr><td><code>test_frontend</code></td><td>Every selector resolves, every endpoint called exists, nothing loads from a remote host</td></tr>
+          <tr><td><code>test_api</code></td><td>Every endpoint, validation errors, and a full journey: chat → path → progress → feedback → dashboard</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      Continuous integration runs lint, catalogue validation, and the full suite
+      on Python 3.10, 3.11 and 3.12 plus Windows, then builds the Docker image
+      and boots it to check <code>/api/health</code>.
+    </p>
+  </section>
+
+  <!-- ------------------------------------------------------------- limitations -->
+  <section class="unnumbered">
+    <div class="head">
+      <div class="num">·</div>
+      <h2>Limitations and next steps</h2>
+      <div class="sub">Stated plainly</div>
+    </div>
+
+    <ul>
+      <li><strong>The catalogue is curated, not integrated.</strong> 90 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
+      <li><strong>Single-tenant by design.</strong> There are no accounts: a learner id identifies a learner. An optional shared API key and per-caller rate limiting protect a deployment, but per-learner authorisation would be needed before real users share an instance.</li>
+      <li><strong>Rate limiting is in-process.</strong> Correct for one process; a multi-replica deployment would need a shared store.</li>
+      <li><strong>Pace uses completion timestamps only.</strong> It cannot yet distinguish "studied five hours on Sunday" from "an hour a day", and does not model format-specific drop-off — the next honest signal to add.</li>
+      <li><strong>No learned re-ranking.</strong> With real interaction data, a model choosing between equally valid next steps within a dependency layer is the natural extension.</li>
+    </ul>
+  </section>
+
+  <!-- ------------------------------------------------------------- appendix -->
+  <section class="unnumbered page-break">
+    <div class="head">
+      <div class="num">·</div>
+      <h2>Running it</h2>
+      <div class="sub">Two commands, no credentials</div>
+    </div>
+
+    <pre>pip install -r requirements.txt
+python run.py                      # http://127.0.0.1:8000
+
+# tests and lint
+pip install -r requirements-dev.txt
+python -m pytest                   # 315 tests, offline
+python -m ruff check .
+
+# or containerised
+docker build -t learning-path-recommender .
+docker run -p 8000:8000 -v lpr-data:/data learning-path-recommender</pre>
+
+    <p>
+      No API key is required. To make the assistant's replies conversational,
+      copy <code>.env.example</code> to <code>.env</code> and set any one
+      provider key — Gemini, Groq and Ollama all have free options, and Ollama
+      runs locally with no network at all. Interactive API documentation is at
+      <code>/docs</code> while the server runs.
+    </p>
+
+    <div class="panel">
+      <h4>Selected endpoints</h4>
+      <p style="margin:0; font-family: var(--mono); font-size: .8rem; line-height: 1.9;">
+        POST /api/chat · GET/POST /api/learners/{id}/path ·
+        GET /api/learners/{id}/gap · GET /api/learners/{id}/recommendations ·
+        GET /api/learners/{id}/explain/{item_id} · GET /api/learners/{id}/dashboard ·
+        GET /api/learners/{id}/graph · GET /api/learners/{id}/plan ·
+        GET /api/learners/{id}/pace · POST /api/learners/{id}/replan ·
+        GET /api/learners/{id}/achievements · GET /api/learners/{id}/export
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    Solution documentation · AI-Powered Personalised Learning Path Recommender ·
+    Vangara Yaswanth Sai
+  </footer>
+
+</div>
