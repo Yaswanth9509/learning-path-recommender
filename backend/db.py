@@ -7,6 +7,7 @@ because they are always read and written whole.
 
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 import threading
@@ -29,10 +30,14 @@ CREATE TABLE IF NOT EXISTS profiles (
     data       TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+-- One row per goal a learner is pursuing: a learner can run several roadmaps
+-- side by side, with one of them active at a time.
 CREATE TABLE IF NOT EXISTS paths (
-    learner_id TEXT PRIMARY KEY,
+    learner_id TEXT NOT NULL,
+    goal_id    TEXT NOT NULL,
     data       TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (learner_id, goal_id)
 );
 CREATE TABLE IF NOT EXISTS progress (
     learner_id TEXT NOT NULL,
@@ -78,8 +83,49 @@ class Database:
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA foreign_keys=ON")
         with self._lock:
+            self._migrate()
             self._conn.executescript(_SCHEMA)
             self._conn.commit()
+
+    def _migrate(self) -> None:
+        """Bring an older database up to the current schema.
+
+        The only change so far: `paths` used to hold one row per learner. It now
+        holds one per goal, so a learner can run several roadmaps at once. The
+        single existing path is carried over under its own goal.
+        """
+        tables = {
+            row["name"]
+            for row in self._conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            )
+        }
+        if "paths" not in tables:
+            return
+        columns = {
+            row["name"] for row in self._conn.execute("PRAGMA table_info(paths)")
+        }
+        if "goal_id" in columns:
+            return
+
+        legacy = self._conn.execute("SELECT learner_id, data, updated_at FROM paths")
+        rows = [
+            (r["learner_id"], json.loads(r["data"]).get("goal_id", ""), r["data"],
+             r["updated_at"])
+            for r in legacy
+        ]
+        self._conn.execute("DROP TABLE paths")
+        self._conn.execute(
+            "CREATE TABLE paths (learner_id TEXT NOT NULL, goal_id TEXT NOT NULL, "
+            "data TEXT NOT NULL, updated_at TEXT NOT NULL, "
+            "PRIMARY KEY (learner_id, goal_id))"
+        )
+        self._conn.executemany(
+            "INSERT OR REPLACE INTO paths (learner_id, goal_id, data, updated_at) "
+            "VALUES (?, ?, ?, ?)",
+            [row for row in rows if row[1]],
+        )
+        self._conn.commit()
 
     def close(self) -> None:
         with self._lock:
@@ -125,18 +171,44 @@ class Database:
     # ----------------------------------------------------------------- paths
     def save_path(self, path: LearningPath) -> LearningPath:
         self._write(
-            "INSERT INTO paths (learner_id, data, updated_at) VALUES (?, ?, ?) "
-            "ON CONFLICT(learner_id) DO UPDATE SET data=excluded.data, "
-            "updated_at=excluded.updated_at",
-            (path.learner_id, path.model_dump_json(), utcnow()),
+            "INSERT INTO paths (learner_id, goal_id, data, updated_at) "
+            "VALUES (?, ?, ?, ?) ON CONFLICT(learner_id, goal_id) DO UPDATE SET "
+            "data=excluded.data, updated_at=excluded.updated_at",
+            (path.learner_id, path.goal_id, path.model_dump_json(), utcnow()),
         )
         return path
 
-    def get_path(self, learner_id: str) -> Optional[LearningPath]:
-        rows = self._query("SELECT data FROM paths WHERE learner_id = ?", (learner_id,))
+    def get_path(
+        self, learner_id: str, goal_id: Optional[str] = None
+    ) -> Optional[LearningPath]:
+        """The roadmap for one goal, or the most recently touched one."""
+        if goal_id is None:
+            rows = self._query(
+                "SELECT data FROM paths WHERE learner_id = ? "
+                "ORDER BY updated_at DESC LIMIT 1",
+                (learner_id,),
+            )
+        else:
+            rows = self._query(
+                "SELECT data FROM paths WHERE learner_id = ? AND goal_id = ?",
+                (learner_id, goal_id),
+            )
         if not rows:
             return None
         return LearningPath.model_validate_json(rows[0]["data"])
+
+    def list_paths(self, learner_id: str) -> list[LearningPath]:
+        rows = self._query(
+            "SELECT data FROM paths WHERE learner_id = ? ORDER BY updated_at ASC",
+            (learner_id,),
+        )
+        return [LearningPath.model_validate_json(r["data"]) for r in rows]
+
+    def delete_path(self, learner_id: str, goal_id: str) -> None:
+        self._write(
+            "DELETE FROM paths WHERE learner_id = ? AND goal_id = ?",
+            (learner_id, goal_id),
+        )
 
     # -------------------------------------------------------------- progress
     def set_progress(self, learner_id: str, item_id: str, status: str) -> ProgressEntry:

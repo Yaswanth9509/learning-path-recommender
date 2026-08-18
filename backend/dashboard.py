@@ -14,6 +14,7 @@ from .models import (
     MilestoneProgress,
     NextAction,
     PaceReport,
+    PathSummary,
     ProgressEntry,
     SkillProgress,
 )
@@ -22,12 +23,53 @@ from .profiling import DerivedProfile
 MAX_NEXT_ACTIONS = 3
 
 
+def summarise_paths(
+    catalog: Catalog,
+    paths: list[LearningPath],
+    progress: dict[str, ProgressEntry],
+    active_goal_id: str | None,
+) -> list[PathSummary]:
+    """One line per roadmap, for the switcher and the dashboard.
+
+    Progress is held per item, not per path, so finishing a course that appears
+    on two roadmaps advances both — which is the honest reading of "I did it".
+    """
+    summaries: list[PathSummary] = []
+    for path in paths:
+        items = [item for milestone in path.milestones for item in milestone.items]
+        done = [
+            item for item in items
+            if (entry := progress.get(item.item_id)) and entry.status == "completed"
+        ]
+        hours_done = sum(item.hours for item in done)
+        total = len(items)
+        goal = catalog.goals.get(path.goal_id)
+        summaries.append(
+            PathSummary(
+                goal_id=path.goal_id,
+                goal_title=path.goal_title,
+                domain=goal.domain if goal else "",
+                is_active=path.goal_id == active_goal_id,
+                percent=round(100 * len(done) / total, 1) if total else 0.0,
+                items_completed=len(done),
+                items_total=total,
+                hours_total=path.total_hours,
+                hours_remaining=max(0, path.total_hours - hours_done),
+                total_weeks=path.total_weeks,
+                stages=len(path.milestones),
+                completed=bool(total) and len(done) == total,
+            )
+        )
+    return summaries
+
+
 def build(
     catalog: Catalog,
     derived: DerivedProfile,
     path: LearningPath,
     progress: dict[str, ProgressEntry],
     pace: PaceReport | None = None,
+    paths: list[PathSummary] | None = None,
 ) -> Dashboard:
     all_items = [item for m in path.milestones for item in m.items]
     path_item_ids = {i.item_id for i in all_items}
@@ -97,6 +139,9 @@ def build(
         current_milestone=current_id,
         streak_note=_streak_note(overall, done_count, total_items),
         pace=pace,
+        paths=paths or [],
+        paths_completed=sum(1 for p in (paths or []) if p.completed),
+        paths_total=len(paths or []),
     )
 
 

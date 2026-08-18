@@ -26,6 +26,7 @@ from .catalog import Catalog, CatalogError, get_catalog
 from .db import Database, get_db
 from .gap import analyze
 from .models import (
+    MAX_ACTIVE_PATHS,
     Achievements,
     ChatRequest,
     ChatResponse,
@@ -35,6 +36,7 @@ from .models import (
     LearnerProfile,
     LearningPath,
     PaceReport,
+    PathSummary,
     ProfileUpdate,
     ProgressUpdate,
     Recommendation,
@@ -111,6 +113,21 @@ def _resolve_goal(catalog: Catalog, profile: LearnerProfile) -> str:
     return profile.goal_id
 
 
+def _track_goal(profile: LearnerProfile, goal_id: str) -> None:
+    """Make `goal_id` the active one, keeping it in the learner's goal list.
+
+    At the cap, the goal being replaced is the one currently active — a learner
+    who names a fourth goal is swapping what they are working on now, not
+    silently dropping something they set up days ago.
+    """
+    goals = [g for g in profile.goal_ids if g != goal_id]
+    if len(goals) >= MAX_ACTIVE_PATHS:
+        dropped = profile.goal_id if profile.goal_id in goals else goals[-1]
+        goals = [g for g in goals if g != dropped]
+    profile.goal_ids = goals + [goal_id]
+    profile.goal_id = goal_id
+
+
 def _regenerate(
     catalog: Catalog,
     db: Database,
@@ -119,6 +136,7 @@ def _regenerate(
 ) -> LearningPath:
     """Rebuild the path from the current profile, preserving progress."""
     goal_id = _resolve_goal(catalog, profile)
+    _track_goal(profile, goal_id)
     profiling.sync_completions(
         catalog,
         profile,
@@ -128,7 +146,7 @@ def _regenerate(
     db.save_profile(profile)
 
     derived = profiling.derive(catalog, profile)
-    previous = db.get_path(profile.learner_id)
+    previous = db.get_path(profile.learner_id, goal_id)
     revision = (previous.revision + 1) if previous else 1
 
     path = generate_path(
@@ -354,9 +372,10 @@ def chat(
         db.save_profile(profile)
 
     db.add_message(profile.learner_id, "user", message)
-    existing_path = db.get_path(profile.learner_id)
+    existing_path = db.get_path(profile.learner_id, profile.goal_id)
 
-    interpretation = assistant.interpret_goal(catalog, message)
+    use_provider = profile.assistant_engine != "rules"
+    interpretation = assistant.interpret_goal(catalog, message, use_provider)
 
     # A learner with no goal yet who says something the rules cannot pin to one
     # goal gets asked, not guessed at — a wrong roadmap costs them months. A
@@ -430,7 +449,7 @@ def chat(
         )
         path_generated = True
         reply, source = assistant.acknowledge_goal(
-            catalog, profile, path, interpretation
+            catalog, profile, path, interpretation, use_provider
         )
     else:
         reply, source = assistant.answer(
@@ -439,6 +458,7 @@ def chat(
             existing_path,
             message,
             history=db.get_conversation(profile.learner_id, limit=10)[:-1],
+            use_provider=use_provider,
         )
         # "I already know SQL" is an instruction, not small talk: credit the
         # skill and rebuild, so the plan shrinks instead of the learner being
@@ -476,7 +496,8 @@ def chat(
         path_generated=path_generated,
         source=source,
         suggested_replies=assistant.suggested_replies(
-            catalog, db.get_path(profile.learner_id), updated_profile
+            catalog, db.get_path(profile.learner_id, updated_profile.goal_id),
+            updated_profile,
         ),
     )
 
@@ -515,9 +536,170 @@ def get_path(
     db: Database = Depends(db_dep),
 ) -> LearningPath:
     profile = _load_profile(db, learner_id)
-    path = db.get_path(learner_id)
+    path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
+    return path
+
+
+# --------------------------------------------------------------- many paths
+def _summaries(
+    catalog: Catalog, db: Database, profile: LearnerProfile
+) -> list[PathSummary]:
+    return dashboard_engine.summarise_paths(
+        catalog,
+        db.list_paths(profile.learner_id),
+        db.get_progress(profile.learner_id),
+        profile.goal_id,
+    )
+
+
+@app.get("/api/learners/{learner_id}/paths", response_model=list[PathSummary])
+def list_learner_paths(
+    learner_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> list[PathSummary]:
+    """Every roadmap this learner is running, active one flagged."""
+    profile = _load_profile(db, learner_id)
+    return _summaries(catalog, db, profile)
+
+
+@app.post("/api/learners/{learner_id}/paths", response_model=LearningPath, status_code=201)
+def add_learner_path(
+    learner_id: str,
+    payload: dict = Body(...),
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    """Start a second or third roadmap alongside the current one."""
+    profile = _load_profile(db, learner_id)
+    goal_id = str(payload.get("goal_id") or "")
+    if goal_id not in catalog.goals:
+        raise HTTPException(status_code=400, detail=f"unknown goal '{goal_id}'")
+
+    existing = {p.goal_id for p in db.list_paths(learner_id)}
+    if goal_id in existing:
+        profile.goal_id = goal_id
+        db.save_profile(profile)
+        path = db.get_path(learner_id, goal_id)
+        if path is not None:
+            return path
+    elif len(existing) >= MAX_ACTIVE_PATHS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"You can run {MAX_ACTIVE_PATHS} paths at once. Finish or "
+            "remove one before adding another.",
+        )
+
+    profile.goal_id = goal_id
+    return _regenerate(
+        catalog, db, profile, notes=["Path created alongside your other goals."]
+    )
+
+
+@app.post("/api/learners/{learner_id}/paths/{goal_id}/activate", response_model=LearningPath)
+def activate_learner_path(
+    learner_id: str,
+    goal_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    """Switch which roadmap the app is showing."""
+    profile = _load_profile(db, learner_id)
+    path = db.get_path(learner_id, goal_id)
+    if path is None:
+        raise HTTPException(status_code=404, detail=f"no path for goal '{goal_id}'")
+    profile.goal_id = goal_id
+    if goal_id not in profile.goal_ids:
+        profile.goal_ids = (profile.goal_ids + [goal_id])[-MAX_ACTIVE_PATHS:]
+    db.save_profile(profile)
+    return path
+
+
+@app.delete("/api/learners/{learner_id}/paths/{goal_id}", status_code=204)
+def delete_learner_path(
+    learner_id: str,
+    goal_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> None:
+    """Drop a roadmap. Progress on its items is kept — you did that work."""
+    profile = _load_profile(db, learner_id)
+    if db.get_path(learner_id, goal_id) is None:
+        raise HTTPException(status_code=404, detail=f"no path for goal '{goal_id}'")
+    db.delete_path(learner_id, goal_id)
+    profile.goal_ids = [g for g in profile.goal_ids if g != goal_id]
+    if profile.goal_id == goal_id:
+        profile.goal_id = profile.goal_ids[-1] if profile.goal_ids else None
+    db.save_profile(profile)
+
+
+# ------------------------------------------------- shaping the path by hand
+@app.post("/api/learners/{learner_id}/path/items", response_model=LearningPath)
+def add_path_item(
+    learner_id: str,
+    payload: dict = Body(...),
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    """Add a course to the path yourself, overruling the planner.
+
+    It is still placed by prerequisite — the earliest stage where everything it
+    needs is already covered — so adding an item cannot break the ordering.
+    """
+    profile = _load_profile(db, learner_id)
+    item_id = str(payload.get("item_id") or "")
+    if item_id not in catalog.items:
+        raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
+    if item_id in profile.pinned_item_ids:
+        raise HTTPException(status_code=400, detail="that item is already on your path")
+
+    profile.pinned_item_ids = sorted(set(profile.pinned_item_ids) | {item_id})
+    profile.excluded_item_ids = [i for i in profile.excluded_item_ids if i != item_id]
+    db.save_profile(profile)
+    title = catalog.items[item_id].title
+    return _regenerate(catalog, db, profile, notes=[f"Added “{title}” at your request."])
+
+
+@app.delete("/api/learners/{learner_id}/path/items/{item_id}", response_model=LearningPath)
+def remove_path_item(
+    learner_id: str,
+    item_id: str,
+    catalog: Catalog = Depends(catalog_dep),
+    db: Database = Depends(db_dep),
+) -> LearningPath:
+    """Drop an item from the path and find another route to the same skill."""
+    profile = _load_profile(db, learner_id)
+    if item_id not in catalog.items:
+        raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
+
+    before = db.get_path(learner_id, profile.goal_id)
+    was_uncovered = set(before.uncovered_skills) if before else set()
+
+    profile.pinned_item_ids = [i for i in profile.pinned_item_ids if i != item_id]
+    if item_id not in profile.excluded_item_ids:
+        profile.excluded_item_ids.append(item_id)
+    db.save_profile(profile)
+
+    title = catalog.items[item_id].title
+    path = _regenerate(
+        catalog, db, profile, notes=[f"Removed “{title}” from your path."]
+    )
+
+    # Dropping the only course that teaches a skill takes everything downstream
+    # of it with them. That is deliberate — a path that promises a course whose
+    # prerequisite it never teaches is worse — but the learner has to be told,
+    # in those words, that their own removal caused it.
+    newly_uncovered = [s for s in path.uncovered_skills if s not in was_uncovered]
+    if newly_uncovered:
+        listed = ", ".join(newly_uncovered)
+        path.adaptation_notes.append(
+            f"“{title}” was the only course covering {listed}, so those are now "
+            "out of reach and everything depending on them left the path. Add it "
+            "back if that is not what you wanted."
+        )
+        db.save_path(path)
     return path
 
 
@@ -583,7 +765,7 @@ def explain_item(
     ctx = recommender.build_context(catalog, derived, missing, required)
     rec = recommender.to_recommendation(ctx, catalog.items[item_id])
 
-    path = db.get_path(learner_id)
+    path = db.get_path(learner_id, profile.goal_id)
     placement = None
     if path:
         for milestone in path.milestones:
@@ -624,7 +806,7 @@ def set_progress(
 
     # Reflect the new status in the stored path without reshuffling it: the
     # learner's plan should not move under them just because they ticked a box.
-    path = db.get_path(learner_id)
+    path = db.get_path(learner_id, profile.goal_id)
     if path is not None:
         for milestone in path.milestones:
             for item in milestone.items:
@@ -696,7 +878,7 @@ def get_dashboard(
     db: Database = Depends(db_dep),
 ) -> Dashboard:
     profile = _load_profile(db, learner_id)
-    path = db.get_path(learner_id)
+    path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
     derived = profiling.derive(catalog, profile)
@@ -707,6 +889,7 @@ def get_dashboard(
         path,
         progress,
         pace=insights.build_pace(catalog, profile, path, progress),
+        paths=_summaries(catalog, db, profile),
     )
 
 
@@ -715,7 +898,7 @@ def _path_and_profile(
     catalog: Catalog, db: Database, learner_id: str
 ) -> tuple[LearnerProfile, LearningPath]:
     profile = _load_profile(db, learner_id)
-    path = db.get_path(learner_id)
+    path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
     return profile, path

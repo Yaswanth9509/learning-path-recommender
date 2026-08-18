@@ -17,6 +17,10 @@
     </div>
   </div>
   <div class="topbar-right">
+    <div class="engine-switch" role="group" aria-label="Assistant engine">
+      <button id="engineAuto" class="seg" type="button" data-engine="auto">Gemini</button>
+      <button id="engineRules" class="seg" type="button" data-engine="rules">Rules</button>
+    </div>
     <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
     <select id="learnerSelect" aria-label="Select learner"></select>
     <button id="newLearnerBtn" class="btn btn-ghost" type="button">New learner</button>
@@ -60,6 +64,7 @@
 
   <!-- ------------------------------------------------------------ PATH -->
   <section id="panel-path" class="panel" role="tabpanel">
+    <div id="pathSwitcher" class="path-switcher"></div>
     <div id="pathHeader" class="path-header"></div>
     <div id="gapBox" class="gap-box"></div>
     <div id="milestones" class="milestones"></div>
@@ -90,6 +95,11 @@
   <!-- ------------------------------------------------------- DASHBOARD -->
   <section id="panel-dashboard" class="panel" role="tabpanel">
     <div id="dashKpis" class="kpi-row"></div>
+    <div class="card">
+      <h3>Your paths</h3>
+      <p class="hint">Up to three goals at a time. The active one is what the Path tab shows.</p>
+      <div id="dashPaths" class="path-cards"></div>
+    </div>
     <div id="paceCard" class="card pace-card"></div>
     <div class="card">
       <h3>Achievements</h3>

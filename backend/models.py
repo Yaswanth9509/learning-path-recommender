@@ -16,6 +16,10 @@ LEVEL_TO_INT: dict[str, int] = {"beginner": 1, "intermediate": 2, "advanced": 3}
 #: Bounds on anything a client can send. A chat message is forwarded to an LLM
 #: provider and stored, so it is capped; ids are capped and pattern-checked
 #: because `POST /api/chat` will create a learner row for an unknown one.
+#: A learner can pursue several goals at once. More than a handful stops being
+#: a plan and starts being a wish list, so the number is capped.
+MAX_ACTIVE_PATHS = 3
+
 MAX_MESSAGE_CHARS = 2000
 MAX_NAME_CHARS = 80
 MAX_NOTE_CHARS = 500
@@ -33,7 +37,10 @@ class LearnerProfile(BaseModel):
 
     learner_id: str
     name: str = Field("Learner", max_length=MAX_NAME_CHARS)
+    #: The goal whose roadmap is currently on screen.
     goal_id: Optional[str] = None
+    #: Every goal being pursued, active one included, oldest first.
+    goal_ids: list[str] = Field(default_factory=list, max_length=MAX_ACTIVE_PATHS)
     goal_text: str = Field("", max_length=MAX_MESSAGE_CHARS)
     experience_level: ExperienceLevel = "beginner"
     interests: list[str] = Field(default_factory=list)
@@ -46,6 +53,11 @@ class LearnerProfile(BaseModel):
     extra_target_skills: list[str] = Field(default_factory=list)
     #: item ids the learner rejected; never recommended again
     excluded_item_ids: list[str] = Field(default_factory=list)
+    #: items the learner added to the path by hand; always scheduled
+    pinned_item_ids: list[str] = Field(default_factory=list, max_length=MAX_LIST_ITEMS)
+    #: which engine answers: "auto" prefers the configured provider and falls
+    #: back to the rules; "rules" pins the deterministic engine.
+    assistant_engine: Literal["auto", "rules"] = "auto"
     #: derived from feedback: shifts preferred course difficulty (-1, 0, +1)
     difficulty_offset: int = 0
     provider_affinity: dict[str, int] = Field(default_factory=dict)
@@ -87,6 +99,8 @@ class ProfileUpdate(BaseModel):
     preferred_formats: Optional[list[str]] = Field(None, max_length=MAX_LIST_ITEMS)
     cost_preference: Optional[Literal["free", "any"]] = None
     extra_target_skills: Optional[list[str]] = Field(None, max_length=MAX_LIST_ITEMS)
+    pinned_item_ids: Optional[list[str]] = Field(None, max_length=MAX_LIST_ITEMS)
+    assistant_engine: Optional[Literal["auto", "rules"]] = None
 
 
 # ------------------------------------------------------------ recommendations
@@ -268,6 +282,23 @@ class PaceReport(BaseModel):
     message: str
 
 
+class PathSummary(BaseModel):
+    """One of the learner's roadmaps, as the switcher and dashboard show it."""
+
+    goal_id: str
+    goal_title: str
+    domain: str
+    is_active: bool
+    percent: float
+    items_completed: int
+    items_total: int
+    hours_total: int
+    hours_remaining: int
+    total_weeks: float
+    stages: int
+    completed: bool
+
+
 class Dashboard(BaseModel):
     learner_id: str
     goal_title: str
@@ -287,6 +318,10 @@ class Dashboard(BaseModel):
     current_milestone: Optional[str] = None
     streak_note: str = ""
     pace: Optional[PaceReport] = None
+    #: Every roadmap this learner is running, active one flagged.
+    paths: list[PathSummary] = Field(default_factory=list)
+    paths_completed: int = 0
+    paths_total: int = 0
 
 
 # --------------------------------------------------------------- skill graph

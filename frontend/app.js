@@ -11,6 +11,7 @@ const state = {
   goals: [],
   skills: [],
   items: [],
+  paths: [],
   //: item ids the learner says they finished before this app saw them
   history: new Set(),
   dashboard: null,
@@ -139,6 +140,7 @@ async function boot() {
   try {
     const health = await api("/api/health");
     state.llm = health.llm_enabled;
+    state.providerName = health.provider;
     const badge = $("#engineBadge");
     badge.textContent = health.llm_enabled
       ? `${health.provider} · ${health.model}`
@@ -180,6 +182,39 @@ function renderLearnerSelect(learners, activeId) {
 
 $("#learnerSelect").addEventListener("change", (e) => selectLearner(e.target.value));
 
+/* ---------------------------------------------------------- engine choice */
+function renderEngineSwitch() {
+  const chosen = state.profile?.assistant_engine || "auto";
+  $$(".engine-switch .seg").forEach((btn) => {
+    btn.classList.toggle("is-on", btn.dataset.engine === chosen);
+    btn.setAttribute("aria-pressed", String(btn.dataset.engine === chosen));
+  });
+  // Naming the live provider is more useful than the word "auto".
+  $("#engineAuto").textContent = state.llm && state.providerName
+    ? state.providerName
+    : "AI model";
+  $("#engineAuto").disabled = !state.llm;
+  $("#engineAuto").title = state.llm
+    ? "Answers come from the configured model, falling back to the rules if it fails"
+    : "No provider configured — add a key in .env to enable this";
+}
+
+$$(".engine-switch .seg").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const engine = btn.dataset.engine;
+    if (!state.profile || state.profile.assistant_engine === engine) return;
+    try {
+      state.profile = await api(`/api/learners/${state.learnerId}/profile?regenerate=false`, {
+        method: "PATCH", body: JSON.stringify({ assistant_engine: engine }),
+      });
+      renderEngineSwitch();
+      toast(engine === "rules"
+        ? "Switched to the rule engine — instant, offline, fully deterministic."
+        : "Switched to the AI model — replies will be more conversational.", 3600);
+    } catch (err) { toast(err.message); }
+  });
+});
+
 $("#newLearnerBtn").addEventListener("click", async () => {
   const profile = await api("/api/learners", { method: "POST", body: "{}" });
   const learners = await api("/api/learners");
@@ -198,6 +233,8 @@ async function selectLearner(id) {
   if (state.profile.goal_id) {
     try { state.path = await api(`/api/learners/${id}/path`); } catch (_) { /* none yet */ }
   }
+  renderEngineSwitch();
+  await loadPaths();
   await renderChatHistory();
   renderPath();
   renderProfileTab();
@@ -326,6 +363,120 @@ function skillName(id) {
   return skill ? skill.name : id;
 }
 
+/* ---------------------------------------------------------- several paths */
+const MAX_PATHS = 3;
+
+async function loadPaths() {
+  try { state.paths = await api(`/api/learners/${state.learnerId}/paths`); }
+  catch (_) { state.paths = []; }
+  renderPathSwitcher();
+}
+
+function renderPathSwitcher() {
+  const host = $("#pathSwitcher");
+  host.innerHTML = "";
+  const paths = state.paths || [];
+  if (!paths.length && !state.profile?.goal_id) return;
+
+  paths.forEach((p) => {
+    const chip = el("button", {
+      class: "path-chip" + (p.is_active ? " is-active" : "") + (p.completed ? " is-done" : ""),
+      attrs: { type: "button", title: `${p.items_completed} of ${p.items_total} items done` },
+      on: { click: () => switchPath(p.goal_id) },
+    }, [
+      el("span", { class: "path-chip-title", text: p.goal_title }),
+      el("span", { class: "path-chip-meta", text: `${Math.round(p.percent)}%` }),
+    ]);
+    const bar = el("span", { class: "path-chip-bar" });
+    bar.appendChild(el("span", { attrs: { style: `width:${p.percent}%` } }));
+    chip.appendChild(bar);
+    if (paths.length > 1) {
+      chip.appendChild(el("span", {
+        class: "path-chip-x", text: "✕",
+        attrs: { role: "button", title: `Remove ${p.goal_title}` },
+        on: { click: (e) => { e.stopPropagation(); removePath(p.goal_id, p.goal_title); } },
+      }));
+    }
+    host.appendChild(chip);
+  });
+
+  if (paths.length < MAX_PATHS) {
+    const picker = el("select", { class: "path-add", attrs: { "aria-label": "Add another goal" } });
+    picker.appendChild(el("option", { text: "+ Add a goal", attrs: { value: "" } }));
+    const taken = new Set(paths.map((p) => p.goal_id));
+    state.goals.filter((g) => !taken.has(g.id)).forEach((g) => {
+      picker.appendChild(el("option", { text: g.title, attrs: { value: g.id } }));
+    });
+    picker.addEventListener("change", () => {
+      if (picker.value) addPath(picker.value);
+    });
+    host.appendChild(picker);
+  }
+}
+
+async function switchPath(goalId) {
+  try {
+    state.path = await api(`/api/learners/${state.learnerId}/paths/${goalId}/activate`,
+                           { method: "POST" });
+    state.profile = await api(`/api/learners/${state.learnerId}/profile`);
+    await loadPaths();
+    renderPath();
+    toast(`Now showing ${state.path.goal_title}.`);
+  } catch (err) { toast(err.message); }
+}
+
+async function addPath(goalId) {
+  try {
+    state.path = await api(`/api/learners/${state.learnerId}/paths`, {
+      method: "POST", body: JSON.stringify({ goal_id: goalId }),
+    });
+    state.profile = await api(`/api/learners/${state.learnerId}/profile`);
+    await loadPaths();
+    renderPath();
+    toast(`Added ${state.path.goal_title} — ${state.path.total_hours}h across ${state.path.milestones.length} stages.`, 4200);
+  } catch (err) { toast(err.message, 5000); renderPathSwitcher(); }
+}
+
+async function removePath(goalId, title) {
+  try {
+    await api(`/api/learners/${state.learnerId}/paths/${goalId}`, { method: "DELETE" });
+    state.profile = await api(`/api/learners/${state.learnerId}/profile`);
+    state.path = state.profile.goal_id
+      ? await api(`/api/learners/${state.learnerId}/path`)
+      : null;
+    await loadPaths();
+    renderPath();
+    toast(`Removed ${title}. Your progress on its courses is kept.`, 4200);
+  } catch (err) { toast(err.message); }
+}
+
+/* -------------------------------------------------- shaping a path by hand */
+async function addItemToPath(itemId, title) {
+  try {
+    state.path = await api(`/api/learners/${state.learnerId}/path/items`, {
+      method: "POST", body: JSON.stringify({ item_id: itemId }),
+    });
+    await loadPaths();
+    renderPath();
+    toast(`Added “${title}” to your path.`, 4000);
+  } catch (err) { toast(err.message, 4000); }
+}
+
+async function removeItemFromPath(itemId, title) {
+  try {
+    state.path = await api(`/api/learners/${state.learnerId}/path/items/${itemId}`,
+                           { method: "DELETE" });
+    state.lastRemoved = { itemId, title };
+    await loadPaths();
+    renderPath();
+    const stranded = (state.path.uncovered_skills || []).length;
+    toast(stranded
+      ? `Removed “${title}”, but it was the only course covering ${stranded} skill(s) — undo it on the Path tab if that was not intended.`
+      : `Removed “${title}” — I looked for another route to the same skill.`,
+      stranded ? 6000 : 4200);
+  } catch (err) { toast(err.message); }
+}
+
 /* ------------------------------------------------------------------- path */
 function renderPath() {
   const header = $("#pathHeader");
@@ -338,6 +489,7 @@ function renderPath() {
       "No path yet. Go to the Chat tab and describe what you want to learn." }));
     return;
   }
+  renderPathSwitcher();
   const path = state.path;
 
   header.appendChild(el("div", { class: "path-title", text: path.goal_title }));
@@ -382,8 +534,24 @@ function renderPath() {
     gapBox.appendChild(row);
   }
   if (path.uncovered_skills && path.uncovered_skills.length) {
-    gapBox.appendChild(el("div", { class: "hint", text:
-      "No available course covers: " + path.uncovered_skills.join(", ") }));
+    const warn = el("div", { class: "uncovered" });
+    warn.appendChild(el("strong", { text: "Not currently reachable" }));
+    warn.appendChild(el("div", { class: "hint", text:
+      "No course on offer covers " + path.uncovered_skills.join(", ") +
+      ", so anything depending on them has left the path." }));
+    if (state.lastRemoved) {
+      warn.appendChild(el("button", {
+        class: "btn btn-mini btn-accent",
+        text: `Undo removing “${state.lastRemoved.title}”`,
+        attrs: { type: "button" },
+        on: { click: () => {
+          const { itemId, title } = state.lastRemoved;
+          state.lastRemoved = null;
+          addItemToPath(itemId, title);
+        } },
+      }));
+    }
+    gapBox.appendChild(warn);
   }
 
   // --- milestones
@@ -442,6 +610,11 @@ function renderPathItem(item) {
   statusSelect.addEventListener("change", () => setProgress(item.item_id, statusSelect.value));
   actions.appendChild(statusSelect);
   actions.appendChild(explainButton(item.item_id));
+  actions.appendChild(el("button", {
+    class: "btn btn-mini btn-danger", text: "Remove",
+    attrs: { type: "button", title: "Drop this from the path and find another route" },
+    on: { click: () => removeItemFromPath(item.item_id, item.title) },
+  }));
 
   const fbRow = el("div", { class: "row" });
   [["too_easy", "Too easy"], ["too_hard", "Too hard"], ["not_relevant", "Not relevant"], ["liked", "Liked"]]
@@ -886,6 +1059,49 @@ function renderAchievements(ach) {
   });
 }
 
+/* Every roadmap the learner is running, with the active one called out. */
+function renderDashboardPaths(d) {
+  const host = $("#dashPaths");
+  host.innerHTML = "";
+  const paths = d.paths || [];
+  if (!paths.length) {
+    host.appendChild(el("div", { class: "hint", text: "No paths yet." }));
+    return;
+  }
+
+  paths.forEach((p, index) => {
+    const card = el("div", {
+      class: "path-card" + (p.is_active ? " is-active" : "") + (p.completed ? " is-done" : ""),
+      attrs: { style: `animation-delay:${index * 60}ms` },
+    });
+    const head = el("div", { class: "path-card-head" });
+    head.appendChild(el("div", {}, [
+      el("div", { class: "path-card-title", text: p.goal_title }),
+      el("div", { class: "path-card-sub", text:
+        `${p.domain} · ${p.stages} stages · ${p.hours_remaining}h left of ${p.hours_total}h` }),
+    ]));
+    head.appendChild(el("span", {
+      class: "badge " + (p.completed ? "badge-live" : p.is_active ? "badge-rules" : "badge-muted"),
+      text: p.completed ? "Complete" : p.is_active ? "Active" : "Paused",
+    }));
+    card.appendChild(head);
+
+    const bar = el("div", { class: "path-card-bar" });
+    bar.appendChild(el("span", { attrs: { style: `width:${p.percent}%` } }));
+    card.appendChild(bar);
+    card.appendChild(el("div", { class: "path-card-foot", text:
+      `${p.items_completed} of ${p.items_total} items · ${Math.round(p.percent)}%` }));
+
+    if (!p.is_active) {
+      card.appendChild(el("button", {
+        class: "btn btn-mini", text: "Make active", attrs: { type: "button" },
+        on: { click: () => switchPath(p.goal_id).then(() => loadDashboard()) },
+      }));
+    }
+    host.appendChild(card);
+  });
+}
+
 /* Observed study pace — what the learner does, not what they said they'd do. */
 const PACE_LABELS = {
   unknown: ["Pace", "badge-muted"],
@@ -974,6 +1190,7 @@ function renderDashboard(d) {
   kpis.appendChild(tile("Weeks remaining", `${d.weeks_remaining}`, "At your current weekly hours"));
 
   renderPace(d.pace);
+  renderDashboardPaths(d);
 
   // milestones timeline
   const tl = $("#dashMilestones");
@@ -1092,15 +1309,66 @@ async function loadRecommendations() {
     list.appendChild(el("div", { class: "empty", text: "Nothing matches those filters." }));
     return;
   }
-  recs.forEach((r) => list.appendChild(renderRecommendation(r)));
+
+  // Rank is information, so show it. Anything you can start now that closes a
+  // real gap leads; things you cannot start yet are separated rather than
+  // scattered through the list looking equally available.
+  const startable = recs.filter((r) => r.prerequisites_met);
+  const blocked = recs.filter((r) => !r.prerequisites_met);
+
+  if (startable.length) {
+    list.appendChild(sectionHeading(
+      "Best for your path right now",
+      "Closes a gap you have, and every prerequisite is already met.",
+    ));
+    startable.forEach((r, i) => list.appendChild(renderRecommendation(r, i)));
+  }
+  if (blocked.length) {
+    list.appendChild(sectionHeading(
+      "Worth knowing about, later",
+      "Strong matches that need a prerequisite you have not covered yet.",
+    ));
+    blocked.forEach((r, i) => list.appendChild(renderRecommendation(r, startable.length + i)));
+  }
+}
+
+function sectionHeading(title, note) {
+  return el("div", { class: "rec-heading" }, [
+    el("h3", { text: title }),
+    el("p", { class: "hint", text: note }),
+  ]);
 }
 
 $("#recRefresh").addEventListener("click", loadRecommendations);
 $("#recType").addEventListener("change", loadRecommendations);
 $("#recReady").addEventListener("change", loadRecommendations);
 
-function renderRecommendation(r) {
-  const card = el("div", { class: "rec" });
+/* Tier by score so the eye lands on the right card first: the leader is
+   marked, strong matches are tinted, the rest are plain. */
+function recommendationTier(r, index) {
+  if (!r.prerequisites_met) return { rank: "later", label: "" };
+  if (index === 0) return { rank: "top", label: "Best match" };
+  if (r.score >= 0.75) return { rank: "strong", label: "Strong match" };
+  if (r.closes_gap_skills.length) return { rank: "useful", label: "Closes a gap" };
+  return { rank: "plain", label: "" };
+}
+
+function renderRecommendation(r, index = 0) {
+  const tier = recommendationTier(r, index);
+  const card = el("div", {
+    class: `rec rec-${tier.rank}`,
+    attrs: { style: `animation-delay:${Math.min(index, 8) * 45}ms` },
+  });
+
+  if (tier.label) {
+    card.appendChild(el("span", { class: `rec-flag rec-flag-${tier.rank}`, text: tier.label }));
+  }
+  const onPath = (state.path?.milestones || [])
+    .some((m) => m.items.some((i) => i.item_id === r.item_id));
+  if (onPath) {
+    card.appendChild(el("span", { class: "rec-flag rec-flag-on", text: "On your path" }));
+  }
+
   const head = el("div", { class: "rec-head" });
   head.appendChild(el("div", {}, [
     el("div", { class: "item-title" }, [r.title, itemLink(r)]),
@@ -1136,6 +1404,13 @@ function renderRecommendation(r) {
 
   const actions = el("div", { class: "row" });
   actions.appendChild(explainButton(r.item_id));
+  if (!onPath) {
+    actions.appendChild(el("button", {
+      class: "btn btn-mini btn-accent", text: "+ Add to my path",
+      attrs: { type: "button", title: "Schedule this in the earliest stage that allows it" },
+      on: { click: () => addItemToPath(r.item_id, r.title).then(loadRecommendations) },
+    }));
+  }
   card.appendChild(actions);
   return card;
 }

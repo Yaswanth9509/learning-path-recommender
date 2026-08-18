@@ -156,9 +156,17 @@ def _interpretation_system(catalog: Catalog) -> str:
     )
 
 
-def interpret_goal(catalog: Catalog, text: str) -> GoalInterpretation:
-    """Map free text onto structured profile fields."""
+def interpret_goal(
+    catalog: Catalog, text: str, use_provider: bool = True
+) -> GoalInterpretation:
+    """Map free text onto structured profile fields.
+
+    `use_provider=False` pins the deterministic engine, which is what a learner
+    gets when they choose the rule engine in the UI.
+    """
     rules_result = _interpret_with_rules(catalog, text)
+    if not use_provider:
+        return rules_result
 
     raw, provider = llm.complete(
         system=_interpretation_system(catalog),
@@ -738,8 +746,12 @@ def answer(
     path: Optional[LearningPath],
     question: str,
     history: list[dict[str, str]] | None = None,
+    use_provider: bool = True,
 ) -> tuple[str, str]:
     """Answer a learner question. Returns (reply, source)."""
+    if not use_provider:
+        return _answer_with_rules(catalog, profile, path, question), "rules"
+
     messages: list[dict[str, str]] = []
     for turn in (history or [])[-8:]:
         if turn.get("role") in ("user", "assistant") and turn.get("content"):
@@ -761,8 +773,12 @@ def acknowledge_goal(
     profile: LearnerProfile,
     path: LearningPath,
     interpretation: GoalInterpretation,
+    use_provider: bool = True,
 ) -> tuple[str, str]:
     """The reply sent right after a goal is captured and a path built."""
+    if not use_provider:
+        return _acknowledge_with_rules(catalog, profile, path, interpretation), "rules"
+
     brief = (
         "The learner just described their goal and you have generated their "
         "roadmap. Write their welcome message. Reflect back what you understood "

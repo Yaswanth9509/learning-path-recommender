@@ -126,7 +126,12 @@ def test_naming_a_different_goal_switches_without_ceremony(client):
     assert body["profile"]["goal_id"] == "goal-data-analyst"
     after = client.get(f"/api/learners/{learner_id}/path").json()
     assert after["goal_id"] == "goal-data-analyst"
-    assert after["revision"] > before["revision"]
+    assert after["goal_id"] != before["goal_id"]
+
+    # The first roadmap is kept, not overwritten — they are running two goals.
+    paths = client.get(f"/api/learners/{learner_id}/paths").json()
+    assert {p["goal_id"] for p in paths} == {"goal-ml-engineer", "goal-data-analyst"}
+    assert [p["goal_id"] for p in paths if p["is_active"]] == ["goal-data-analyst"]
 
 
 @pytest.mark.parametrize("question", [

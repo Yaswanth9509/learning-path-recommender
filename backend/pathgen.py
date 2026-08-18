@@ -238,6 +238,7 @@ def generate_path(
     layers = catalog.topological_layers(missing) if missing else []
     selection = _select_courses(ctx, layers)
     groups = _chunk(selection.courses)
+    pinned = _pinned_items(catalog, profile, selection.courses)
 
     # Skills the learner will hold as each milestone completes.
     running_skills = set(derived.known_skills)
@@ -275,6 +276,26 @@ def generate_path(
             # Advance immediately: later items in the same stage may depend on
             # what this course just taught.
             running_skills |= set(new_skills)
+
+        # Anything the learner pinned goes in as soon as it is possible — the
+        # first stage by which they hold everything it requires.
+        for extra in list(pinned):
+            if not set(extra.requires).issubset(running_skills):
+                continue
+            pinned.remove(extra)
+            taught = [catalog.skill_name(s) for s in extra.teaches]
+            covers = f" It covers {', '.join(taught)}." if taught else ""
+            items.append(
+                _to_path_item(
+                    catalog,
+                    extra,
+                    "core" if extra.type in ("course", "resource") else extra.type,
+                    f"You added this yourself, and this is the earliest stage "
+                    f"where every prerequisite for it is met.{covers}",
+                    progress,
+                )
+            )
+            running_skills |= set(extra.teaches)
 
         milestone_skill_set = set(milestone_skills)
 
@@ -345,6 +366,38 @@ def generate_path(
         milestones = _proof_only_milestone(catalog, ctx, report, progress, weekly)
         cumulative_weeks = milestones[0].cumulative_weeks if milestones else 0.0
 
+    # Pinned items whose prerequisites this path never covers still belong to
+    # the learner. Put them at the end and say plainly why they are there.
+    if pinned and milestones:
+        last = milestones[-1]
+        for extra in pinned:
+            unmet = [s for s in extra.requires if s not in running_skills]
+            reason = (
+                "You added this yourself. "
+                + (
+                    "This path does not cover "
+                    + ", ".join(catalog.skill_name(s) for s in unmet)
+                    + ", which it assumes, so treat it as optional."
+                    if unmet
+                    else "It sits at the end because nothing else depends on it."
+                )
+            )
+            last.items.append(
+                _to_path_item(
+                    catalog,
+                    extra,
+                    "core" if extra.type in ("course", "resource") else extra.type,
+                    reason,
+                    progress,
+                )
+            )
+        last.hours = sum(item.hours for item in last.items)
+        last.est_weeks = round(last.hours / weekly, 1)
+        cumulative_weeks = round(
+            sum(milestone.est_weeks for milestone in milestones), 1
+        )
+        last.cumulative_weeks = cumulative_weeks
+
     total_hours = sum(m.hours for m in milestones)
     summary = _summarize(catalog, goal.title, report, milestones, total_hours, weekly)
 
@@ -365,6 +418,26 @@ def generate_path(
         uncovered_skills=[catalog.skill_name(s) for s in selection.uncovered],
         adaptation_notes=adaptation_notes or [],
     )
+
+
+def _pinned_items(
+    catalog: Catalog, profile, already_selected: list[LearningItem]
+) -> list[LearningItem]:
+    """Items the learner added to the path by hand.
+
+    The planner picks what closes the gap; this is the learner overruling it —
+    "I want this course too". They are still placed by prerequisite, never
+    before the stage that makes them possible.
+    """
+    chosen = {item.id for item in already_selected}
+    return [
+        catalog.items[item_id]
+        for item_id in profile.pinned_item_ids
+        if item_id in catalog.items
+        and item_id not in chosen
+        and item_id not in profile.excluded_item_ids
+        and item_id not in profile.completed_item_ids
+    ]
 
 
 def _proof_only_milestone(
