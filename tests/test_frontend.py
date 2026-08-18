@@ -127,6 +127,26 @@ def test_every_learner_feature_is_reachable_from_the_ui(feature, fragment):
     assert fragment in JS, f"the UI never calls the {feature} endpoint"
 
 
+def test_every_tab_is_deep_linkable():
+    """Each panel must be reachable by URL, so views can be linked and shared."""
+    panels = set(re.findall(r"""id=["']panel-([a-z]+)["']""", HTML))
+    declared = re.search(r"const TABS = \[(.*?)\]", JS, re.DOTALL)
+    assert declared, "app.js no longer declares the tab list"
+    routed = set(re.findall(r'"([a-z]+)"', declared.group(1)))
+    assert routed == panels, f"tabs and panels disagree: {routed ^ panels}"
+    assert "hashchange" in JS, "back/forward navigation between tabs is not handled"
+
+
+def test_the_client_has_no_innerhtml_path():
+    """Catalogue text and model output must never be interpreted as markup."""
+    assigned = [
+        value.strip()
+        for value in re.findall(r"innerHTML\s*=\s*([^;]+);", JS)
+        if value.strip() not in ('""', "''", "``")
+    ]
+    assert not assigned, f"innerHTML assigned from a value: {assigned}"
+
+
 # ------------------------------------------------------------------- syntax
 @pytest.mark.skipif(shutil.which("node") is None, reason="Node is not installed")
 def test_app_js_parses():

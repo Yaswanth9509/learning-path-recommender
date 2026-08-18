@@ -24,8 +24,9 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 function el(tag, opts = {}, children = []) {
   const node = document.createElement(tag);
   if (opts.class) node.className = opts.class;
+  // Text only, deliberately: there is no innerHTML path in this client, so
+  // catalogue and model output can never be interpreted as markup.
   if (opts.text !== undefined) node.textContent = opts.text;
-  if (opts.html !== undefined) node.innerHTML = opts.html;
   if (opts.attrs) for (const [k, v] of Object.entries(opts.attrs)) node.setAttribute(k, v);
   if (opts.on) for (const [k, v] of Object.entries(opts.on)) node.addEventListener(k, v);
   for (const child of [].concat(children)) {
@@ -60,6 +61,20 @@ async function api(path, options = {}) {
 
 function pct(n) { return `${Math.round(n)}%`; }
 
+/* Models write **bold**. Render it with real elements rather than leaving the
+   asterisks on screen — and without ever touching innerHTML. */
+function setMessageText(node, text) {
+  node.textContent = "";
+  String(text).split(/(\*\*[^*]+\*\*)/g).forEach((part) => {
+    if (!part) return;
+    if (part.length > 4 && part.startsWith("**") && part.endsWith("**")) {
+      node.appendChild(el("strong", { text: part.slice(2, -2) }));
+    } else {
+      node.appendChild(document.createTextNode(part));
+    }
+  });
+}
+
 /* ------------------------------------------------------------------ modal */
 function openModal(title) {
   const modal = $("#modal");
@@ -81,20 +96,43 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !$("#modal").hidden) closeModal();
 });
 
-/* ------------------------------------------------------------------- tabs */
+/* ------------------------------------------------------------------- tabs
+   Each tab is addressable as #chat, #path, #graph, … so a view can be linked,
+   bookmarked, and reopened where you left off. */
+const TABS = ["chat", "path", "graph", "plan", "dashboard", "explore", "profile"];
+
+function showTab(name, { updateHash = true } = {}) {
+  if (!TABS.includes(name)) return;
+  $$(".tab").forEach((t) => t.classList.toggle("is-active", t.dataset.tab === name));
+  $$(".panel").forEach((p) => p.classList.toggle("is-active", p.id === `panel-${name}`));
+  if (updateHash && window.location.hash.slice(1) !== name) {
+    window.location.hash = name;
+  }
+  if (name === "path") renderPath();
+  if (name === "graph") loadGraph();
+  if (name === "plan") loadPlan();
+  if (name === "dashboard") loadDashboard();
+  if (name === "explore") loadRecommendations();
+  if (name === "profile") renderProfileTab();
+}
+
 $$(".tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    $$(".tab").forEach((t) => t.classList.toggle("is-active", t === tab));
-    const name = tab.dataset.tab;
-    $$(".panel").forEach((p) => p.classList.toggle("is-active", p.id === `panel-${name}`));
-    if (name === "path") renderPath();
-    if (name === "graph") loadGraph();
-    if (name === "plan") loadPlan();
-    if (name === "dashboard") loadDashboard();
-    if (name === "explore") loadRecommendations();
-    if (name === "profile") renderProfileTab();
-  });
+  tab.addEventListener("click", () => showTab(tab.dataset.tab));
 });
+
+/* `#explain/<item-id>` opens one item's full justification, so a learner can
+   send someone the exact reason a course is on their path. */
+function routeHash() {
+  const hash = window.location.hash.slice(1);
+  if (hash.startsWith("explain/")) {
+    showTab("path", { updateHash: false });
+    explainItem(hash.slice("explain/".length));
+    return;
+  }
+  showTab(hash, { updateHash: false });
+}
+
+window.addEventListener("hashchange", routeHash);
 
 /* --------------------------------------------------------------- bootstrap */
 async function boot() {
@@ -125,6 +163,9 @@ async function boot() {
 
   renderLearnerSelect(learners.length ? learners : [chosen], chosen.learner_id);
   await selectLearner(chosen.learner_id);
+
+  // Honour a deep link on load, e.g. /#dashboard or /#explain/c-js.
+  if (window.location.hash.slice(1)) routeHash();
 }
 
 function renderLearnerSelect(learners, activeId) {
@@ -177,7 +218,9 @@ async function renderChatHistory() {
       "Hi. Tell me what you want to be able to do — a role you're aiming for, a project you want to build, or a subject you want to master. Include anything you already know and how much time you have each week, and I'll build a path around it." }));
   }
   history.forEach((m) => {
-    log.appendChild(el("div", { class: `msg msg-${m.role === "user" ? "user" : "bot"}`, text: m.content }));
+    const node = el("div", { class: `msg msg-${m.role === "user" ? "user" : "bot"}` });
+    setMessageText(node, m.content);
+    log.appendChild(node);
   });
   log.scrollTop = log.scrollHeight;
 }
@@ -212,7 +255,7 @@ $("#chatForm").addEventListener("submit", async (event) => {
       method: "POST",
       body: JSON.stringify({ message, learner_id: state.learnerId }),
     });
-    pending.textContent = res.reply;
+    setMessageText(pending, res.reply);
     pending.appendChild(el("div", {
       class: "msg-meta",
       text: res.source === "rules"
@@ -484,8 +527,9 @@ async function explainItem(itemId) {
   ]));
 
   if (data.placement) {
+    // The milestone title already carries its stage number; don't repeat it.
     body.appendChild(el("div", { class: "explain-block" }, [
-      el("strong", { text: `Stage ${data.placement.order} · ${data.placement.milestone}` }),
+      el("strong", { text: data.placement.milestone }),
       el("div", { class: "item-why", text: data.placement.rationale }),
     ]));
   } else {
