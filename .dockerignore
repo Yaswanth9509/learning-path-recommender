@@ -1,0 +1,25 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+htmlcov
+.coverage
+coverage.xml
+
+# Secrets and local state never belong in an image.
+.env
+*.db
+*.db-wal
+*.db-shm
+
+# Not needed at runtime.
+tests
+make_zip.py
+*.zip
+README.md
+CONTRIBUTING.md
+CHANGELOG.md

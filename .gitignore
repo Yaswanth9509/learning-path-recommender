@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Packaging and coverage output
+build/
+dist/
+*.egg-info/
+.coverage
+coverage.xml
+htmlcov/
+*.zip
+
+# Local secrets — never commit
+.env
+
+# Application state (recreated on first run)
+*.db
+*.db-wal
+*.db-shm

@@ -1,0 +1,11 @@
+# Development and test dependencies.
+#
+#     pip install -r requirements.txt -r requirements-dev.txt
+#     python -m pytest
+#     python -m ruff check .
+-r requirements.txt
+
+pytest>=8.0,<9.0
+httpx>=0.27          # required by fastapi.testclient
+pytest-cov>=5.0
+ruff>=0.6

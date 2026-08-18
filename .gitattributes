@@ -1,0 +1,9 @@
+# Keep the repository LF regardless of who commits from Windows — CI runs on
+# Ubuntu, and mixed endings make diffs unreadable.
+* text=auto eol=lf
+
+# Binary assets git must not touch.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.zip binary
