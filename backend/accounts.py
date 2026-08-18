@@ -1,0 +1,258 @@
+"""Accounts and sessions.
+
+Deliberately small and dependency-free: PBKDF2 from `hashlib` for passwords,
+`secrets` for session tokens, and the same SQLite file that already holds
+learners. Nothing here needs a service, a key, or a network call, so the app
+still runs offline and deploys as one container.
+
+What this is *not*: there is no email verification and no password reset,
+because both need a mail service the project does not have. A learner who
+forgets their password has to make a new account. That is an honest limit of a
+demo, not an oversight.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import re
+import secrets
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+#: Cost factor. High enough that a leaked database is expensive to attack,
+#: low enough that signing in stays instant on a free instance.
+PBKDF2_ROUNDS = 210_000
+SALT_BYTES = 16
+TOKEN_BYTES = 32
+
+SESSION_COOKIE = "lpr_session"
+SESSION_DAYS = 30
+
+#: A learner is a persona ("me", "my sister"), not an account. Five is plenty
+#: for one person and keeps a shared demo instance from being filled by one user.
+MAX_LEARNERS_PER_USER = 5
+
+MIN_PASSWORD_CHARS = 8
+MAX_PASSWORD_CHARS = 200
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+class AuthError(ValueError):
+    """Raised for anything a caller did wrong: bad email, weak password, …"""
+
+
+@dataclass(frozen=True)
+class User:
+    id: str
+    email: str
+    display_name: str
+    is_guest: bool
+    created_at: str
+
+
+def normalise_email(email: str) -> str:
+    cleaned = (email or "").strip().lower()
+    if not _EMAIL_RE.match(cleaned) or len(cleaned) > 254:
+        raise AuthError("that does not look like an email address")
+    return cleaned
+
+
+def check_password_strength(password: str) -> None:
+    if len(password or "") < MIN_PASSWORD_CHARS:
+        raise AuthError(
+            f"password must be at least {MIN_PASSWORD_CHARS} characters"
+        )
+    if len(password) > MAX_PASSWORD_CHARS:
+        raise AuthError("password is too long")
+
+
+def hash_password(password: str) -> str:
+    """`pbkdf2$rounds$salt$hash`, all hex — self-describing, so the cost factor
+    can be raised later without invalidating existing accounts."""
+    salt = secrets.token_bytes(SALT_BYTES)
+    digest = hashlib.pbkdf2_hmac(
+        "sha256", password.encode("utf-8"), salt, PBKDF2_ROUNDS
+    )
+    return f"pbkdf2${PBKDF2_ROUNDS}${salt.hex()}${digest.hex()}"
+
+
+def verify_password(password: str, stored: str) -> bool:
+    try:
+        algorithm, rounds, salt_hex, expected = stored.split("$")
+        if algorithm != "pbkdf2":
+            return False
+        digest = hashlib.pbkdf2_hmac(
+            "sha256", password.encode("utf-8"), bytes.fromhex(salt_hex), int(rounds)
+        )
+    except (ValueError, AttributeError):
+        return False
+    return hmac.compare_digest(digest.hex(), expected)
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+class Accounts:
+    """User and session storage, over the application's SQLite connection."""
+
+    SCHEMA = """
+    CREATE TABLE IF NOT EXISTS users (
+        id            TEXT PRIMARY KEY,
+        email         TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        display_name  TEXT NOT NULL DEFAULT '',
+        is_guest      INTEGER NOT NULL DEFAULT 0,
+        created_at    TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS sessions (
+        token      TEXT PRIMARY KEY,
+        user_id    TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+    """
+
+    def __init__(self, connection: sqlite3.Connection, lock) -> None:
+        self._conn = connection
+        self._lock = lock
+        with self._lock:
+            self._conn.executescript(self.SCHEMA)
+            self._conn.commit()
+
+    # ----------------------------------------------------------------- users
+    def create_user(
+        self, email: str, password: str, display_name: str = "", is_guest: bool = False
+    ) -> User:
+        address = normalise_email(email)
+        check_password_strength(password)
+        user = User(
+            id=secrets.token_hex(8),
+            email=address,
+            display_name=(display_name or address.split("@")[0])[:80],
+            is_guest=is_guest,
+            created_at=_now().isoformat(timespec="seconds"),
+        )
+        with self._lock:
+            try:
+                self._conn.execute(
+                    "INSERT INTO users (id, email, password_hash, display_name, "
+                    "is_guest, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    (user.id, user.email, hash_password(password), user.display_name,
+                     int(is_guest), user.created_at),
+                )
+                self._conn.commit()
+            except sqlite3.IntegrityError as exc:
+                raise AuthError("an account with that email already exists") from exc
+        return user
+
+    def create_guest(self) -> tuple[User, str]:
+        """A throwaway account so someone can try the product immediately."""
+        handle = secrets.token_hex(4)
+        password = secrets.token_urlsafe(24)
+        user = self.create_user(
+            f"guest-{handle}@guest.local", password, f"Guest {handle[:4]}", is_guest=True
+        )
+        return user, password
+
+    def _row_to_user(self, row) -> User:
+        return User(
+            id=row["id"], email=row["email"], display_name=row["display_name"],
+            is_guest=bool(row["is_guest"]), created_at=row["created_at"],
+        )
+
+    def authenticate(self, email: str, password: str) -> User:
+        address = (email or "").strip().lower()
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM users WHERE email = ?", (address,)
+            ).fetchall()
+        # Hash regardless, so a missing account and a wrong password take the
+        # same time and cannot be told apart by timing.
+        stored = rows[0]["password_hash"] if rows else hash_password("no-such-user")
+        if not verify_password(password or "", stored) or not rows:
+            raise AuthError("email or password is incorrect")
+        return self._row_to_user(rows[0])
+
+    def get_user(self, user_id: str) -> Optional[User]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM users WHERE id = ?", (user_id,)
+            ).fetchall()
+        return self._row_to_user(rows[0]) if rows else None
+
+    def set_display_name(self, user_id: str, name: str) -> None:
+        with self._lock:
+            self._conn.execute(
+                "UPDATE users SET display_name = ? WHERE id = ?",
+                ((name or "").strip()[:80], user_id),
+            )
+            self._conn.commit()
+
+    def change_password(self, user_id: str, current: str, replacement: str) -> None:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT password_hash FROM users WHERE id = ?", (user_id,)
+            ).fetchall()
+        if not rows or not verify_password(current or "", rows[0]["password_hash"]):
+            raise AuthError("current password is incorrect")
+        check_password_strength(replacement)
+        with self._lock:
+            self._conn.execute(
+                "UPDATE users SET password_hash = ? WHERE id = ?",
+                (hash_password(replacement), user_id),
+            )
+            self._conn.commit()
+
+    # -------------------------------------------------------------- sessions
+    def start_session(self, user_id: str) -> tuple[str, datetime]:
+        token = secrets.token_urlsafe(TOKEN_BYTES)
+        now = _now()
+        expires = now + timedelta(days=SESSION_DAYS)
+        with self._lock:
+            self._conn.execute(
+                "INSERT INTO sessions (token, user_id, created_at, expires_at) "
+                "VALUES (?, ?, ?, ?)",
+                (token, user_id, now.isoformat(timespec="seconds"),
+                 expires.isoformat(timespec="seconds")),
+            )
+            self._conn.commit()
+        return token, expires
+
+    def user_for_session(self, token: str) -> Optional[User]:
+        if not token:
+            return None
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT user_id, expires_at FROM sessions WHERE token = ?", (token,)
+            ).fetchall()
+        if not rows:
+            return None
+        try:
+            expires = datetime.fromisoformat(rows[0]["expires_at"])
+        except ValueError:
+            return None
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if expires <= _now():
+            self.end_session(token)
+            return None
+        return self.get_user(rows[0]["user_id"])
+
+    def end_session(self, token: str) -> None:
+        with self._lock:
+            self._conn.execute("DELETE FROM sessions WHERE token = ?", (token,))
+            self._conn.commit()
+
+    def purge_expired(self) -> int:
+        with self._lock:
+            cursor = self._conn.execute(
+                "DELETE FROM sessions WHERE expires_at <= ?",
+                (_now().isoformat(timespec="seconds"),),
+            )
+            self._conn.commit()
+        return cursor.rowcount

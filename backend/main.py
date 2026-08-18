@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Query
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import (
+    accounts,
     assistant,
     dashboard as dashboard_engine,
     insights,
@@ -91,10 +93,123 @@ def db_dep() -> Database:
     return get_db()
 
 
+# --------------------------------------------------------------- accounts
+def current_user(request: Request, db: Database = Depends(db_dep)):
+    """The signed-in user, or `None`.
+
+    Signing in is optional by design: without a session the API behaves as a
+    single shared workspace, which is what the test suite and a local run use.
+    With one, every learner is scoped to that account and invisible to others.
+    """
+    return db.accounts.user_for_session(request.cookies.get(accounts.SESSION_COOKIE, ""))
+
+
+def require_user(user=Depends(current_user)):
+    if user is None:
+        raise HTTPException(status_code=401, detail="sign in to do that")
+    return user
+
+
+def _set_session(response: Response, db: Database, user) -> None:
+    token, expires = db.accounts.start_session(user.id)
+    response.set_cookie(
+        accounts.SESSION_COOKIE,
+        token,
+        expires=expires.strftime("%a, %d %b %Y %H:%M:%S GMT"),
+        httponly=True,          # unreadable from JavaScript, so XSS cannot lift it
+        samesite="lax",         # not sent on cross-site POSTs
+        secure=_env_flag("COOKIE_SECURE", False),  # set behind HTTPS
+        path="/",
+    )
+
+
+def _env_flag(name: str, default: bool) -> bool:
+    raw = os.environ.get(name, "")
+    return default if not raw.strip() else raw.strip().lower() not in {"0", "false", "no"}
+
+
+def _user_view(user, db: Database) -> dict:
+    return {
+        "id": user.id,
+        "email": user.email,
+        "display_name": user.display_name,
+        "is_guest": user.is_guest,
+        "learners": db.count_learners(user.id),
+        "max_learners": accounts.MAX_LEARNERS_PER_USER,
+        "max_paths_per_learner": MAX_ACTIVE_PATHS,
+    }
+
+
+@app.post("/api/auth/register", status_code=201)
+def register(response: Response, payload: dict = Body(...), db: Database = Depends(db_dep)):
+    try:
+        user = db.accounts.create_user(
+            str(payload.get("email", "")),
+            str(payload.get("password", "")),
+            str(payload.get("display_name", "")),
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    # Learners made before anyone signed in belong to whoever signs up first.
+    db.adopt_orphan_learners(user.id)
+    _set_session(response, db, user)
+    return _user_view(user, db)
+
+
+@app.post("/api/auth/login")
+def login(response: Response, payload: dict = Body(...), db: Database = Depends(db_dep)):
+    try:
+        user = db.accounts.authenticate(
+            str(payload.get("email", "")), str(payload.get("password", ""))
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+    _set_session(response, db, user)
+    return _user_view(user, db)
+
+
+@app.post("/api/auth/guest", status_code=201)
+def guest(response: Response, db: Database = Depends(db_dep)):
+    """A throwaway account, so anyone can try the product without signing up."""
+    user, _ = db.accounts.create_guest()
+    _set_session(response, db, user)
+    return _user_view(user, db)
+
+
+@app.post("/api/auth/logout", status_code=204)
+def logout(request: Request, response: Response, db: Database = Depends(db_dep)):
+    db.accounts.end_session(request.cookies.get(accounts.SESSION_COOKIE, ""))
+    response.delete_cookie(accounts.SESSION_COOKIE, path="/")
+
+
+@app.get("/api/auth/me")
+def whoami(user=Depends(current_user), db: Database = Depends(db_dep)) -> dict:
+    if user is None:
+        return {"signed_in": False, "max_learners": accounts.MAX_LEARNERS_PER_USER}
+    return {"signed_in": True, **_user_view(user, db)}
+
+
+@app.patch("/api/auth/password", status_code=204)
+def change_password(
+    payload: dict = Body(...), user=Depends(require_user), db: Database = Depends(db_dep)
+) -> None:
+    try:
+        db.accounts.change_password(
+            user.id, str(payload.get("current", "")), str(payload.get("new", ""))
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 # ------------------------------------------------------------------- helpers
-def _load_profile(db: Database, learner_id: str) -> LearnerProfile:
+def _load_profile(db: Database, learner_id: str, user=None) -> LearnerProfile:
     profile = db.get_profile(learner_id)
     if profile is None:
+        raise HTTPException(status_code=404, detail=f"unknown learner '{learner_id}'")
+    # A learner owned by someone else is not found, rather than forbidden: the
+    # caller learns nothing about whether that id exists.
+    owner = db.owner_of(learner_id) or ""
+    if user is not None and owner and owner != user.id:
         raise HTTPException(status_code=404, detail=f"unknown learner '{learner_id}'")
     return profile
 
@@ -252,22 +367,35 @@ def create_learner(
     payload: ProfileUpdate = Body(default_factory=ProfileUpdate),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearnerProfile:
+    owner = user.id if user else ""
+    if db.count_learners(owner) >= accounts.MAX_LEARNERS_PER_USER:
+        raise HTTPException(
+            status_code=400,
+            detail=f"You can keep {accounts.MAX_LEARNERS_PER_USER} learners. "
+            "Delete one before adding another.",
+        )
     profile = LearnerProfile(learner_id=uuid.uuid4().hex[:10])
     _apply_update(catalog, profile, payload)
-    return db.save_profile(profile)
+    return db.save_profile(profile, user_id=owner)
 
 
 @app.get("/api/learners", response_model=list[LearnerProfile])
-def list_learners(db: Database = Depends(db_dep)) -> list[LearnerProfile]:
-    return db.list_profiles()
+def list_learners(
+    db: Database = Depends(db_dep), user=Depends(current_user)
+) -> list[LearnerProfile]:
+    """Only your own learners — never anyone else's."""
+    return db.list_profiles(user_id=user.id if user else "")
 
 
 @app.get("/api/learners/{learner_id}/profile", response_model=LearnerProfile)
 def get_profile(
-    learner_id: str, db: Database = Depends(db_dep)
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearnerProfile:
-    return _load_profile(db, learner_id)
+    return _load_profile(db, learner_id, user)
 
 
 @app.get("/api/learners/{learner_id}/profile/summary")
@@ -275,8 +403,9 @@ def profile_summary(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     derived = profiling.derive(catalog, profile)
     return {
         "summary": profiling.summarize(catalog, derived),
@@ -333,8 +462,9 @@ def update_profile(
     regenerate: bool = Query(True, description="Rebuild the path after updating"),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearnerProfile:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     _apply_update(catalog, profile, payload)
     db.save_profile(profile)
 
@@ -344,8 +474,12 @@ def update_profile(
 
 
 @app.delete("/api/learners/{learner_id}", status_code=204)
-def delete_learner(learner_id: str, db: Database = Depends(db_dep)) -> None:
-    _load_profile(db, learner_id)
+def delete_learner(
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    user=Depends(current_user),
+) -> None:
+    _load_profile(db, learner_id, user)
     db.delete_learner(learner_id)
 
 
@@ -509,14 +643,19 @@ def get_conversation(
     learner_id: str,
     db: Database = Depends(db_dep),
     limit: int = Query(50, ge=1, le=200),
+    user=Depends(current_user),
 ) -> list[dict]:
-    _load_profile(db, learner_id)
+    _load_profile(db, learner_id, user)
     return db.get_conversation(learner_id, limit=limit)
 
 
 @app.delete("/api/learners/{learner_id}/conversation", status_code=204)
-def clear_conversation(learner_id: str, db: Database = Depends(db_dep)) -> None:
-    _load_profile(db, learner_id)
+def clear_conversation(
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    user=Depends(current_user),
+) -> None:
+    _load_profile(db, learner_id, user)
     db.clear_conversation(learner_id)
 
 
@@ -526,8 +665,9 @@ def create_path(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     return _regenerate(catalog, db, profile, notes=["Path generated on request."])
 
 
@@ -536,8 +676,9 @@ def get_path(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
@@ -561,9 +702,10 @@ def list_learner_paths(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> list[PathSummary]:
     """Every roadmap this learner is running, active one flagged."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     return _summaries(catalog, db, profile)
 
 
@@ -573,9 +715,10 @@ def add_learner_path(
     payload: dict = Body(...),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
     """Start a second or third roadmap alongside the current one."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     goal_id = str(payload.get("goal_id") or "")
     if goal_id not in catalog.goals:
         raise HTTPException(status_code=400, detail=f"unknown goal '{goal_id}'")
@@ -606,9 +749,10 @@ def activate_learner_path(
     goal_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
     """Switch which roadmap the app is showing."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     path = db.get_path(learner_id, goal_id)
     if path is None:
         raise HTTPException(status_code=404, detail=f"no path for goal '{goal_id}'")
@@ -625,9 +769,10 @@ def delete_learner_path(
     goal_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> None:
     """Drop a roadmap. Progress on its items is kept — you did that work."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     if db.get_path(learner_id, goal_id) is None:
         raise HTTPException(status_code=404, detail=f"no path for goal '{goal_id}'")
     db.delete_path(learner_id, goal_id)
@@ -644,13 +789,14 @@ def add_path_item(
     payload: dict = Body(...),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
     """Add a course to the path yourself, overruling the planner.
 
     It is still placed by prerequisite — the earliest stage where everything it
     needs is already covered — so adding an item cannot break the ordering.
     """
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     item_id = str(payload.get("item_id") or "")
     if item_id not in catalog.items:
         raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
@@ -670,9 +816,10 @@ def remove_path_item(
     item_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> LearningPath:
     """Drop an item from the path and find another route to the same skill."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     if item_id not in catalog.items:
         raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
 
@@ -710,8 +857,9 @@ def get_gap(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     goal_id = _resolve_goal(catalog, profile)
     derived = profiling.derive(catalog, profile)
     report, _ = analyze(catalog, derived, goal_id)
@@ -732,8 +880,9 @@ def get_recommendations(
     ready_only: bool = Query(False, description="Only items you can start today"),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> list[Recommendation]:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     goal_id = _resolve_goal(catalog, profile)
     derived = profiling.derive(catalog, profile)
     report, missing = analyze(catalog, derived, goal_id)
@@ -755,9 +904,10 @@ def explain_item(
     item_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
     """Full, itemised justification for one recommendation."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     if item_id not in catalog.items:
         raise HTTPException(status_code=404, detail=f"unknown item '{item_id}'")
     goal_id = _resolve_goal(catalog, profile)
@@ -792,8 +942,9 @@ def set_progress(
     payload: ProgressUpdate,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     if payload.item_id not in catalog.items:
         raise HTTPException(status_code=404, detail=f"unknown item '{payload.item_id}'")
 
@@ -824,8 +975,12 @@ def set_progress(
 
 
 @app.get("/api/learners/{learner_id}/progress")
-def get_progress(learner_id: str, db: Database = Depends(db_dep)) -> dict:
-    _load_profile(db, learner_id)
+def get_progress(
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    user=Depends(current_user),
+) -> dict:
+    _load_profile(db, learner_id, user)
     return {
         item_id: entry.model_dump()
         for item_id, entry in db.get_progress(learner_id).items()
@@ -839,9 +994,10 @@ def submit_feedback(
     payload: FeedbackRequest,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
     """Record feedback, adapt the profile, and regenerate the path."""
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     if payload.item_id not in catalog.items:
         raise HTTPException(status_code=404, detail=f"unknown item '{payload.item_id}'")
 
@@ -867,8 +1023,12 @@ def submit_feedback(
 
 
 @app.get("/api/learners/{learner_id}/feedback")
-def list_feedback(learner_id: str, db: Database = Depends(db_dep)) -> list[dict]:
-    _load_profile(db, learner_id)
+def list_feedback(
+    learner_id: str,
+    db: Database = Depends(db_dep),
+    user=Depends(current_user),
+) -> list[dict]:
+    _load_profile(db, learner_id, user)
     return [e.model_dump() for e in db.get_feedback(learner_id)]
 
 
@@ -878,8 +1038,9 @@ def get_dashboard(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> Dashboard:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
@@ -897,9 +1058,9 @@ def get_dashboard(
 
 # ------------------------------------------------------ graph / plan / badges
 def _path_and_profile(
-    catalog: Catalog, db: Database, learner_id: str
+    catalog: Catalog, db: Database, learner_id: str, user=None
 ) -> tuple[LearnerProfile, LearningPath]:
-    profile = _load_profile(db, learner_id)
+    profile = _load_profile(db, learner_id, user)
     path = db.get_path(learner_id, profile.goal_id)
     if path is None:
         path = _regenerate(catalog, db, profile)
@@ -911,9 +1072,10 @@ def get_skill_graph(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> SkillGraph:
     """The prerequisite DAG this learner's path was generated from."""
-    profile, path = _path_and_profile(catalog, db, learner_id)
+    profile, path = _path_and_profile(catalog, db, learner_id, user)
     derived = profiling.derive(catalog, profile)
     return insights.build_graph(
         catalog, derived, path, db.get_progress(learner_id)
@@ -925,9 +1087,10 @@ def get_pace(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> PaceReport:
     """How fast the learner is actually going, versus what they planned."""
-    profile, path = _path_and_profile(catalog, db, learner_id)
+    profile, path = _path_and_profile(catalog, db, learner_id, user)
     return insights.build_pace(catalog, profile, path, db.get_progress(learner_id))
 
 
@@ -936,6 +1099,7 @@ def replan_to_pace(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> dict:
     """Rebuild the schedule around the learner's observed rate, not their hopes.
 
@@ -943,7 +1107,7 @@ def replan_to_pace(
     move under them because they ticked a box. This is the explicit opposite:
     they asked for the schedule to be refitted to how they actually study.
     """
-    profile, path = _path_and_profile(catalog, db, learner_id)
+    profile, path = _path_and_profile(catalog, db, learner_id, user)
     progress = db.get_progress(learner_id)
     pace = insights.build_pace(catalog, profile, path, progress)
 
@@ -991,9 +1155,10 @@ def get_weekly_plan(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> WeeklyPlan:
     """The roadmap resolved against the learner's actual weekly hours."""
-    _, path = _path_and_profile(catalog, db, learner_id)
+    _, path = _path_and_profile(catalog, db, learner_id, user)
     return insights.build_weekly_plan(path, db.get_progress(learner_id))
 
 
@@ -1002,8 +1167,9 @@ def get_achievements(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> Achievements:
-    _, path = _path_and_profile(catalog, db, learner_id)
+    _, path = _path_and_profile(catalog, db, learner_id, user)
     return insights.build_achievements(catalog, path, db.get_progress(learner_id))
 
 
@@ -1012,9 +1178,10 @@ def export_path(
     learner_id: str,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> PlainTextResponse:
     """The whole roadmap as shareable Markdown."""
-    _, path = _path_and_profile(catalog, db, learner_id)
+    _, path = _path_and_profile(catalog, db, learner_id, user)
     progress = db.get_progress(learner_id)
     achievements = insights.build_achievements(catalog, path, progress)
     markdown = insights.export_markdown(path, achievements)

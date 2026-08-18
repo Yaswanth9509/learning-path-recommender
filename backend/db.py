@@ -14,6 +14,7 @@ import threading
 from pathlib import Path
 from typing import Any, Optional
 
+from .accounts import Accounts
 from .models import (
     FeedbackEntry,
     LearnerProfile,
@@ -25,11 +26,15 @@ from .models import (
 DEFAULT_DB_PATH = Path(__file__).parent / "learning.db"
 
 _SCHEMA = """
+-- `user_id` is empty for learners created before accounts existed; they are
+-- adopted by the first account that signs in on this instance.
 CREATE TABLE IF NOT EXISTS profiles (
     learner_id TEXT PRIMARY KEY,
+    user_id    TEXT NOT NULL DEFAULT '',
     data       TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
 -- One row per goal a learner is pursuing: a learner can run several roadmaps
 -- side by side, with one of them active at a time.
 CREATE TABLE IF NOT EXISTS paths (
@@ -86,6 +91,8 @@ class Database:
             self._migrate()
             self._conn.executescript(_SCHEMA)
             self._conn.commit()
+        #: Users and sessions live in the same file as everything else.
+        self.accounts = Accounts(self._conn, self._lock)
 
     def _migrate(self) -> None:
         """Bring an older database up to the current schema.
@@ -100,6 +107,16 @@ class Database:
                 "SELECT name FROM sqlite_master WHERE type = 'table'"
             )
         }
+        if "profiles" in tables:
+            profile_columns = {
+                row["name"] for row in self._conn.execute("PRAGMA table_info(profiles)")
+            }
+            if "user_id" not in profile_columns:
+                self._conn.execute(
+                    "ALTER TABLE profiles ADD COLUMN user_id TEXT NOT NULL DEFAULT ''"
+                )
+                self._conn.commit()
+
         if "paths" not in tables:
             return
         columns = {
@@ -142,15 +159,41 @@ class Database:
             return self._conn.execute(sql, params).fetchall()
 
     # -------------------------------------------------------------- profiles
-    def save_profile(self, profile: LearnerProfile) -> LearnerProfile:
+    def save_profile(
+        self, profile: LearnerProfile, user_id: str = ""
+    ) -> LearnerProfile:
         profile.updated_at = utcnow()
         self._write(
-            "INSERT INTO profiles (learner_id, data, updated_at) VALUES (?, ?, ?) "
-            "ON CONFLICT(learner_id) DO UPDATE SET data=excluded.data, "
-            "updated_at=excluded.updated_at",
-            (profile.learner_id, profile.model_dump_json(), profile.updated_at),
+            "INSERT INTO profiles (learner_id, user_id, data, updated_at) "
+            "VALUES (?, ?, ?, ?) ON CONFLICT(learner_id) DO UPDATE SET "
+            "data=excluded.data, updated_at=excluded.updated_at, "
+            "user_id=CASE WHEN excluded.user_id != '' THEN excluded.user_id "
+            "ELSE profiles.user_id END",
+            (profile.learner_id, user_id, profile.model_dump_json(),
+             profile.updated_at),
         )
         return profile
+
+    def owner_of(self, learner_id: str) -> Optional[str]:
+        rows = self._query(
+            "SELECT user_id FROM profiles WHERE learner_id = ?", (learner_id,)
+        )
+        return rows[0]["user_id"] if rows else None
+
+    def count_learners(self, user_id: str) -> int:
+        rows = self._query(
+            "SELECT COUNT(*) AS n FROM profiles WHERE user_id = ?", (user_id,)
+        )
+        return int(rows[0]["n"]) if rows else 0
+
+    def adopt_orphan_learners(self, user_id: str) -> int:
+        """Give learners created before sign-in existed to their first owner."""
+        with self._lock:
+            cursor = self._conn.execute(
+                "UPDATE profiles SET user_id = ? WHERE user_id = ''", (user_id,)
+            )
+            self._conn.commit()
+        return cursor.rowcount
 
     def get_profile(self, learner_id: str) -> Optional[LearnerProfile]:
         rows = self._query(
@@ -160,8 +203,15 @@ class Database:
             return None
         return LearnerProfile.model_validate_json(rows[0]["data"])
 
-    def list_profiles(self) -> list[LearnerProfile]:
-        rows = self._query("SELECT data FROM profiles ORDER BY updated_at DESC")
+    def list_profiles(self, user_id: Optional[str] = None) -> list[LearnerProfile]:
+        """Every learner, or only one user's — never another user's."""
+        if user_id is None:
+            rows = self._query("SELECT data FROM profiles ORDER BY updated_at DESC")
+        else:
+            rows = self._query(
+                "SELECT data FROM profiles WHERE user_id = ? ORDER BY updated_at DESC",
+                (user_id,),
+            )
         return [LearnerProfile.model_validate_json(r["data"]) for r in rows]
 
     def delete_learner(self, learner_id: str) -> None:
