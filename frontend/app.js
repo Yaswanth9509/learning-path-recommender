@@ -16,6 +16,7 @@ const state = {
   history: new Set(),
   dashboard: null,
   llm: false,
+  user: null,
 };
 
 /* ------------------------------------------------------------------ utils */
@@ -135,8 +136,96 @@ function routeHash() {
 
 window.addEventListener("hashchange", routeHash);
 
+/* ------------------------------------------------------------------- auth */
+let authMode = "login";
+
+function showAuthGate(show) {
+  $("#authGate").hidden = !show;
+  document.body.classList.toggle("is-gated", show);
+}
+
+function authError(message) {
+  const box = $("#authError");
+  box.textContent = message || "";
+  box.hidden = !message;
+}
+
+$$(".auth-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    authMode = tab.dataset.auth;
+    $$(".auth-tab").forEach((t) => t.classList.toggle("is-active", t === tab));
+    $("#authNameRow").hidden = authMode !== "register";
+    $("#authSubmit").textContent = authMode === "register" ? "Create account" : "Sign in";
+    $("#authPassword").autocomplete =
+      authMode === "register" ? "new-password" : "current-password";
+    authError("");
+  });
+});
+
+$("#authForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  authError("");
+  const body = {
+    email: $("#authEmail").value.trim(),
+    password: $("#authPassword").value,
+    display_name: $("#authName").value.trim(),
+  };
+  const submit = $("#authSubmit");
+  submit.disabled = true;
+  try {
+    const endpoint = authMode === "register" ? "/api/auth/register" : "/api/auth/login";
+    state.user = await api(endpoint, { method: "POST", body: JSON.stringify(body) });
+    await enterApp();
+  } catch (err) {
+    authError(err.message);
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+$("#guestBtn").addEventListener("click", async () => {
+  authError("");
+  try {
+    state.user = await api("/api/auth/guest", { method: "POST" });
+    await enterApp();
+  } catch (err) { authError(err.message); }
+});
+
+$("#signOutBtn").addEventListener("click", async () => {
+  try { await api("/api/auth/logout", { method: "POST" }); } catch (_) { /* going anyway */ }
+  localStorage.removeItem(LS_KEY);
+  window.location.reload();
+});
+
+function renderUserChip() {
+  const chip = $("#userChip");
+  const out = $("#signOutBtn");
+  if (!state.user) { chip.hidden = true; out.hidden = true; return; }
+  chip.hidden = false;
+  out.hidden = false;
+  chip.textContent = state.user.is_guest ? "Guest" : state.user.display_name;
+  chip.title = state.user.is_guest
+    ? "A throwaway account. Create a real one to keep this work."
+    : `${state.user.email} · ${state.user.learners} of ${state.user.max_learners} learners`;
+}
+
 /* --------------------------------------------------------------- bootstrap */
 async function boot() {
+  try {
+    const me = await api("/api/auth/me");
+    if (!me.signed_in) { showAuthGate(true); return; }
+    state.user = me;
+  } catch (_) {
+    toast("Cannot reach the API. Is the server running?");
+    return;
+  }
+  await enterApp();
+}
+
+/* Everything that needs a signed-in user. */
+async function enterApp() {
+  showAuthGate(false);
+  renderUserChip();
   try {
     const health = await api("/api/health");
     state.llm = health.llm_enabled;
@@ -162,6 +251,10 @@ async function boot() {
 
   // Honour a deep link on load, e.g. /#dashboard or /#explain/c-js.
   if (window.location.hash.slice(1)) routeHash();
+}
+
+async function refreshUser() {
+  try { state.user = await api("/api/auth/me"); renderUserChip(); } catch (_) {}
 }
 
 function renderLearnerSelect(learners, activeId) {

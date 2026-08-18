@@ -8,6 +8,57 @@
 </head>
 <body>
 
+<!-- Sign-in gate. Hidden the moment a session exists. -->
+<div id="authGate" class="auth-gate" hidden>
+  <div class="auth-panel">
+    <div class="auth-pitch">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <h1>Learning Path Recommender</h1>
+      <p class="auth-lede">
+        Tell it what you want to become. It works out the <strong>order</strong>
+        to learn it in — from a prerequisite graph, not a popularity ranking.
+      </p>
+      <ul class="auth-points">
+        <li><strong>Prerequisite-ordered.</strong> Nothing is ever scheduled before what it depends on.</li>
+        <li><strong>Explained.</strong> Every item shows the gap it closes and why it sits where it does.</li>
+        <li><strong>Yours.</strong> Up to 5 learners, 3 goals each, progress tracked across all of them.</li>
+      </ul>
+    </div>
+
+    <div class="auth-form-wrap">
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab is-active" type="button" data-auth="login">Sign in</button>
+        <button class="auth-tab" type="button" data-auth="register">Create account</button>
+      </div>
+
+      <form id="authForm" class="auth-form" autocomplete="on">
+        <label id="authNameRow" hidden>Your name
+          <input type="text" id="authName" autocomplete="name" maxlength="80"
+                 placeholder="What should I call you?" />
+        </label>
+        <label>Email
+          <input type="email" id="authEmail" autocomplete="email" required
+                 placeholder="you@example.com" />
+        </label>
+        <label>Password
+          <input type="password" id="authPassword" autocomplete="current-password"
+                 required minlength="8" placeholder="At least 8 characters" />
+        </label>
+        <p id="authError" class="auth-error" role="alert" hidden></p>
+        <button id="authSubmit" class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+
+      <div class="auth-or"><span>or</span></div>
+      <button id="guestBtn" class="btn btn-block" type="button">Try it as a guest</button>
+      <p class="hint auth-note">
+        A guest account works fully and needs no email. Passwords are hashed and
+        stored only on this server — there is no password reset, so use something
+        you will remember.
+      </p>
+    </div>
+  </div>
+</div>
+
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">◈</span>
@@ -26,6 +77,8 @@
     <button id="renameLearnerBtn" class="btn btn-ghost" type="button"
             title="Rename this learner">Rename</button>
     <button id="newLearnerBtn" class="btn btn-ghost" type="button">New learner</button>
+    <span id="userChip" class="user-chip" hidden></span>
+    <button id="signOutBtn" class="btn btn-ghost" type="button" hidden>Sign out</button>
   </div>
 </header>
 

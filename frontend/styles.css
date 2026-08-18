@@ -79,10 +79,17 @@ p { margin: 0 0 .6rem; }
 .badge-rules { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
 
 /* ----------------------------------------------------------------- forms */
-select, input[type="text"], input[type="number"] {
+/* Every text-like input, not just [type=text] — email, password and search
+   were falling through to the browser default and rendering white on dark. */
+select,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   font: inherit; color: var(--text); background: var(--surface);
   border: 1px solid var(--border); border-radius: 8px; padding: .4rem .55rem;
 }
+input::placeholder { color: var(--text-dim); opacity: .75; }
+
+/* `hidden` must win over any display rule a component sets. */
+[hidden] { display: none !important; }
 input:focus-visible, select:focus-visible, button:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 1px;
 }
@@ -354,6 +361,72 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .badge.earned .icon { filter: none; opacity: 1; }
 .badge .n { font-weight: 620; font-size: .84rem; }
 .badge .d { font-size: .76rem; color: var(--text-dim); }
+
+/* --------------------------------------------------------------- sign in */
+body.is-gated { overflow: hidden; }
+body.is-gated .topbar, body.is-gated .tabs, body.is-gated main { display: none; }
+
+.auth-gate {
+  position: fixed; inset: 0; z-index: 90; overflow-y: auto;
+  display: grid; place-items: center; padding: 2rem 1.25rem;
+  background:
+    radial-gradient(1100px 620px at 12% -10%, var(--accent-soft), transparent 60%),
+    radial-gradient(900px 520px at 110% 110%, var(--good-soft), transparent 55%),
+    var(--bg);
+}
+.auth-panel {
+  display: grid; grid-template-columns: 1.05fr .95fr; gap: 0;
+  width: min(960px, 100%); overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; box-shadow: 0 24px 60px rgba(10, 13, 20, .28);
+  animation: pop .35s cubic-bezier(.2, .7, .3, 1) both;
+}
+.auth-pitch { padding: 2.4rem 2.2rem; background: var(--surface-2); }
+.auth-pitch .brand-mark { width: 2.2rem; height: 2.2rem; display: grid; place-items: center; margin-bottom: 1rem; }
+.auth-pitch h1 { font-size: 1.5rem; margin: 0 0 .6rem; letter-spacing: -.01em; }
+.auth-lede { font-size: .95rem; color: var(--text-dim); margin: 0 0 1.4rem; line-height: 1.6; }
+.auth-points { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem; }
+.auth-points li {
+  font-size: .85rem; color: var(--text-dim); line-height: 1.5;
+  padding-left: 1.1rem; position: relative;
+}
+.auth-points li::before {
+  content: ""; position: absolute; left: 0; top: .45em;
+  width: 6px; height: 6px; border-radius: 999px; background: var(--accent);
+}
+.auth-points strong { color: var(--text); display: block; font-size: .88rem; }
+
+.auth-form-wrap { padding: 2.4rem 2.2rem; display: flex; flex-direction: column; gap: .85rem; }
+.auth-tabs { display: flex; gap: .25rem; background: var(--surface-2); padding: .25rem; border-radius: 10px; }
+.auth-tab {
+  flex: 1; font: inherit; font-size: .85rem; font-weight: 560; padding: .45rem;
+  border: 0; border-radius: 8px; cursor: pointer; background: transparent; color: var(--text-dim);
+  transition: background .16s ease, color .16s ease;
+}
+.auth-tab.is-active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.auth-form { display: flex; flex-direction: column; gap: .7rem; margin-top: .4rem; }
+.auth-form label { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; color: var(--text-dim); }
+.auth-form input { padding: .55rem .65rem; font-size: .92rem; }
+.auth-error {
+  margin: 0; font-size: .82rem; color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-radius: 8px; padding: .5rem .65rem;
+}
+.btn-block { width: 100%; justify-content: center; padding: .55rem; font-size: .9rem; }
+.auth-or { display: flex; align-items: center; gap: .7rem; color: var(--text-faint, var(--text-dim)); font-size: .75rem; }
+.auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.auth-note { margin: 0; line-height: 1.5; }
+
+.user-chip {
+  font-size: .78rem; padding: .25rem .55rem; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); font-weight: 560; white-space: nowrap;
+}
+
+@media (max-width: 820px) {
+  .auth-panel { grid-template-columns: 1fr; }
+  .auth-pitch { padding: 1.8rem 1.5rem 1.4rem; }
+  .auth-form-wrap { padding: 1.5rem; }
+}
 
 /* ------------------------------------------------------------- animation */
 @keyframes rise {
