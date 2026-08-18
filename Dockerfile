@@ -29,6 +29,9 @@ EXPOSE 8000
 
 # Fails the container if the catalog stops validating or the app stops serving.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health').read()"
+    CMD python -c "import os,urllib.request; urllib.request.urlopen(f\"http://127.0.0.1:{os.environ.get('PORT','8000')}/api/health\").read()"
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form on purpose: hosting platforms (Render, Railway, Fly, Cloud Run)
+# assign the port through $PORT and expect the process to honour it. Locally
+# there is no $PORT, so it falls back to 8000.
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

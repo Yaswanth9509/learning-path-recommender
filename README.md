@@ -352,7 +352,13 @@ docker run -p 8000:8000 -v lpr-data:/data --env-file .env learning-path-recommen
 ```
 
 Non-root, with SQLite on a volume. State is one file (`LEARNING_DB_PATH`);
-delete it to reset. Nothing else to migrate or back up.
+delete it to reset. Nothing else to migrate or back up. The container honours
+`$PORT`, so it runs unchanged on Render, Railway, Fly, or Cloud Run.
+
+**Deploying to Render:** [`render.yaml`](render.yaml) is a ready blueprint —
+*New → Blueprint → pick this repo*, then set `GEMINI_API_KEY` when prompted (or
+skip it; the rule engine needs no key). CI builds this image and boots it on
+every push, so what deploys is what was tested.
 
 ---
 

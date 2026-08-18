@@ -1,0 +1,39 @@
+# Render blueprint — one-click deploy of the Docker image.
+#
+#   1. Push this repository to GitHub.
+#   2. render.com → New → Blueprint → pick the repo. Render reads this file.
+#   3. Set GEMINI_API_KEY in the dashboard when prompted (or leave it blank —
+#      the app runs fine on its rule engine without any provider).
+#
+# The free instance type has no persistent disk and sleeps after 15 minutes of
+# inactivity, so the SQLite file resets on wake and the first request takes
+# ~50 seconds. That is acceptable for a demo: the catalogue is read-only and
+# every learner starts from a chat message anyway. For durable state, raise the
+# plan and attach a disk mounted at /data.
+services:
+  - type: web
+    name: learning-path-recommender
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Written on every request; keep it on the writable ephemeral volume.
+      - key: LEARNING_DB_PATH
+        value: /tmp/learning.db
+      # Prompted for at deploy time and never stored in the repository.
+      - key: GEMINI_API_KEY
+        sync: false
+      # Lock this to your own origin once the URL is known.
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      # A public demo is worth rate limiting harder than a local run.
+      - key: RATE_LIMIT_CHAT_PER_MINUTE
+        value: "10"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "120"
+      # Render terminates TLS in front of the app, so the caller IP arrives in
+      # X-Forwarded-For; without this the limiter would see one proxy address.
+      - key: TRUST_PROXY_HEADER
+        value: "1"
