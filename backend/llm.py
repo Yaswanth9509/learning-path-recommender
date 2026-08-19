@@ -38,6 +38,9 @@ PRIORITY = ("anthropic", "gemini", "groq", "openrouter", "ollama")
 #: Model ids move fast. Every one of these is overridable by env var, and an
 #: unknown id surfaces as a provider error and falls back to the rule engine
 #: rather than breaking the app.
+#: Sent on every provider request. See `_post_json`.
+USER_AGENT = "learning-path-recommender/1.4 (+https://github.com/Yaswanth9509/learning-path-recommender)"
+
 DEFAULT_MODELS = {
     "anthropic": "claude-opus-5",
     # The `-latest` alias tracks Google's current lite model, so a retirement
@@ -45,7 +48,16 @@ DEFAULT_MODELS = {
     # enough for a public demo, where the flagship model allows only a handful
     # of requests a day.
     "gemini": "gemini-flash-lite-latest",
-    "groq": "llama-3.3-70b-versatile",
+    # Groq's catalogue turns over: the Llama chat models it once served were
+    # gone by the time this was last checked, and a pinned id that disappears
+    # 404s for every user. Check `GET /openai/v1/models` before changing it.
+    #
+    # Note the free tier is capped at ~8k tokens/minute whichever model is
+    # named — `groq/compound-mini` advertises 70k but routes to this same
+    # model underneath and inherits its limit. Since this app sends the whole
+    # path as context (~5k tokens a message), Groq free is roughly one message
+    # a minute: a good spare, not a good primary.
+    "groq": "openai/gpt-oss-120b",
     "openrouter": "meta-llama/llama-3.3-70b-instruct:free",
     "ollama": "llama3.1",
 }
@@ -65,6 +77,12 @@ def _post_json(
     body = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(url, data=body, method="POST")
     request.add_header("Content-Type", "application/json")
+    # Identify the client. Left unset, urllib sends "Python-urllib/3.x", and
+    # providers behind Cloudflare reject that signature outright — Groq
+    # answers 403 "error code: 1010" before the key is ever looked at, which
+    # then degrades to the rule engine and looks like a bad model rather than
+    # a blocked request.
+    request.add_header("User-Agent", USER_AGENT)
     for key, value in headers.items():
         request.add_header(key, value)
     try:

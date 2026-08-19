@@ -1,9 +1,10 @@
 """Accounts and sessions.
 
-Deliberately small and dependency-free: PBKDF2 from `hashlib` for passwords,
-`secrets` for session tokens, and the same SQLite file that already holds
-learners. Nothing here needs a service, a key, or a network call, so the app
-still runs offline and deploys as one container.
+Deliberately small: PBKDF2 from `hashlib` for passwords, `secrets` for session
+tokens, and the same database that already holds learners — a SQLite file
+locally, Postgres once deployed. Nothing here needs an external service, a key,
+or a network call beyond the database itself, so the app still runs offline and
+deploys as one container.
 
 What this is *not*: there is no email verification and no password reset,
 because both need a mail service the project does not have. A learner who
@@ -17,7 +18,6 @@ import hashlib
 import hmac
 import re
 import secrets
-import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -117,7 +117,7 @@ class Accounts:
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
     """
 
-    def __init__(self, connection: sqlite3.Connection, lock) -> None:
+    def __init__(self, connection, lock) -> None:
         self._conn = connection
         self._lock = lock
         with self._lock:
@@ -146,7 +146,8 @@ class Accounts:
                      int(is_guest), user.created_at),
                 )
                 self._conn.commit()
-            except sqlite3.IntegrityError as exc:
+            except self._conn.integrity_error as exc:
+                self._conn.rollback()
                 raise AuthError("an account with that email already exists") from exc
         return user
 
@@ -210,7 +211,8 @@ class Accounts:
                      user_id),
                 )
                 self._conn.commit()
-            except sqlite3.IntegrityError as exc:
+            except self._conn.integrity_error as exc:
+                self._conn.rollback()
                 raise AuthError("an account with that email already exists") from exc
         user = self.get_user(user_id)
         assert user is not None

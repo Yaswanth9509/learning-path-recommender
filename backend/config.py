@@ -13,8 +13,19 @@ from typing import Any
 
 #: Token budgets. On models with thinking enabled these cap thinking plus
 #: response text together, so both leave deliberate headroom.
-CHAT_MAX_TOKENS = 4000
-EXTRACT_MAX_TOKENS = 3000
+#:
+#: These are *reservations*, not estimates, and providers bill rate limits
+#: against what you request rather than what you use. Measured against the
+#: real prompts: a chat reply runs 100-270 tokens and the goal-extraction JSON
+#: is smaller still, so 4000 and 3000 were booking roughly twenty times what
+#: they spent. On Groq's free tier that alone was the difference between one
+#: message a minute and three or four.
+#:
+#: Sized at several times the longest reply actually observed, so there is
+#: room for a model that thinks before it answers without booking the budget
+#: of one that writes an essay.
+CHAT_MAX_TOKENS = 1200
+EXTRACT_MAX_TOKENS = 800
 
 ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 

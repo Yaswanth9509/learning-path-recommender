@@ -232,7 +232,8 @@ def test_a_learner_can_pin_the_rule_engine(client):
     assert updated["assistant_engine"] == "rules"
 
     body = client.post("/api/chat", json={
-        "learner_id": learner_id, "message": "I want to be a data analyst",
+        "learner_id": learner_id,
+        "message": "I want to be a data analyst, a beginner with 8 hours a week",
     }).json()
     assert body["source"] == "rules"
     assert body["path_generated"] is True

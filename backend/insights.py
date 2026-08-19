@@ -13,7 +13,7 @@ Three features that make the underlying model visible rather than implied:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from .catalog import Catalog
 from .models import (
@@ -28,6 +28,7 @@ from .models import (
     SkillEdge,
     SkillGraph,
     SkillNode,
+    Streak,
     WeeklyPlan,
 )
 from .profiling import DerivedProfile
@@ -349,6 +350,53 @@ def _focus_line(items: list[PlannedItem]) -> str:
 
 
 # --------------------------------------------------------------- achievements
+def build_streak(progress: dict[str, ProgressEntry]) -> Streak:
+    """Consecutive days with at least one completion.
+
+    Derived from the timestamps already recorded, so it needs no new storage
+    and can never disagree with the progress log. A day counts once however
+    many items were finished in it — the point is turning up, not volume.
+
+    Today not yet counted does not break the run: a streak ending yesterday is
+    still live until the day is over, otherwise it would read as broken every
+    morning.
+    """
+    days = sorted({
+        parsed.date()
+        for entry in progress.values()
+        if entry.status == "completed" and (parsed := _parse(entry.updated_at))
+    }, reverse=True)
+    if not days:
+        return Streak()
+
+    today = datetime.now(timezone.utc).date()
+    week_ago = today - timedelta(days=6)
+    days_this_week = sum(1 for day in days if day >= week_ago)
+    active_today = days[0] == today
+
+    # The current run only counts if it reaches today or yesterday.
+    current = 0
+    if days[0] >= today - timedelta(days=1):
+        current = 1
+        for earlier, later in zip(days[1:], days, strict=False):
+            if (later - earlier).days == 1:
+                current += 1
+            else:
+                break
+
+    best = run = 1
+    for earlier, later in zip(days[1:], days, strict=False):
+        run = run + 1 if (later - earlier).days == 1 else 1
+        best = max(best, run)
+
+    return Streak(
+        current_days=current,
+        best_days=max(best, current),
+        days_this_week=days_this_week,
+        active_today=active_today,
+    )
+
+
 def build_achievements(
     catalog: Catalog, path: LearningPath, progress: dict[str, ProgressEntry]
 ) -> Achievements:
@@ -381,6 +429,17 @@ def build_achievements(
         if milestone.items and all(i.item_id in completed_ids for i in milestone.items):
             stages_done += 1
 
+    streak = build_streak(progress)
+    stages_total = len(path.milestones)
+
+    # Which domains the learner has actually finished something in. The
+    # catalogue is no longer only software, so breadth is worth rewarding.
+    domains_done = {
+        catalog.items[item_id].domain
+        for item_id in completed_ids
+        if item_id in catalog.items
+    }
+
     total_items = sum(len(m.items) for m in path.milestones)
     done_in_path = sum(
         1 for m in path.milestones for i in m.items if i.item_id in completed_ids
@@ -408,6 +467,28 @@ def build_achievements(
         ("goal-reached", "Goal Reached", "Complete the entire path.", "🏆",
          total_items > 0 and done_in_path == total_items,
          "Complete every item on your path."),
+        # --- turning up repeatedly, which is what finishing actually takes ---
+        ("streak-3", "Three in a Row", "Study three days running.", "📅",
+         streak.best_days >= 3,
+         f"{max(0, 3 - streak.best_days)} more consecutive day(s)."),
+        ("streak-7", "Full Week", "Study seven days running.", "🗓️",
+         streak.best_days >= 7,
+         f"{max(0, 7 - streak.best_days)} more consecutive day(s)."),
+        ("consistent", "Consistent", "Study four separate days in one week.",
+         "📈", streak.days_this_week >= 4,
+         f"{max(0, 4 - streak.days_this_week)} more day(s) this week."),
+        # --- per stage, so a long path pays out before the very end ---------
+        ("two-stages", "Halfway Up", "Finish two stages.", "🧗",
+         stages_done >= 2, f"{max(0, 2 - stages_done)} more stage(s)."),
+        ("every-stage", "Clean Sweep", "Finish every stage on the path.", "🧹",
+         stages_total > 0 and stages_done == stages_total,
+         f"{max(0, stages_total - stages_done)} stage(s) left."),
+        # --- breadth, now that the catalogue reaches past software ----------
+        ("two-domains", "Well Rounded", "Finish work in two different fields.",
+         "🌍", len(domains_done) >= 2,
+         f"{max(0, 2 - len(domains_done))} more field(s)."),
+        ("deep-work", "Deep Work", "Log 250 hours of study.", "🌋",
+         hours_done >= 250, f"{max(0, 250 - hours_done)} hours to go."),
     ]
 
     badges = [
@@ -427,6 +508,9 @@ def build_achievements(
         badges=badges,
         earned_count=sum(1 for b in badges if b.earned),
         total_count=len(badges),
+        streak=streak,
+        stages_completed=stages_done,
+        stages_total=stages_total,
     )
 
 

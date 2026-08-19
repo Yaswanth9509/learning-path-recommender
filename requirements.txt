@@ -5,6 +5,13 @@ fastapi>=0.115,<1.0
 uvicorn[standard]>=0.30,<1.0
 pydantic>=2.7,<3.0
 
+# Postgres. Only used when DATABASE_URL is set; with it unset the app runs on
+# stdlib sqlite3 exactly as before and this import never happens. It is a hard
+# requirement for deployment, though: a free instance has no persistent disk,
+# so a SQLite file is wiped whenever the instance sleeps and every registered
+# account goes with it.
+psycopg[binary]>=3.1,<4.0
+
 # Optional. Every LLM provider in backend/llm.py speaks HTTP through stdlib
 # urllib, so none of them needs a package. Install this only if you want the
 # Anthropic SDK path (native structured outputs and refusal handling):

@@ -282,3 +282,88 @@ def test_feature_endpoints(client):
 def test_feature_endpoints_reject_unknown_learners(client):
     for suffix in ("graph", "plan", "achievements", "export"):
         assert client.get(f"/api/learners/ghost/{suffix}").status_code == 404
+
+
+# ------------------------------------------------------------------ streaks
+def _completed_days_ago(*offsets: int):
+    """Progress entries completed N days ago, one per offset."""
+    from datetime import datetime, timedelta, timezone
+
+    from backend.models import ProgressEntry
+
+    now = datetime.now(timezone.utc)
+    return {
+        f"item-{index}": ProgressEntry(
+            item_id=f"item-{index}",
+            status="completed",
+            updated_at=(now - timedelta(days=offset)).isoformat(),
+        )
+        for index, offset in enumerate(offsets)
+    }
+
+
+def test_a_streak_needs_no_new_storage():
+    """It is derived from completion timestamps that already exist."""
+    from backend.insights import build_streak
+
+    assert build_streak({}).current_days == 0
+    assert build_streak(_completed_days_ago(0)).current_days == 1
+
+
+def test_consecutive_days_accumulate():
+    from backend.insights import build_streak
+
+    streak = build_streak(_completed_days_ago(0, 1, 2))
+    assert streak.current_days == 3
+    assert streak.best_days == 3
+    assert streak.active_today is True
+
+
+def test_today_not_yet_studied_does_not_break_a_live_streak():
+    """Otherwise every streak would read as broken each morning."""
+    from backend.insights import build_streak
+
+    streak = build_streak(_completed_days_ago(1, 2, 3))
+    assert streak.current_days == 3
+    assert streak.active_today is False
+
+
+def test_a_missed_day_ends_the_run_but_keeps_the_record():
+    from backend.insights import build_streak
+
+    streak = build_streak(_completed_days_ago(3, 4, 5))
+    assert streak.current_days == 0, "a run that stopped days ago is not current"
+    assert streak.best_days == 3, "the best run should survive a break"
+
+
+def test_several_items_in_one_day_count_once():
+    """The point is turning up, not volume."""
+    from backend.insights import build_streak
+
+    assert build_streak(_completed_days_ago(0, 0, 0)).current_days == 1
+
+
+def test_days_this_week_counts_distinct_days():
+    from backend.insights import build_streak
+
+    streak = build_streak(_completed_days_ago(0, 1, 3, 4, 5))
+    assert streak.days_this_week == 5
+    assert streak.current_days == 2, "only today and yesterday are consecutive"
+
+
+def test_achievements_reward_breadth_and_stages(catalog, make_profile):
+    """The catalogue reaches past software now, so breadth is worth a badge."""
+    from backend.insights import build_achievements
+
+    _, derived, path = _setup(catalog, make_profile, "goal-data-analyst")
+    achievements = build_achievements(catalog, path, {})
+
+    ids = {badge.id for badge in achievements.badges}
+    for expected in ("streak-3", "streak-7", "consistent", "two-stages",
+                     "every-stage", "two-domains", "deep-work"):
+        assert expected in ids, f"{expected} badge is missing"
+
+    assert achievements.stages_total == len(path.milestones)
+    assert achievements.stages_completed == 0
+    # Every unearned badge must say what would earn it.
+    assert all(b.hint for b in achievements.badges if not b.earned)

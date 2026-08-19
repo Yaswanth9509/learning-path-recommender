@@ -1,53 +1,850 @@
 [
-{"id":"prog-fundamentals","name":"Programming Fundamentals","domain":"Foundations","level":1,"prerequisites":[],"description":"Variables, control flow, functions, and problem decomposition."},
-{"id":"cli-git","name":"Command Line & Git","domain":"Foundations","level":1,"prerequisites":[],"description":"Shell navigation, version control, branching, and collaboration workflows."},
-{"id":"python","name":"Python Programming","domain":"Foundations","level":1,"prerequisites":["prog-fundamentals"],"description":"Idiomatic Python, standard library, packaging, and virtual environments."},
-{"id":"sql","name":"SQL & Relational Databases","domain":"Foundations","level":1,"prerequisites":[],"description":"Querying, joins, aggregation, window functions, and query planning."},
-{"id":"math-stats","name":"Statistics & Probability","domain":"Foundations","level":2,"prerequisites":[],"description":"Distributions, inference, hypothesis testing, and experiment design."},
-{"id":"data-structures","name":"Data Structures & Algorithms","domain":"Foundations","level":2,"prerequisites":["prog-fundamentals"],"description":"Complexity analysis, core data structures, and algorithmic problem solving."},
-{"id":"testing","name":"Automated Testing","domain":"Foundations","level":2,"prerequisites":["prog-fundamentals"],"description":"Unit, integration, and end-to-end testing plus test-driven development."},
-
-{"id":"data-wrangling","name":"Data Wrangling with pandas","domain":"Data & AI","level":2,"prerequisites":["python"],"description":"Cleaning, reshaping, joining, and aggregating tabular data."},
-{"id":"data-viz","name":"Data Visualization & Storytelling","domain":"Data & AI","level":2,"prerequisites":["data-wrangling"],"description":"Chart selection, visual encoding, and communicating findings to stakeholders."},
-{"id":"eda","name":"Exploratory Data Analysis","domain":"Data & AI","level":2,"prerequisites":["data-wrangling","math-stats"],"description":"Profiling datasets, spotting anomalies, and forming testable hypotheses."},
-{"id":"bi-dashboards","name":"BI Dashboarding","domain":"Data & AI","level":2,"prerequisites":["sql","data-viz"],"description":"Metric modelling, dashboard design, and self-serve analytics delivery."},
-{"id":"ml-foundations","name":"Machine Learning Foundations","domain":"Data & AI","level":2,"prerequisites":["math-stats","python"],"description":"Learning theory, bias-variance tradeoff, and the end-to-end ML workflow."},
-{"id":"supervised-ml","name":"Supervised Learning","domain":"Data & AI","level":2,"prerequisites":["ml-foundations"],"description":"Regression, classification, regularisation, and ensemble methods."},
-{"id":"unsupervised-ml","name":"Unsupervised Learning","domain":"Data & AI","level":2,"prerequisites":["ml-foundations"],"description":"Clustering, dimensionality reduction, and anomaly detection."},
-{"id":"feature-engineering","name":"Feature Engineering","domain":"Data & AI","level":2,"prerequisites":["supervised-ml","data-wrangling"],"description":"Encoding, scaling, leakage prevention, and feature selection."},
-{"id":"model-evaluation","name":"Model Evaluation & Validation","domain":"Data & AI","level":2,"prerequisites":["supervised-ml"],"description":"Cross-validation, metric selection, calibration, and error analysis."},
-{"id":"experiment-tracking","name":"Experiment Tracking & Reproducibility","domain":"Data & AI","level":2,"prerequisites":["ml-foundations","cli-git"],"description":"Versioning data, code, and runs so results can be reproduced."},
-{"id":"responsible-ai","name":"Responsible AI & Governance","domain":"Data & AI","level":2,"prerequisites":["model-evaluation"],"description":"Fairness metrics, interpretability, documentation, and risk review."},
-{"id":"deep-learning","name":"Deep Learning","domain":"Data & AI","level":3,"prerequisites":["supervised-ml","data-structures"],"description":"Neural network architectures, backpropagation, and training at scale."},
-{"id":"nlp","name":"Natural Language Processing","domain":"Data & AI","level":3,"prerequisites":["deep-learning"],"description":"Tokenisation, transformers, fine-tuning, and text task pipelines."},
-{"id":"computer-vision","name":"Computer Vision","domain":"Data & AI","level":3,"prerequisites":["deep-learning"],"description":"Convolutional and vision-transformer models for image understanding."},
-{"id":"vector-search","name":"Embeddings & Vector Search","domain":"Data & AI","level":3,"prerequisites":["nlp"],"description":"Embedding models, similarity metrics, and approximate nearest neighbour indexes."},
-{"id":"llm-engineering","name":"LLM Application Engineering","domain":"Data & AI","level":3,"prerequisites":["nlp","rest-api"],"description":"Prompt design, tool use, evaluation harnesses, and production LLM services."},
-{"id":"rag-systems","name":"Retrieval-Augmented Generation","domain":"Data & AI","level":3,"prerequisites":["llm-engineering","vector-search"],"description":"Chunking, retrieval quality, grounding, and citation-backed answers."},
-{"id":"mlops","name":"MLOps & Model Deployment","domain":"Data & AI","level":3,"prerequisites":["model-evaluation","docker","ci-cd"],"description":"Serving, monitoring, drift detection, and automated retraining."},
-
-{"id":"html-css","name":"HTML & CSS","domain":"Web Development","level":1,"prerequisites":[],"description":"Semantic markup, layout systems, and modern CSS architecture."},
-{"id":"javascript","name":"JavaScript","domain":"Web Development","level":1,"prerequisites":["prog-fundamentals"],"description":"The language, the DOM, async patterns, and the module ecosystem."},
-{"id":"typescript","name":"TypeScript","domain":"Web Development","level":2,"prerequisites":["javascript"],"description":"Static typing, generics, and type-safe application architecture."},
-{"id":"react","name":"React","domain":"Web Development","level":2,"prerequisites":["javascript","html-css"],"description":"Components, hooks, rendering behaviour, and composition patterns."},
-{"id":"state-management","name":"Frontend State Management","domain":"Web Development","level":2,"prerequisites":["react"],"description":"Local, server, and global state strategies plus caching and invalidation."},
-{"id":"ui-accessibility","name":"Accessible & Responsive UI","domain":"Web Development","level":2,"prerequisites":["html-css"],"description":"WCAG practice, keyboard and screen-reader support, responsive layout."},
-{"id":"nodejs","name":"Node.js & Express","domain":"Web Development","level":2,"prerequisites":["javascript"],"description":"Server-side JavaScript, middleware, and the request lifecycle."},
-{"id":"rest-api","name":"REST API Design","domain":"Web Development","level":2,"prerequisites":["nodejs"],"description":"Resource modelling, versioning, pagination, errors, and documentation."},
-{"id":"data-modeling","name":"Database Design & Modelling","domain":"Web Development","level":2,"prerequisites":["sql"],"description":"Normalisation, indexing, migrations, and transaction design."},
-{"id":"auth-security","name":"Web Auth & Application Security","domain":"Web Development","level":2,"prerequisites":["rest-api"],"description":"Sessions, OAuth/OIDC, the OWASP Top 10, and secure defaults."},
-{"id":"web-performance","name":"Web Performance Optimisation","domain":"Web Development","level":3,"prerequisites":["react"],"description":"Core Web Vitals, bundle budgets, rendering strategies, and caching."},
-{"id":"nextjs","name":"Full-Stack React with Next.js","domain":"Web Development","level":3,"prerequisites":["react","rest-api"],"description":"Server components, routing, data fetching, and deployment."},
-
-{"id":"networking","name":"Networking Fundamentals","domain":"Cloud & DevOps","level":1,"prerequisites":[],"description":"TCP/IP, DNS, HTTP, TLS, load balancing, and routing basics."},
-{"id":"linux","name":"Linux Administration","domain":"Cloud & DevOps","level":1,"prerequisites":["cli-git"],"description":"Processes, permissions, services, packages, and shell scripting."},
-{"id":"docker","name":"Containers with Docker","domain":"Cloud & DevOps","level":2,"prerequisites":["linux"],"description":"Images, layers, networking, volumes, and multi-stage builds."},
-{"id":"ci-cd","name":"CI/CD Pipelines","domain":"Cloud & DevOps","level":2,"prerequisites":["cli-git","testing"],"description":"Build, test, and release automation with safe deployment strategies."},
-{"id":"cloud-fundamentals","name":"Cloud Fundamentals (AWS)","domain":"Cloud & DevOps","level":2,"prerequisites":["linux","networking"],"description":"Compute, storage, identity, networking, and cost management."},
-{"id":"kubernetes","name":"Kubernetes Orchestration","domain":"Cloud & DevOps","level":3,"prerequisites":["docker","networking"],"description":"Workloads, services, config, scheduling, and cluster operations."},
-{"id":"iac","name":"Infrastructure as Code","domain":"Cloud & DevOps","level":3,"prerequisites":["cloud-fundamentals"],"description":"Declarative provisioning, modules, state management, and drift control."},
-{"id":"observability","name":"Observability & Monitoring","domain":"Cloud & DevOps","level":3,"prerequisites":["cloud-fundamentals"],"description":"Metrics, logs, traces, SLOs, and actionable alerting."},
-{"id":"cloud-security","name":"Cloud Security","domain":"Cloud & DevOps","level":3,"prerequisites":["cloud-fundamentals","auth-security"],"description":"Identity boundaries, network isolation, secrets, and compliance controls."},
-{"id":"sre","name":"Site Reliability Engineering","domain":"Cloud & DevOps","level":3,"prerequisites":["observability","kubernetes"],"description":"Error budgets, capacity planning, incident response, and postmortems."},
-{"id":"system-design","name":"System Design","domain":"Cloud & DevOps","level":3,"prerequisites":["rest-api","data-modeling","cloud-fundamentals"],"description":"Scalability, consistency tradeoffs, queues, caching, and failure modes."}
+  {
+    "id": "prog-fundamentals",
+    "name": "Programming Fundamentals",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Variables, control flow, functions, and problem decomposition."
+  },
+  {
+    "id": "cli-git",
+    "name": "Command Line & Git",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Shell navigation, version control, branching, and collaboration workflows."
+  },
+  {
+    "id": "python",
+    "name": "Python Programming",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "Idiomatic Python, standard library, packaging, and virtual environments."
+  },
+  {
+    "id": "sql",
+    "name": "SQL & Relational Databases",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Querying, joins, aggregation, window functions, and query planning."
+  },
+  {
+    "id": "math-stats",
+    "name": "Statistics & Probability",
+    "domain": "Foundations",
+    "level": 2,
+    "prerequisites": [],
+    "description": "Distributions, inference, hypothesis testing, and experiment design."
+  },
+  {
+    "id": "data-structures",
+    "name": "Data Structures & Algorithms",
+    "domain": "Foundations",
+    "level": 2,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "Complexity analysis, core data structures, and algorithmic problem solving."
+  },
+  {
+    "id": "testing",
+    "name": "Automated Testing",
+    "domain": "Foundations",
+    "level": 2,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "Unit, integration, and end-to-end testing plus test-driven development."
+  },
+  {
+    "id": "data-wrangling",
+    "name": "Data Wrangling with pandas",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "python"
+    ],
+    "description": "Cleaning, reshaping, joining, and aggregating tabular data."
+  },
+  {
+    "id": "data-viz",
+    "name": "Data Visualization & Storytelling",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "data-wrangling"
+    ],
+    "description": "Chart selection, visual encoding, and communicating findings to stakeholders."
+  },
+  {
+    "id": "eda",
+    "name": "Exploratory Data Analysis",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "data-wrangling",
+      "math-stats"
+    ],
+    "description": "Profiling datasets, spotting anomalies, and forming testable hypotheses."
+  },
+  {
+    "id": "bi-dashboards",
+    "name": "BI Dashboarding",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "sql",
+      "data-viz"
+    ],
+    "description": "Metric modelling, dashboard design, and self-serve analytics delivery."
+  },
+  {
+    "id": "ml-foundations",
+    "name": "Machine Learning Foundations",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "math-stats",
+      "python"
+    ],
+    "description": "Learning theory, bias-variance tradeoff, and the end-to-end ML workflow."
+  },
+  {
+    "id": "supervised-ml",
+    "name": "Supervised Learning",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "ml-foundations"
+    ],
+    "description": "Regression, classification, regularisation, and ensemble methods."
+  },
+  {
+    "id": "unsupervised-ml",
+    "name": "Unsupervised Learning",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "ml-foundations"
+    ],
+    "description": "Clustering, dimensionality reduction, and anomaly detection."
+  },
+  {
+    "id": "feature-engineering",
+    "name": "Feature Engineering",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "supervised-ml",
+      "data-wrangling"
+    ],
+    "description": "Encoding, scaling, leakage prevention, and feature selection."
+  },
+  {
+    "id": "model-evaluation",
+    "name": "Model Evaluation & Validation",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "supervised-ml"
+    ],
+    "description": "Cross-validation, metric selection, calibration, and error analysis."
+  },
+  {
+    "id": "experiment-tracking",
+    "name": "Experiment Tracking & Reproducibility",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "ml-foundations",
+      "cli-git"
+    ],
+    "description": "Versioning data, code, and runs so results can be reproduced."
+  },
+  {
+    "id": "responsible-ai",
+    "name": "Responsible AI & Governance",
+    "domain": "Data & AI",
+    "level": 2,
+    "prerequisites": [
+      "model-evaluation"
+    ],
+    "description": "Fairness metrics, interpretability, documentation, and risk review."
+  },
+  {
+    "id": "deep-learning",
+    "name": "Deep Learning",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "supervised-ml",
+      "data-structures"
+    ],
+    "description": "Neural network architectures, backpropagation, and training at scale."
+  },
+  {
+    "id": "nlp",
+    "name": "Natural Language Processing",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "deep-learning"
+    ],
+    "description": "Tokenisation, transformers, fine-tuning, and text task pipelines."
+  },
+  {
+    "id": "computer-vision",
+    "name": "Computer Vision",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "deep-learning"
+    ],
+    "description": "Convolutional and vision-transformer models for image understanding."
+  },
+  {
+    "id": "vector-search",
+    "name": "Embeddings & Vector Search",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "nlp"
+    ],
+    "description": "Embedding models, similarity metrics, and approximate nearest neighbour indexes."
+  },
+  {
+    "id": "llm-engineering",
+    "name": "LLM Application Engineering",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "nlp",
+      "rest-api"
+    ],
+    "description": "Prompt design, tool use, evaluation harnesses, and production LLM services."
+  },
+  {
+    "id": "rag-systems",
+    "name": "Retrieval-Augmented Generation",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "llm-engineering",
+      "vector-search"
+    ],
+    "description": "Chunking, retrieval quality, grounding, and citation-backed answers."
+  },
+  {
+    "id": "mlops",
+    "name": "MLOps & Model Deployment",
+    "domain": "Data & AI",
+    "level": 3,
+    "prerequisites": [
+      "model-evaluation",
+      "docker",
+      "ci-cd"
+    ],
+    "description": "Serving, monitoring, drift detection, and automated retraining."
+  },
+  {
+    "id": "html-css",
+    "name": "HTML & CSS",
+    "domain": "Web Development",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Semantic markup, layout systems, and modern CSS architecture."
+  },
+  {
+    "id": "javascript",
+    "name": "JavaScript",
+    "domain": "Web Development",
+    "level": 1,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "The language, the DOM, async patterns, and the module ecosystem."
+  },
+  {
+    "id": "typescript",
+    "name": "TypeScript",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "javascript"
+    ],
+    "description": "Static typing, generics, and type-safe application architecture."
+  },
+  {
+    "id": "react",
+    "name": "React",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "javascript",
+      "html-css"
+    ],
+    "description": "Components, hooks, rendering behaviour, and composition patterns."
+  },
+  {
+    "id": "state-management",
+    "name": "Frontend State Management",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "react"
+    ],
+    "description": "Local, server, and global state strategies plus caching and invalidation."
+  },
+  {
+    "id": "ui-accessibility",
+    "name": "Accessible & Responsive UI",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "html-css"
+    ],
+    "description": "WCAG practice, keyboard and screen-reader support, responsive layout."
+  },
+  {
+    "id": "nodejs",
+    "name": "Node.js & Express",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "javascript"
+    ],
+    "description": "Server-side JavaScript, middleware, and the request lifecycle."
+  },
+  {
+    "id": "rest-api",
+    "name": "REST API Design",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "nodejs"
+    ],
+    "description": "Resource modelling, versioning, pagination, errors, and documentation."
+  },
+  {
+    "id": "data-modeling",
+    "name": "Database Design & Modelling",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "sql"
+    ],
+    "description": "Normalisation, indexing, migrations, and transaction design."
+  },
+  {
+    "id": "auth-security",
+    "name": "Web Auth & Application Security",
+    "domain": "Web Development",
+    "level": 2,
+    "prerequisites": [
+      "rest-api"
+    ],
+    "description": "Sessions, OAuth/OIDC, the OWASP Top 10, and secure defaults."
+  },
+  {
+    "id": "web-performance",
+    "name": "Web Performance Optimisation",
+    "domain": "Web Development",
+    "level": 3,
+    "prerequisites": [
+      "react"
+    ],
+    "description": "Core Web Vitals, bundle budgets, rendering strategies, and caching."
+  },
+  {
+    "id": "nextjs",
+    "name": "Full-Stack React with Next.js",
+    "domain": "Web Development",
+    "level": 3,
+    "prerequisites": [
+      "react",
+      "rest-api"
+    ],
+    "description": "Server components, routing, data fetching, and deployment."
+  },
+  {
+    "id": "networking",
+    "name": "Networking Fundamentals",
+    "domain": "Cloud & DevOps",
+    "level": 1,
+    "prerequisites": [],
+    "description": "TCP/IP, DNS, HTTP, TLS, load balancing, and routing basics."
+  },
+  {
+    "id": "linux",
+    "name": "Linux Administration",
+    "domain": "Cloud & DevOps",
+    "level": 1,
+    "prerequisites": [
+      "cli-git"
+    ],
+    "description": "Processes, permissions, services, packages, and shell scripting."
+  },
+  {
+    "id": "docker",
+    "name": "Containers with Docker",
+    "domain": "Cloud & DevOps",
+    "level": 2,
+    "prerequisites": [
+      "linux"
+    ],
+    "description": "Images, layers, networking, volumes, and multi-stage builds."
+  },
+  {
+    "id": "ci-cd",
+    "name": "CI/CD Pipelines",
+    "domain": "Cloud & DevOps",
+    "level": 2,
+    "prerequisites": [
+      "cli-git",
+      "testing"
+    ],
+    "description": "Build, test, and release automation with safe deployment strategies."
+  },
+  {
+    "id": "cloud-fundamentals",
+    "name": "Cloud Fundamentals (AWS)",
+    "domain": "Cloud & DevOps",
+    "level": 2,
+    "prerequisites": [
+      "linux",
+      "networking"
+    ],
+    "description": "Compute, storage, identity, networking, and cost management."
+  },
+  {
+    "id": "kubernetes",
+    "name": "Kubernetes Orchestration",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "docker",
+      "networking"
+    ],
+    "description": "Workloads, services, config, scheduling, and cluster operations."
+  },
+  {
+    "id": "iac",
+    "name": "Infrastructure as Code",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "cloud-fundamentals"
+    ],
+    "description": "Declarative provisioning, modules, state management, and drift control."
+  },
+  {
+    "id": "observability",
+    "name": "Observability & Monitoring",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "cloud-fundamentals"
+    ],
+    "description": "Metrics, logs, traces, SLOs, and actionable alerting."
+  },
+  {
+    "id": "cloud-security",
+    "name": "Cloud Security",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "cloud-fundamentals",
+      "auth-security"
+    ],
+    "description": "Identity boundaries, network isolation, secrets, and compliance controls."
+  },
+  {
+    "id": "sre",
+    "name": "Site Reliability Engineering",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "observability",
+      "kubernetes"
+    ],
+    "description": "Error budgets, capacity planning, incident response, and postmortems."
+  },
+  {
+    "id": "system-design",
+    "name": "System Design",
+    "domain": "Cloud & DevOps",
+    "level": 3,
+    "prerequisites": [
+      "rest-api",
+      "data-modeling",
+      "cloud-fundamentals"
+    ],
+    "description": "Scalability, consistency tradeoffs, queues, caching, and failure modes."
+  },
+  {
+    "id": "communication",
+    "name": "Written & Verbal Communication",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Structure an argument, write it plainly, and present it to people who are not in your head."
+  },
+  {
+    "id": "spreadsheets",
+    "name": "Spreadsheets & Modelling",
+    "domain": "Foundations",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Formulas, pivots, lookups and clean workbook structure — the tool most analysis outside engineering is actually done in."
+  },
+  {
+    "id": "business-fundamentals",
+    "name": "Business Fundamentals",
+    "domain": "Business & Product",
+    "level": 1,
+    "prerequisites": [],
+    "description": "How a business makes money: customers, costs, margin, and the levers that move them."
+  },
+  {
+    "id": "market-research",
+    "name": "Market & Customer Research",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "business-fundamentals"
+    ],
+    "description": "Size a market, interview customers, and tell a real signal from a flattering one."
+  },
+  {
+    "id": "product-discovery",
+    "name": "Product Discovery",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "market-research"
+    ],
+    "description": "Find the problem worth solving before committing a team to a solution."
+  },
+  {
+    "id": "roadmapping",
+    "name": "Prioritisation & Roadmapping",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "product-discovery"
+    ],
+    "description": "Sequence work against limited capacity and defend the order you chose."
+  },
+  {
+    "id": "stakeholder-comms",
+    "name": "Stakeholder Communication",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "communication"
+    ],
+    "description": "Keep engineering, sales and leadership working from the same picture."
+  },
+  {
+    "id": "agile-delivery",
+    "name": "Agile Delivery",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "business-fundamentals"
+    ],
+    "description": "Run the loop that ships: backlog, iteration, review, and honest estimation."
+  },
+  {
+    "id": "product-analytics",
+    "name": "Product Analytics",
+    "domain": "Business & Product",
+    "level": 2,
+    "prerequisites": [
+      "business-fundamentals",
+      "spreadsheets"
+    ],
+    "description": "Instrument a product, read funnels and retention, and decide from them."
+  },
+  {
+    "id": "pricing-strategy",
+    "name": "Pricing & Monetisation",
+    "domain": "Business & Product",
+    "level": 3,
+    "prerequisites": [
+      "market-research"
+    ],
+    "description": "Choose a model and a number, and know what each does to demand."
+  },
+  {
+    "id": "marketing-fundamentals",
+    "name": "Marketing Fundamentals",
+    "domain": "Marketing",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Positioning, audience, channel and message — why anyone should care."
+  },
+  {
+    "id": "content-marketing",
+    "name": "Content Marketing",
+    "domain": "Marketing",
+    "level": 2,
+    "prerequisites": [
+      "marketing-fundamentals",
+      "communication"
+    ],
+    "description": "Plan and produce content that earns attention instead of buying it."
+  },
+  {
+    "id": "seo",
+    "name": "Search Engine Optimisation",
+    "domain": "Marketing",
+    "level": 2,
+    "prerequisites": [
+      "marketing-fundamentals"
+    ],
+    "description": "Technical health, intent-led keywords, and content that ranks and stays."
+  },
+  {
+    "id": "paid-acquisition",
+    "name": "Paid Acquisition",
+    "domain": "Marketing",
+    "level": 2,
+    "prerequisites": [
+      "marketing-fundamentals"
+    ],
+    "description": "Buy attention without losing money: targeting, creative, bidding, CAC."
+  },
+  {
+    "id": "email-lifecycle",
+    "name": "Email & Lifecycle Marketing",
+    "domain": "Marketing",
+    "level": 2,
+    "prerequisites": [
+      "marketing-fundamentals"
+    ],
+    "description": "Onboarding, retention and win-back sequences that people do not mute."
+  },
+  {
+    "id": "marketing-analytics",
+    "name": "Marketing Analytics",
+    "domain": "Marketing",
+    "level": 3,
+    "prerequisites": [
+      "marketing-fundamentals",
+      "spreadsheets"
+    ],
+    "description": "Attribution, cohort behaviour, and proving a channel actually worked."
+  },
+  {
+    "id": "brand-strategy",
+    "name": "Brand Strategy",
+    "domain": "Marketing",
+    "level": 3,
+    "prerequisites": [
+      "marketing-fundamentals"
+    ],
+    "description": "Decide what you stand for and hold it still long enough to compound."
+  },
+  {
+    "id": "design-principles",
+    "name": "Design Principles",
+    "domain": "Design",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Hierarchy, contrast, spacing and alignment — why a layout reads or does not."
+  },
+  {
+    "id": "ux-research",
+    "name": "UX Research",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "design-principles"
+    ],
+    "description": "Interviews, surveys and observation that surface what users do, not what they say they do."
+  },
+  {
+    "id": "interaction-design",
+    "name": "Interaction Design",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "design-principles"
+    ],
+    "description": "Flows, states and affordances: what happens when someone touches it."
+  },
+  {
+    "id": "visual-design",
+    "name": "Visual Design",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "design-principles"
+    ],
+    "description": "Type, colour, grid and composition applied to a real interface."
+  },
+  {
+    "id": "prototyping",
+    "name": "Prototyping",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "interaction-design"
+    ],
+    "description": "Build something clickable early enough that being wrong is still cheap."
+  },
+  {
+    "id": "usability-testing",
+    "name": "Usability Testing",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "ux-research"
+    ],
+    "description": "Put the thing in front of five people and watch where they stumble."
+  },
+  {
+    "id": "accessibility-design",
+    "name": "Accessible Design",
+    "domain": "Design",
+    "level": 2,
+    "prerequisites": [
+      "design-principles"
+    ],
+    "description": "Contrast, focus order, labels and motion — designing for the people usually left out."
+  },
+  {
+    "id": "design-systems",
+    "name": "Design Systems",
+    "domain": "Design",
+    "level": 3,
+    "prerequisites": [
+      "visual-design",
+      "interaction-design"
+    ],
+    "description": "Turn one-off screens into components, tokens and rules a team can reuse."
+  },
+  {
+    "id": "accounting-basics",
+    "name": "Accounting Basics",
+    "domain": "Finance & Accounting",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Debits, credits, accruals, and what the books are actually recording."
+  },
+  {
+    "id": "financial-statements",
+    "name": "Financial Statement Analysis",
+    "domain": "Finance & Accounting",
+    "level": 2,
+    "prerequisites": [
+      "accounting-basics"
+    ],
+    "description": "Read an income statement, balance sheet and cash flow together, and notice what they disagree about."
+  },
+  {
+    "id": "financial-modelling",
+    "name": "Financial Modelling",
+    "domain": "Finance & Accounting",
+    "level": 2,
+    "prerequisites": [
+      "financial-statements",
+      "spreadsheets"
+    ],
+    "description": "Build a driver-based three-statement model that does not break when an assumption changes."
+  },
+  {
+    "id": "corporate-finance",
+    "name": "Corporate Finance",
+    "domain": "Finance & Accounting",
+    "level": 2,
+    "prerequisites": [
+      "financial-statements"
+    ],
+    "description": "Cost of capital, capital structure, and deciding which projects deserve money."
+  },
+  {
+    "id": "budgeting-forecasting",
+    "name": "Budgeting & Forecasting",
+    "domain": "Finance & Accounting",
+    "level": 2,
+    "prerequisites": [
+      "financial-statements"
+    ],
+    "description": "Plan a year, track variance against it, and re-forecast without drama."
+  },
+  {
+    "id": "valuation",
+    "name": "Valuation",
+    "domain": "Finance & Accounting",
+    "level": 3,
+    "prerequisites": [
+      "financial-modelling"
+    ],
+    "description": "DCF, comparables and precedent transactions — and the judgement each one hides."
+  },
+  {
+    "id": "algebra",
+    "name": "Algebra & Functions",
+    "domain": "Mathematics",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Manipulate expressions, solve equations, and read a function as a shape."
+  },
+  {
+    "id": "calculus",
+    "name": "Calculus",
+    "domain": "Mathematics",
+    "level": 2,
+    "prerequisites": [
+      "algebra"
+    ],
+    "description": "Limits, derivatives and integrals, and what rate of change means in practice."
+  },
+  {
+    "id": "linear-algebra",
+    "name": "Linear Algebra",
+    "domain": "Mathematics",
+    "level": 2,
+    "prerequisites": [
+      "algebra"
+    ],
+    "description": "Vectors, matrices and transformations — the language most applied maths is written in."
+  },
+  {
+    "id": "probability",
+    "name": "Probability & Statistics",
+    "domain": "Mathematics",
+    "level": 2,
+    "prerequisites": [
+      "algebra"
+    ],
+    "description": "Distributions, expectation and inference, and quantifying what you do not know."
+  },
+  {
+    "id": "discrete-math",
+    "name": "Discrete Mathematics",
+    "domain": "Mathematics",
+    "level": 2,
+    "prerequisites": [
+      "algebra"
+    ],
+    "description": "Logic, sets, combinatorics and graphs — the maths behind proofs and algorithms."
+  },
+  {
+    "id": "real-analysis",
+    "name": "Real Analysis",
+    "domain": "Mathematics",
+    "level": 3,
+    "prerequisites": [
+      "calculus"
+    ],
+    "description": "Make calculus rigorous: sequences, continuity and proof written properly."
+  }
 ]

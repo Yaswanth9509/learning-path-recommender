@@ -406,7 +406,7 @@
           <text x="264" y="296">declared + implied skills</text>
           <text x="264" y="312">+ prior learning history</text>
           <text x="264" y="396">required − known</text>
-          <text x="508" y="174">48 skills · 90 items · 9 goals</text>
+          <text x="508" y="174">85 skills · 139 items · 14 goals</text>
           <text x="508" y="190">validated DAG, checked at import</text>
           <text x="508" y="296">topological layers</text>
           <text x="508" y="312">greedy course cover</text>
@@ -480,7 +480,7 @@
     <h3>Graph algorithms — the core</h3>
     <ul>
       <li><strong>Transitive closure</strong> over the prerequisite DAG, in both directions: downward from the goal to compute everything required, and downward from declared skills to credit everything implied.</li>
-      <li><strong>Kahn's algorithm</strong> for cycle detection, run at import over all 48 skills. A cycle makes any ordering impossible, so it fails loudly at startup rather than silently at generation.</li>
+      <li><strong>Kahn's algorithm</strong> for cycle detection, run at import over all 85 skills. A cycle makes any ordering impossible, so it fails loudly at startup rather than silently at generation.</li>
       <li><strong>Layered topological sort</strong> — not a single linear order, but dependency <em>levels</em>, so items that could be studied in parallel are grouped and can be scheduled together in one milestone.</li>
       <li><strong>Greedy set cover</strong> per layer: a course teaching three outstanding skills covers all three, so a learner is never sent to two courses where one would do.</li>
     </ul>
@@ -603,6 +603,11 @@
 
     <h3>Built beyond the brief</h3>
     <ul>
+      <li><strong>Accounts, guests and isolation.</strong> Register, sign in, or start as a guest with no email at all. A guest is a real account with a throwaway identity, so work is saved from the first message, and it can be upgraded to a permanent account <em>in place</em> — the user id never changes, so every learner, path and completed item stays exactly where it is. Each account sees only its own learners, and cannot read another's even by id.</li>
+      <li><strong>Several goals at once.</strong> A learner runs up to three roadmaps side by side with one active, switchable from the Path tab and compared on the dashboard. Real people do not stop wanting one thing when they start wanting another.</li>
+      <li><strong>The assistant asks before it assumes.</strong> Experience level and weekly hours decide where a path starts and how long it runs, so they are asked for once, up front, rather than defaulted silently. Answer "you decide" and it chooses — and says which numbers it chose, so they can be corrected.</li>
+      <li><strong>A visible engine switch.</strong> The header names which engine will answer the next message, and every reply says which one produced it. When a free-tier key runs out of quota the app degrades to the rule engine and keeps working; without this you can be reading rule-engine output and concluding the model is bad.</li>
+      <li><strong>Two storage engines behind one interface.</strong> The application is written against SQLite and stays that way; setting <code>DATABASE_URL</code> sends the identical SQL to Postgres instead. A deployment needs it, because a free instance has no persistent disk and would erase every registered account each time it sleeps.</li>
       <li><strong>Interactive skill graph.</strong> The actual prerequisite DAG rendered as an SVG in dependency columns. Every arrow is a constraint the planner obeyed; a test asserts each edge points strictly forward, so the drawing can never contradict the plan.</li>
       <li><strong>Weekly plan.</strong> The remaining roadmap poured into fixed-capacity weeks, splitting long courses across them: "week 3 — wrap up Modern JavaScript, start Data Structures".</li>
       <li><strong>Achievements.</strong> XP, seven levels, and nine badges tied to real milestones. Unearned badges show what would earn them.</li>
@@ -693,12 +698,14 @@
     </div>
 
     <p>
-      315 tests run in about three seconds with no network, no API key, and no
-      tokens spent, at 90.5% branch coverage. The load-bearing one is
+      448 tests run in about fifteen seconds with no network, no API key, and
+      no tokens spent, at 90% branch coverage. The database is pinned to
+      SQLite for the same reason the model is disabled: a configured
+      <code>DATABASE_URL</code> must never send a test run to a real server. The load-bearing one is
       <code>assert_prerequisites_respected</code>: it walks a generated path in
       the exact order a learner would, accumulating taught skills, and fails if
       any item is ever reached before the skills it requires. It runs across all
-      nine goals and three experience levels.
+      fourteen goals and three experience levels.
     </p>
 
     <div class="table-wrap">
@@ -715,6 +722,10 @@
           <tr><td><code>test_security</code></td><td>The rate limiter's sliding window, the API-key gate, payload bounds, response headers</td></tr>
           <tr><td><code>test_frontend</code></td><td>Every selector resolves, every endpoint called exists, nothing loads from a remote host</td></tr>
           <tr><td><code>test_api</code></td><td>Every endpoint, validation errors, and a full journey: chat → path → progress → feedback → dashboard</td></tr>
+          <tr><td><code>test_accounts</code></td><td>Registration, sign-in, guest upgrade in place, and that one account can never see another's learners</td></tr>
+          <tr><td><code>test_paths</code></td><td>Several goals per learner, which one is active, and the cap on how many run at once</td></tr>
+          <tr><td><code>test_sqlstore</code></td><td>The SQLite/Postgres seam: placeholder and DDL translation, engine selection, and the channel-binding fallback</td></tr>
+          <tr><td><code>test_conversation</code></td><td>Typos, greetings, meta questions, goal switching, and mid-chat skill claims</td></tr>
         </tbody>
       </table>
     </div>
@@ -735,8 +746,9 @@
     </div>
 
     <ul>
-      <li><strong>The catalogue is curated, not integrated.</strong> 90 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
-      <li><strong>Single-tenant by design.</strong> There are no accounts: a learner id identifies a learner. An optional shared API key and per-caller rate limiting protect a deployment, but per-learner authorisation would be needed before real users share an instance.</li>
+      <li><strong>The catalogue is curated, not integrated.</strong> 139 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
+      <li><strong>No password recovery.</strong> Accounts exist and are isolated per user, but there is no email verification and no reset, because both need a mail service the project does not have. A learner who forgets their password makes a new account. That is an honest limit of a demo rather than an oversight.</li>
+      <li><strong>One connection, serialised.</strong> Every query goes through a single connection behind a lock — correct and simple for one process, and enough for a demo, but a busy deployment would want a pool. The seam is one module, so that is a contained change.</li>
       <li><strong>Rate limiting is in-process.</strong> Correct for one process; a multi-replica deployment would need a shared store.</li>
       <li><strong>Pace uses completion timestamps only.</strong> It cannot yet distinguish "studied five hours on Sunday" from "an hour a day", and does not model format-specific drop-off — the next honest signal to add.</li>
       <li><strong>No learned re-ranking.</strong> With real interaction data, a model choosing between equally valid next steps within a dependency layer is the natural extension.</li>
@@ -756,7 +768,7 @@ python run.py                      # http://127.0.0.1:8000
 
 # tests and lint
 pip install -r requirements-dev.txt
-python -m pytest                   # 315 tests, offline
+python -m pytest                   # 448 tests, offline
 python -m ruff check .
 
 # or containerised

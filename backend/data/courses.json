@@ -1765,5 +1765,953 @@
     "requires": [],
     "description": "The original RAG paper — read it before building your third retrieval pipeline.",
     "url": "https://arxiv.org/abs/2005.11401"
+  },
+  {
+    "id": "c-communication",
+    "title": "Writing Clearly at Work",
+    "provider": "OpenLearn",
+    "type": "course",
+    "level": 1,
+    "hours": 14,
+    "rating": 4.6,
+    "learners": 96000,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "communication"
+    ],
+    "requires": [],
+    "description": "Structure a document, cut half the words, and still say more."
+  },
+  {
+    "id": "c-spreadsheets",
+    "title": "Spreadsheets: From Formulas to Models",
+    "provider": "QuantAcademy",
+    "type": "course",
+    "level": 1,
+    "hours": 20,
+    "rating": 4.7,
+    "learners": 210000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [
+      "spreadsheets"
+    ],
+    "requires": [],
+    "description": "Formulas, lookups, pivots and workbook structure that survives review."
+  },
+  {
+    "id": "a-spreadsheets",
+    "title": "Assessment: Spreadsheet Skills Check",
+    "provider": "QuantAcademy",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "rating": 4.4,
+    "learners": 41000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Foundations",
+    "teaches": [],
+    "requires": [
+      "spreadsheets"
+    ],
+    "description": "Timed modelling tasks against a realistic workbook."
+  },
+  {
+    "id": "c-business-101",
+    "title": "How Businesses Actually Work",
+    "provider": "Northgate Business School",
+    "type": "course",
+    "level": 1,
+    "hours": 18,
+    "rating": 4.6,
+    "learners": 132000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Business & Product",
+    "teaches": [
+      "business-fundamentals"
+    ],
+    "requires": [],
+    "description": "Unit economics, margin and cash, explained without an MBA."
+  },
+  {
+    "id": "c-market-research",
+    "title": "Customer & Market Research",
+    "provider": "Northgate Business School",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.5,
+    "learners": 74000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Business & Product",
+    "teaches": [
+      "market-research"
+    ],
+    "requires": [
+      "business-fundamentals"
+    ],
+    "description": "Run interviews that are not leading and size a market you can defend."
+  },
+  {
+    "id": "c-product-discovery",
+    "title": "Product Discovery in Practice",
+    "provider": "ProductCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 24,
+    "rating": 4.7,
+    "learners": 88000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Business & Product",
+    "teaches": [
+      "product-discovery"
+    ],
+    "requires": [
+      "market-research"
+    ],
+    "description": "Find the problem worth solving before a team commits a quarter to it."
+  },
+  {
+    "id": "c-roadmapping",
+    "title": "Prioritisation & Roadmapping",
+    "provider": "ProductCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 61000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Business & Product",
+    "teaches": [
+      "roadmapping"
+    ],
+    "requires": [
+      "product-discovery"
+    ],
+    "description": "Frameworks for saying no, and the roadmap that survives contact with sales."
+  },
+  {
+    "id": "c-stakeholder",
+    "title": "Communicating with Stakeholders",
+    "provider": "ProductCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 12,
+    "rating": 4.4,
+    "learners": 47000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Business & Product",
+    "teaches": [
+      "stakeholder-comms"
+    ],
+    "requires": [
+      "communication"
+    ],
+    "description": "Write the update, run the review, and keep everyone on one picture."
+  },
+  {
+    "id": "c-agile",
+    "title": "Agile Delivery for Product Teams",
+    "provider": "OpenLearn",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.3,
+    "learners": 118000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Business & Product",
+    "teaches": [
+      "agile-delivery"
+    ],
+    "requires": [
+      "business-fundamentals"
+    ],
+    "description": "Backlogs, iterations and estimates that are honest about uncertainty."
+  },
+  {
+    "id": "c-product-analytics",
+    "title": "Product Analytics",
+    "provider": "ProductCraft",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.6,
+    "learners": 54000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Business & Product",
+    "teaches": [
+      "product-analytics"
+    ],
+    "requires": [
+      "spreadsheets"
+    ],
+    "description": "Instrument a product, then read funnels, cohorts and retention properly."
+  },
+  {
+    "id": "c-pricing",
+    "title": "Pricing & Monetisation",
+    "provider": "Northgate Business School",
+    "type": "course",
+    "level": 3,
+    "hours": 16,
+    "rating": 4.6,
+    "learners": 33000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Business & Product",
+    "teaches": [
+      "pricing-strategy"
+    ],
+    "requires": [
+      "market-research"
+    ],
+    "description": "Pick a model and a number, and understand what each does to demand."
+  },
+  {
+    "id": "pr-pm-launch",
+    "title": "Project: Take a Feature from Problem to Launch Plan",
+    "provider": "ProductCraft",
+    "type": "project",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.7,
+    "learners": 26000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Business & Product",
+    "teaches": [],
+    "requires": [
+      "roadmapping",
+      "stakeholder-comms"
+    ],
+    "description": "Produce the discovery write-up, the prioritisation call and the rollout plan."
+  },
+  {
+    "id": "a-product",
+    "title": "Assessment: Product Judgement",
+    "provider": "ProductCraft",
+    "type": "assessment",
+    "level": 2,
+    "hours": 2,
+    "rating": 4.4,
+    "learners": 31000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Business & Product",
+    "teaches": [],
+    "requires": [
+      "product-discovery"
+    ],
+    "description": "Case scenarios with no clean answer, scored on the reasoning."
+  },
+  {
+    "id": "c-marketing-101",
+    "title": "Marketing Fundamentals",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 1,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 164000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Marketing",
+    "teaches": [
+      "marketing-fundamentals"
+    ],
+    "requires": [],
+    "description": "Positioning, audience and message, before a single channel is chosen."
+  },
+  {
+    "id": "c-seo",
+    "title": "SEO: Technical, Content and Intent",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.6,
+    "learners": 98000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Marketing",
+    "teaches": [
+      "seo"
+    ],
+    "requires": [
+      "marketing-fundamentals"
+    ],
+    "description": "Fix the crawl, target real intent, and write pages that hold a ranking."
+  },
+  {
+    "id": "c-content",
+    "title": "Content Marketing that Earns Attention",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.4,
+    "learners": 72000,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Marketing",
+    "teaches": [
+      "content-marketing"
+    ],
+    "requires": [
+      "communication"
+    ],
+    "description": "Plan a calendar, write the piece, and measure whether it did anything."
+  },
+  {
+    "id": "c-paid",
+    "title": "Paid Acquisition without Burning Budget",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 66000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Marketing",
+    "teaches": [
+      "paid-acquisition"
+    ],
+    "requires": [
+      "marketing-fundamentals"
+    ],
+    "description": "Targeting, creative testing and bidding, judged against CAC and payback."
+  },
+  {
+    "id": "c-email",
+    "title": "Email & Lifecycle Marketing",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.3,
+    "learners": 51000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Marketing",
+    "teaches": [
+      "email-lifecycle"
+    ],
+    "requires": [
+      "marketing-fundamentals"
+    ],
+    "description": "Onboarding, retention and win-back flows people do not immediately mute."
+  },
+  {
+    "id": "c-marketing-analytics",
+    "title": "Marketing Analytics & Attribution",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 3,
+    "hours": 24,
+    "rating": 4.6,
+    "learners": 38000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Marketing",
+    "teaches": [
+      "marketing-analytics"
+    ],
+    "requires": [
+      "spreadsheets"
+    ],
+    "description": "Cohorts, attribution models, and proving a channel actually contributed."
+  },
+  {
+    "id": "c-brand",
+    "title": "Brand Strategy",
+    "provider": "Beacon Marketing Institute",
+    "type": "course",
+    "level": 3,
+    "hours": 16,
+    "rating": 4.5,
+    "learners": 29000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Marketing",
+    "teaches": [
+      "brand-strategy"
+    ],
+    "requires": [
+      "marketing-fundamentals"
+    ],
+    "description": "Decide what you stand for, then hold it still long enough to compound."
+  },
+  {
+    "id": "pr-campaign",
+    "title": "Project: Plan and Measure a Full Campaign",
+    "provider": "Beacon Marketing Institute",
+    "type": "project",
+    "level": 2,
+    "hours": 12,
+    "rating": 4.5,
+    "learners": 22000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Marketing",
+    "teaches": [],
+    "requires": [
+      "seo",
+      "content-marketing"
+    ],
+    "description": "Brief, channel plan, content, and a measurement plan agreed up front."
+  },
+  {
+    "id": "a-marketing",
+    "title": "Assessment: Marketing Fundamentals Check",
+    "provider": "Beacon Marketing Institute",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "rating": 4.2,
+    "learners": 44000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Marketing",
+    "teaches": [],
+    "requires": [
+      "marketing-fundamentals"
+    ],
+    "description": "Positioning and channel scenarios against a fictional product."
+  },
+  {
+    "id": "c-design-101",
+    "title": "Design Principles",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 1,
+    "hours": 16,
+    "rating": 4.7,
+    "learners": 142000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [
+      "design-principles"
+    ],
+    "requires": [],
+    "description": "Hierarchy, contrast, spacing and alignment, drilled on real layouts."
+  },
+  {
+    "id": "c-ux-research",
+    "title": "UX Research Methods",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.6,
+    "learners": 79000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Design",
+    "teaches": [
+      "ux-research"
+    ],
+    "requires": [
+      "design-principles"
+    ],
+    "description": "Interviews, diary studies and surveys that avoid leading the witness."
+  },
+  {
+    "id": "c-interaction",
+    "title": "Interaction Design",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 68000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Design",
+    "teaches": [
+      "interaction-design"
+    ],
+    "requires": [
+      "design-principles"
+    ],
+    "description": "Flows, states, empty screens and errors — the parts demos skip."
+  },
+  {
+    "id": "c-visual",
+    "title": "Visual Design for Interfaces",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 20,
+    "rating": 4.6,
+    "learners": 84000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Design",
+    "teaches": [
+      "visual-design"
+    ],
+    "requires": [
+      "design-principles"
+    ],
+    "description": "Type scales, colour systems and grids applied to a working product."
+  },
+  {
+    "id": "c-prototyping",
+    "title": "Prototyping and Testing Ideas Early",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.5,
+    "learners": 57000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [
+      "prototyping"
+    ],
+    "requires": [
+      "interaction-design"
+    ],
+    "description": "Get something clickable in front of people while being wrong is cheap."
+  },
+  {
+    "id": "c-usability",
+    "title": "Usability Testing",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 12,
+    "rating": 4.6,
+    "learners": 46000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [
+      "usability-testing"
+    ],
+    "requires": [
+      "ux-research"
+    ],
+    "description": "Recruit five people, run the session, and separate signal from politeness."
+  },
+  {
+    "id": "c-design-systems",
+    "title": "Design Systems",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 3,
+    "hours": 24,
+    "rating": 4.7,
+    "learners": 35000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Design",
+    "teaches": [
+      "design-systems"
+    ],
+    "requires": [
+      "visual-design"
+    ],
+    "description": "Tokens, components and the governance that stops a system rotting."
+  },
+  {
+    "id": "pr-ux-portfolio",
+    "title": "Project: A Redesign, Researched and Tested",
+    "provider": "Studio Method",
+    "type": "project",
+    "level": 2,
+    "hours": 18,
+    "rating": 4.7,
+    "learners": 31000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [],
+    "requires": [
+      "prototyping",
+      "usability-testing"
+    ],
+    "description": "Research, prototype, test with real users, and write up what changed."
+  },
+  {
+    "id": "a-ux",
+    "title": "Assessment: Research Method Selection",
+    "provider": "Studio Method",
+    "type": "assessment",
+    "level": 2,
+    "hours": 2,
+    "rating": 4.3,
+    "learners": 24000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [],
+    "requires": [
+      "ux-research"
+    ],
+    "description": "Given a question and a deadline, choose and justify a method."
+  },
+  {
+    "id": "r-wcag",
+    "title": "WCAG Quick Reference",
+    "provider": "W3C Web Accessibility Initiative",
+    "type": "resource",
+    "level": 2,
+    "hours": 3,
+    "rating": 4.9,
+    "learners": 0,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [
+      "accessibility-design"
+    ],
+    "requires": [],
+    "description": "The normative checklist the whole field defers to.",
+    "url": "https://www.w3.org/WAI/WCAG22/quickref/"
+  },
+  {
+    "id": "c-accounting-101",
+    "title": "Accounting Basics",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 1,
+    "hours": 20,
+    "rating": 4.5,
+    "learners": 121000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "accounting-basics"
+    ],
+    "requires": [],
+    "description": "Debits, credits and accruals, until the books stop being a mystery."
+  },
+  {
+    "id": "c-financial-statements",
+    "title": "Reading Financial Statements",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 22,
+    "rating": 4.7,
+    "learners": 87000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "financial-statements"
+    ],
+    "requires": [
+      "accounting-basics"
+    ],
+    "description": "Read all three statements together and notice where they disagree."
+  },
+  {
+    "id": "c-fin-modelling",
+    "title": "Three-Statement Financial Modelling",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 30,
+    "rating": 4.8,
+    "learners": 64000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "financial-modelling"
+    ],
+    "requires": [
+      "financial-statements",
+      "spreadsheets"
+    ],
+    "description": "Build a driver-based model that does not break when an input moves."
+  },
+  {
+    "id": "c-corp-finance",
+    "title": "Corporate Finance",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 24,
+    "rating": 4.5,
+    "learners": 52000,
+    "format": "video",
+    "cost": "paid",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "corporate-finance"
+    ],
+    "requires": [
+      "financial-statements"
+    ],
+    "description": "Cost of capital, structure, and choosing between projects competing for cash."
+  },
+  {
+    "id": "c-budgeting",
+    "title": "Budgeting & Forecasting",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 2,
+    "hours": 16,
+    "rating": 4.4,
+    "learners": 43000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "budgeting-forecasting"
+    ],
+    "requires": [
+      "financial-statements"
+    ],
+    "description": "Plan a year, track variance honestly, and re-forecast without theatre."
+  },
+  {
+    "id": "c-valuation",
+    "title": "Valuation: DCF and Comparables",
+    "provider": "Ledger Institute",
+    "type": "course",
+    "level": 3,
+    "hours": 26,
+    "rating": 4.7,
+    "learners": 41000,
+    "format": "interactive",
+    "cost": "paid",
+    "domain": "Finance & Accounting",
+    "teaches": [
+      "valuation"
+    ],
+    "requires": [
+      "financial-modelling"
+    ],
+    "description": "Three methods, and the judgement each of them quietly depends on."
+  },
+  {
+    "id": "pr-valuation",
+    "title": "Project: Value a Listed Company End to End",
+    "provider": "Ledger Institute",
+    "type": "project",
+    "level": 3,
+    "hours": 16,
+    "rating": 4.6,
+    "learners": 18000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Finance & Accounting",
+    "teaches": [],
+    "requires": [
+      "valuation"
+    ],
+    "description": "From filings to a defended per-share number, with the assumptions stated."
+  },
+  {
+    "id": "a-finance",
+    "title": "Assessment: Statement Analysis",
+    "provider": "Ledger Institute",
+    "type": "assessment",
+    "level": 2,
+    "hours": 2,
+    "rating": 4.4,
+    "learners": 28000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Finance & Accounting",
+    "teaches": [],
+    "requires": [
+      "financial-statements"
+    ],
+    "description": "Spot the accounting choice that flatters the reported result."
+  },
+  {
+    "id": "c-algebra",
+    "title": "Algebra & Functions",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 1,
+    "hours": 26,
+    "rating": 4.7,
+    "learners": 198000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [
+      "algebra"
+    ],
+    "requires": [],
+    "description": "Expressions, equations and functions, with enough practice to stick."
+  },
+  {
+    "id": "c-calculus",
+    "title": "Calculus I & II",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 2,
+    "hours": 40,
+    "rating": 4.8,
+    "learners": 156000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [
+      "calculus"
+    ],
+    "requires": [
+      "algebra"
+    ],
+    "description": "Limits, derivatives and integrals, taught through problems rather than rules."
+  },
+  {
+    "id": "c-linear-algebra",
+    "title": "Linear Algebra",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 2,
+    "hours": 34,
+    "rating": 4.9,
+    "learners": 143000,
+    "format": "video",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [
+      "linear-algebra"
+    ],
+    "requires": [
+      "algebra"
+    ],
+    "description": "Vectors, matrices and transformations, with the geometry kept in view."
+  },
+  {
+    "id": "c-probability",
+    "title": "Probability & Statistics",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 2,
+    "hours": 32,
+    "rating": 4.7,
+    "learners": 128000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [
+      "probability"
+    ],
+    "requires": [
+      "algebra"
+    ],
+    "description": "Distributions, expectation and inference, applied to real questions."
+  },
+  {
+    "id": "c-discrete",
+    "title": "Discrete Mathematics",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 2,
+    "hours": 30,
+    "rating": 4.6,
+    "learners": 74000,
+    "format": "reading",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [
+      "discrete-math"
+    ],
+    "requires": [
+      "algebra"
+    ],
+    "description": "Logic, sets, counting and graphs, with proof introduced gently."
+  },
+  {
+    "id": "c-analysis",
+    "title": "Introduction to Real Analysis",
+    "provider": "Lyceum Open Courseware",
+    "type": "course",
+    "level": 3,
+    "hours": 36,
+    "rating": 4.6,
+    "learners": 39000,
+    "format": "reading",
+    "cost": "paid",
+    "domain": "Mathematics",
+    "teaches": [
+      "real-analysis"
+    ],
+    "requires": [
+      "calculus"
+    ],
+    "description": "Make calculus rigorous, and learn to write a proof that holds."
+  },
+  {
+    "id": "a-algebra",
+    "title": "Assessment: Algebra Readiness",
+    "provider": "Lyceum Open Courseware",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "rating": 4.5,
+    "learners": 88000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [],
+    "requires": [
+      "algebra"
+    ],
+    "description": "Find the gaps before they bite you halfway through calculus."
+  },
+  {
+    "id": "pr-math-modelling",
+    "title": "Project: Model a Real-World System",
+    "provider": "Lyceum Open Courseware",
+    "type": "project",
+    "level": 2,
+    "hours": 14,
+    "rating": 4.5,
+    "learners": 21000,
+    "format": "project",
+    "cost": "free",
+    "domain": "Mathematics",
+    "teaches": [],
+    "requires": [
+      "calculus",
+      "probability"
+    ],
+    "description": "Take a messy real situation to a defensible quantitative model."
+  },
+  {
+    "id": "c-design-a11y",
+    "title": "Accessible Design",
+    "provider": "Studio Method",
+    "type": "course",
+    "level": 2,
+    "hours": 16,
+    "rating": 4.8,
+    "learners": 39000,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Design",
+    "teaches": [
+      "accessibility-design"
+    ],
+    "requires": [
+      "design-principles"
+    ],
+    "description": "Contrast, focus order, semantics and motion, tested with a screen reader."
   }
 ]

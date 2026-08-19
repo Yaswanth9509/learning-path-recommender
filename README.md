@@ -12,7 +12,8 @@ the test suite for every goal and every learner shape.
 pip install -r requirements.txt && python run.py     # → http://127.0.0.1:8000
 ```
 
-No API key required. Three dependencies. No build step.
+No API key required. No build step. Runs on a single SQLite file, or on
+Postgres by setting one environment variable.
 
 <img src="docs/screenshot-chat.png" alt="A learner states a goal in plain language and the assistant replies with the shape of their roadmap" width="100%">
 
@@ -28,6 +29,7 @@ No API key required. Three dependencies. No build step.
 | [Explainability](#nothing-is-a-black-box) | Where every number comes from |
 | [Adaptation](#it-adapts-to-what-you-actually-do) | Feedback, pace, history |
 | [The assistant](#the-assistant-works-without-an-api-key) | Five providers, or none |
+| [Accounts](#accounts-guests-and-several-paths-at-once) | Sign-in, guests, and running several goals |
 | [API](#api) · [Testing](#testing) · [Deploying](#serving-it-to-other-people) | Reference |
 
 ---
@@ -259,8 +261,8 @@ dependency**: the whole layer is stdlib `urllib`.
 
 ## Catalog integrity
 
-48 skills, 90 learning items, 9 career goals — validated exhaustively at import.
-`CatalogError` is raised for:
+85 skills, 139 learning items, 14 goals across nine domains — validated
+exhaustively at import. `CatalogError` is raised for:
 
 - a prerequisite that does not resolve, or a skill requiring itself
 - **any cycle** in the prerequisite graph (Kahn's algorithm)
@@ -273,6 +275,71 @@ This runs at startup and in `run.py`, so broken data fails loudly instead of
 producing a subtly wrong roadmap. To extend the catalog, edit
 `backend/data/{skills,courses,goals}.json` and run the tests.
 
+The catalogue is deliberately not only for developers. Alongside Data & AI, Web
+Development and Cloud & DevOps sit **Business & Product, Marketing, Design,
+Finance & Accounting and Mathematics** — and Mathematics is a *subject* rather
+than a job title, because wanting to learn something is a goal even when no
+role is attached to it. Every goal is reachable from plain language ("I want to
+become a product manager", "help me get better at maths"), and every one is
+asserted to produce a real, prerequisite-ordered path in `test_catalog.py`.
+
+---
+
+## Accounts, guests, and several paths at once
+
+<img src="docs/screenshot-signin.png" alt="The sign-in screen, offering register, sign in, or continue as a guest" width="100%">
+
+Signing in is optional by design, and the door is not a wall:
+
+- **Continue as a guest** and everything works immediately — no email, no
+  password, nothing to verify. A guest is a real account with a throwaway
+  identity, so the work is saved from the first message.
+- **Keep your work** turns that guest into a permanent account *in place*. The
+  user id never changes, so every learner, path, message and completed item
+  stays exactly where it is. Nothing is migrated and nothing is lost.
+- Every learner, path and message is scoped to one account. Another account
+  cannot list them and cannot read them by id — asserted in `test_accounts.py`.
+
+There is no email verification and no password reset, because both need a mail
+service the project does not have. That is an honest limit of a demo rather
+than an oversight.
+
+### More than one goal at a time
+
+A learner runs up to three goals side by side, with one active. The Path tab
+switches between them, and the dashboard shows each with its own progress. This
+matters because real people do not stop wanting one thing when they start
+wanting another — someone learning data analysis at work may be learning design
+in the evenings.
+
+### The engine switch
+
+<img src="docs/screenshot-chat.png" alt="Chat, with the engine switch and the badge naming which engine answered" width="100%">
+
+The header carries a switch between the configured model and the **Standard**
+rule engine, and a badge naming which one will answer the next message. Every
+reply also says which engine produced it.
+
+This is not decoration. When a free-tier key runs out of quota the app degrades
+to the rule engine silently and keeps working — which means you can be reading
+rule-engine output and concluding the model is bad. The badge and the per-reply
+line make that visible rather than mysterious.
+
+### Where the data lives
+
+By default the whole application state is one SQLite file you can delete to
+reset. Set `DATABASE_URL` and the identical SQL runs against Postgres instead.
+
+A deployment needs the second option: a free instance has no persistent disk, so
+the SQLite file — and every registered account in it — is erased whenever the
+instance sleeps. `GET /api/health` reports `"storage"` so you can check which
+one a deployment actually got rather than assuming.
+
+Put the database in the same region as whatever serves the app. Each request
+makes several round trips, so a cross-region pairing is felt immediately: a
+Singapore instance against a `us-east-2` database took over seven seconds to
+load a page that is otherwise instant.
+
 ---
 
 ## API
@@ -281,7 +348,10 @@ Interactive docs at `/docs` while the server runs.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `GET` | `/api/health` | Status, catalog size, live assistant engine, gate settings |
+| `GET` | `/api/health` | Status, catalog size, live assistant engine, storage engine, gate settings |
+| `POST` | `/api/auth/{register,login,guest,logout}` | Create an account, sign in, start a guest session, sign out |
+| `POST` | `/api/auth/upgrade` | Turn a guest into a permanent account, keeping all of its work |
+| `GET` | `/api/auth/me` | The signed-in user, or `{"signed_in": false}` |
 | `GET` | `/api/catalog/{goals,skills,items}` | Browse the catalog |
 | `GET/POST` | `/api/learners` | List learners / create one |
 | `DELETE` | `/api/learners/{id}` | Delete a learner and everything of theirs |
@@ -289,7 +359,10 @@ Interactive docs at `/docs` while the server runs.
 | `GET` | `/api/learners/{id}/profile/summary` | Profiling output, incl. implied skills |
 | `POST` | `/api/chat` | Conversational interface — states a goal or asks a question |
 | `GET/DELETE` | `/api/learners/{id}/conversation` | Chat history; clear it |
-| `GET/POST` | `/api/learners/{id}/path` | Fetch or regenerate the learning path |
+| `GET/POST` | `/api/learners/{id}/path` | Fetch or regenerate the active learning path |
+| `GET/POST` | `/api/learners/{id}/paths` | List every goal in progress / start another |
+| `POST` | `/api/learners/{id}/paths/{goal}/activate` | Switch which path is the active one |
+| `DELETE` | `/api/learners/{id}/paths/{goal}` | Drop one goal, keeping the others |
 | `GET` | `/api/learners/{id}/gap` | Skill gap report + explanation |
 | `GET` | `/api/learners/{id}/recommendations` | Ranked, explained recommendations |
 | `GET` | `/api/learners/{id}/explain/{item_id}` | Full justification for one item |
@@ -307,8 +380,10 @@ Interactive docs at `/docs` while the server runs.
 
 ## Testing
 
-**350 tests at 90% branch coverage**, all offline and deterministic — no
-network, no API key, no tokens.
+**448 tests at 90% branch coverage**, all offline and deterministic — no
+network, no API key, no tokens. The database is pinned to SQLite for the
+same reason, so a configured `DATABASE_URL` can never send a test suite to
+a real server.
 
 ```bash
 pip install -r requirements-dev.txt
@@ -318,7 +393,7 @@ python -m ruff check .
 
 The load-bearing test is `assert_prerequisites_respected` — it walks a path in
 the exact order a learner would and fails if any item is reached before the
-skills it requires. It runs across all 9 goals × 3 experience levels.
+skills it requires. It runs across all 14 goals × 3 experience levels.
 
 <details>
 <summary><strong>What each suite proves</strong></summary>
@@ -336,6 +411,9 @@ skills it requires. It runs across all 9 goals × 3 experience levels.
 | `test_conversation.py` | Typos, greetings, meta questions, goal switching, and mid-chat skill claims — all against the rule engine |
 | `test_frontend.py` | Every selector resolves, every endpoint called exists, nothing loads from a remote host |
 | `test_api.py` | Every endpoint, validation errors, and a full journey: chat → path → progress → feedback → dashboard |
+| `test_accounts.py` | Registration, sign-in, guest upgrade in place, and that one account can never see another's learners |
+| `test_sqlstore.py` | The SQLite/Postgres seam: placeholder and DDL translation, engine selection, and the channel-binding fallback |
+| `test_paths.py` | Several goals per learner, the active-path rule, and the cap on how many run at once |
 
 </details>
 
@@ -384,11 +462,11 @@ backend/
   data/{skills,courses,goals}.json   catalog data
   catalog.py  profiling.py  gap.py  recommender.py
   pathgen.py  dashboard.py  insights.py
-  assistant.py  llm.py  security.py
-  models.py  db.py  config.py  main.py
+  assistant.py  llm.py  security.py  accounts.py
+  models.py  db.py  sqlstore.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               350 tests, all offline
+tests/                               448 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py

@@ -137,6 +137,60 @@ def test_every_tab_is_deep_linkable():
     assert "hashchange" in JS, "back/forward navigation between tabs is not handled"
 
 
+def test_every_button_in_the_page_is_wired_to_something():
+    """A button with no handler is a dead control the user still clicks.
+
+    `Rename`, `New learner` and `Save my work` all shipped this way: present in
+    the markup, styled, and bound to nothing at all.
+    """
+    # Class tokens that a delegated `closest(...)` handler picks up, e.g. the
+    # engine switch, which is bound once on `document` rather than per button.
+    delegated = set()
+    for selector in re.findall(r"""closest\??\.?\(\s*["']([^"']+)["']""", JS):
+        delegated.update(re.findall(r"\.([A-Za-z0-9_-]+)", selector))
+
+    unwired = []
+    for tag in re.findall(r"<button[^>]*>", HTML):
+        found = re.search(r"""\bid=["']([A-Za-z0-9_-]+)["']""", tag)
+        if not found:
+            continue
+        button = found.group(1)
+        if re.search(rf"""["'#]{re.escape(button)}["']""", JS):
+            continue  # referenced by id somewhere in the client
+        classes = set(re.findall(r"""\bclass=["']([^"']*)["']""", tag)[0].split()) \
+            if re.search(r"""\bclass=["']""", tag) else set()
+        if classes & delegated:
+            continue  # handled by delegation
+        unwired.append(button)
+
+    assert unwired == [], f"buttons in index.html that app.js never handles: {unwired}"
+
+
+def test_the_status_pill_class_is_not_reused_for_achievement_tiles():
+    """`.badge` sets `white-space: nowrap` for the header pills.
+
+    The achievement tiles are multi-line cards, so they carry their own class.
+    Sharing `.badge` made their descriptions overflow into the next card.
+    """
+    assert re.search(r"^\.badge\s*\{[^}]*white-space:\s*nowrap", CSS, re.MULTILINE), (
+        "the header status pill no longer sets nowrap — this guard needs rewriting"
+    )
+    assert '"ach-badge"' in JS, "achievement tiles must not render with class `badge`"
+    assert ".badge-grid .badge" not in CSS
+
+
+def test_the_toast_hides_completely_when_it_is_empty():
+    """`translateY(120%)` of an ~18px empty box does not clear a 1.5rem inset.
+
+    It left a blank pill floating at the bottom of every page.
+    """
+    resting = re.search(r"\.toast\s*\{[^}]*?transform:\s*([^;]+);", CSS, re.DOTALL)
+    assert resting, "the toast no longer declares a resting transform"
+    assert "%" not in resting.group(1).split("translateY")[-1].split(")")[0] or "calc" in resting.group(1), (
+        f"the toast hides by a bare percentage of its own height: {resting.group(1)!r}"
+    )
+
+
 def test_the_client_has_no_innerhtml_path():
     """Catalogue text and model output must never be interpreted as markup."""
     assigned = [
@@ -155,3 +209,29 @@ def test_app_js_parses():
         capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_empty_tabs_offer_a_way_forward():
+    """"Set a goal in the Chat tab first" is a dead end on five of seven tabs.
+
+    A first-time visitor should be able to see the product working without
+    typing anything, so every empty state carries actions.
+    """
+    assert "emptyWithStart" in JS, "the actionable empty state is gone"
+    assert 'text: "Set a goal in the Chat tab first."' not in JS, (
+        "a dead-end empty state came back"
+    )
+    assert "startExamplePath" in JS, "nothing builds the worked example"
+    # The example has to be a goal the catalogue actually defines.
+    match = re.search(r'const EXAMPLE_GOAL = "([^"]+)"', JS)
+    assert match, "the example goal is no longer declared"
+    from backend.catalog import get_catalog
+
+    assert match.group(1) in get_catalog().goals
+
+
+def test_the_worked_example_does_not_rebuild_silently():
+    """It changes the learner's goal, so it must say what it did."""
+    block = re.search(r"async function startExamplePath.*?\n\}", JS, re.DOTALL)
+    assert block, "startExamplePath is gone"
+    assert "toast(" in block.group(0), "the example switches goals without saying so"

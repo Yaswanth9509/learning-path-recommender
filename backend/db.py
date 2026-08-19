@@ -1,15 +1,19 @@
-"""SQLite persistence.
+"""Persistence, over SQLite by default and Postgres when deployed.
 
-Deliberately dependency-free (stdlib `sqlite3`): the whole application state is
-one file that can be deleted to reset. Rich objects are stored as JSON blobs
-because they are always read and written whole.
+With no `DATABASE_URL` this is what it always was: stdlib `sqlite3`, the whole
+application state in one file that can be deleted to reset. Set `DATABASE_URL`
+and the same SQL runs against Postgres instead, because a deployed instance
+with no persistent disk would otherwise lose every account when it sleeps. The
+differences between the two engines live in `sqlstore.py`, not here.
+
+Rich objects are stored as JSON blobs because they are always read and written
+whole.
 """
 
 from __future__ import annotations
 
 import json
 import os
-import sqlite3
 import threading
 from pathlib import Path
 from typing import Any, Optional
@@ -22,6 +26,7 @@ from .models import (
     ProgressEntry,
     utcnow,
 )
+from .sqlstore import Store, database_url
 
 DEFAULT_DB_PATH = Path(__file__).parent / "learning.db"
 
@@ -73,26 +78,34 @@ CREATE INDEX IF NOT EXISTS idx_conversation_learner ON conversation(learner_id);
 
 
 class Database:
-    """Thread-safe wrapper around a single SQLite file."""
+    """Thread-safe wrapper around one database connection."""
 
-    def __init__(self, path: Optional[Path | str] = None) -> None:
+    def __init__(
+        self, path: Optional[Path | str] = None, url: Optional[str] = None
+    ) -> None:
+        # An explicit path is a caller asking for a file, so it wins over the
+        # environment — that is how the tests keep using SQLite regardless.
+        self.url = "" if path is not None else (
+            url if url is not None else database_url()
+        )
         env_path = os.environ.get("LEARNING_DB_PATH")
-        self.path = Path(path or env_path or DEFAULT_DB_PATH)
+        self.path = None if self.url else Path(path or env_path or DEFAULT_DB_PATH)
         self._lock = threading.Lock()
-        if str(self.path) != ":memory:":
+        if self.path is not None and str(self.path) != ":memory:":
             self.path.parent.mkdir(parents=True, exist_ok=True)
-        # check_same_thread=False + an explicit lock: FastAPI serves requests
-        # from a thread pool, and every write here is short.
-        self._conn = sqlite3.connect(str(self.path), check_same_thread=False)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=WAL")
-        self._conn.execute("PRAGMA foreign_keys=ON")
+        # One connection behind an explicit lock: FastAPI serves requests from
+        # a thread pool, and every write here is short.
+        self._conn = Store(self.path, self.url)
         with self._lock:
             self._migrate()
             self._conn.executescript(_SCHEMA)
             self._conn.commit()
-        #: Users and sessions live in the same file as everything else.
+        #: Users and sessions live in the same database as everything else.
         self.accounts = Accounts(self._conn, self._lock)
+
+    @property
+    def is_postgres(self) -> bool:
+        return self._conn.is_postgres
 
     def _migrate(self) -> None:
         """Bring an older database up to the current schema.
@@ -100,7 +113,12 @@ class Database:
         The only change so far: `paths` used to hold one row per learner. It now
         holds one per goal, so a learner can run several roadmaps at once. The
         single existing path is carried over under its own goal.
+
+        Postgres support arrived after both changes, so no Postgres database
+        can predate them and there is nothing to migrate.
         """
+        if self._conn.is_postgres:
+            return
         tables = {
             row["name"]
             for row in self._conn.execute(
@@ -154,7 +172,7 @@ class Database:
             self._conn.execute(sql, params)
             self._conn.commit()
 
-    def _query(self, sql: str, params: tuple[Any, ...] = ()) -> list[sqlite3.Row]:
+    def _query(self, sql: str, params: tuple[Any, ...] = ()) -> list[Any]:
         with self._lock:
             return self._conn.execute(sql, params).fetchall()
 

@@ -105,11 +105,18 @@ const TABS = ["chat", "path", "graph", "plan", "dashboard", "explore", "profile"
 
 function showTab(name, { updateHash = true } = {}) {
   if (!TABS.includes(name)) return;
+
+  // Setting the hash fires `hashchange`, which routes back through here. Left
+  // unguarded that ran every tab's loader twice: two fetches per click, and
+  // two graphs appended to a host that had only been cleared once.
+  const already = $(`#panel-${name}`)?.classList.contains("is-active");
+
   $$(".tab").forEach((t) => t.classList.toggle("is-active", t.dataset.tab === name));
   $$(".panel").forEach((p) => p.classList.toggle("is-active", p.id === `panel-${name}`));
   if (updateHash && window.location.hash.slice(1) !== name) {
     window.location.hash = name;
   }
+  if (already) return;
   // Land at the top of the new view rather than halfway down the last one.
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (name === "path") renderPath();
@@ -117,7 +124,7 @@ function showTab(name, { updateHash = true } = {}) {
   if (name === "plan") loadPlan();
   if (name === "dashboard") loadDashboard();
   if (name === "explore") loadRecommendations();
-  if (name === "profile") renderProfileTab();
+  if (name === "profile") { renderAccount(); renderProfileTab(); }
 }
 
 $$(".tab").forEach((tab) => {
@@ -290,6 +297,47 @@ function renderLearnerSelect(learners, activeId) {
 
 $("#learnerSelect").addEventListener("change", (e) => selectLearner(e.target.value));
 
+/* Rename, add and keep-my-work sit in the header beside the picker. Renaming
+   must not rebuild the path — the goal has not changed, only the label. */
+$("#renameLearnerBtn").addEventListener("click", async () => {
+  if (!state.learnerId) return;
+  const current = state.profile?.name || "";
+  const name = (window.prompt("Name for this learner", current) || "").trim();
+  if (!name || name === current) return;
+  try {
+    state.profile = await api(
+      `/api/learners/${state.learnerId}/profile?regenerate=false`,
+      { method: "PATCH", body: JSON.stringify({ name }) },
+    );
+    await refreshLearnerSelect(state.learnerId);
+    toast(`Renamed to ${state.profile.name}.`);
+  } catch (err) { toast(err.message, 4000); }
+});
+
+$("#newLearnerBtn").addEventListener("click", async () => {
+  const name = (window.prompt("Name for the new learner") || "").trim();
+  if (!name) return;
+  try {
+    const profile = await api("/api/learners", {
+      method: "POST", body: JSON.stringify({ name }),
+    });
+    await refreshLearnerSelect(profile.learner_id);
+    await selectLearner(profile.learner_id);
+    showTab("chat");
+    toast(`${profile.name} is ready — tell me what they want to learn.`, 4000);
+  } catch (err) { toast(err.message, 5000); }
+});
+
+$("#keepWorkBtn").addEventListener("click", upgradeGuest);
+
+/* Re-read the list from the server so the dropdown reflects what was saved,
+   rather than being patched in place from a guess about the response. */
+async function refreshLearnerSelect(activeId) {
+  const learners = await api("/api/learners");
+  renderLearnerSelect(learners, activeId);
+  await refreshUser();
+}
+
 /* ---------------------------------------------------------- engine choice */
 /* Two engines answer the chat: the configured model, or the deterministic
    Standard engine that ships with the app. The choice is per learner. */
@@ -366,12 +414,21 @@ async function selectLearner(id) {
   state.history = new Set(state.profile.completed_item_ids || []);
   state.path = null;
 
-  if (state.profile.goal_id) {
-    try { state.path = await api(`/api/learners/${id}/path`); } catch (_) { /* none yet */ }
-  }
   renderEngineSwitch();
-  await loadPaths();
-  await renderChatHistory();
+
+  // The path, the path list and the conversation are three independent reads.
+  // Awaited one after another they queued four round trips back to back, which
+  // is invisible against a local SQLite file and about six seconds against a
+  // database in another region. Only the profile has to come first.
+  const pathRequest = state.profile.goal_id
+    ? api(`/api/learners/${id}/path`).catch(() => null)  // no path yet is fine
+    : Promise.resolve(null);
+  const [loadedPath] = await Promise.all([
+    pathRequest,
+    loadPaths(),
+    renderChatHistory(),
+  ]);
+  state.path = loadedPath;
   renderPath();
   renderProfileTab();
   renderSuggestions(state.path
@@ -431,9 +488,11 @@ $("#chatForm").addEventListener("submit", async (event) => {
     setMessageText(pending, res.reply);
     pending.appendChild(el("div", {
       class: "msg-meta",
-      text: res.source === "rules"
-        ? "Answered by the Standard engine"
-        : `Answered by ${res.source}`,
+      text: res.source === "assistant"
+        ? "A question from the assistant, not a generated answer"
+        : res.source === "rules"
+          ? "Answered by the Standard engine"
+          : `Answered by ${res.source}`,
     }));
     state.profile = res.profile;
     renderInterpretation(res.interpretation);
@@ -636,8 +695,8 @@ function renderPath() {
   header.innerHTML = ""; gapBox.innerHTML = ""; list.innerHTML = "";
 
   if (!state.path) {
-    list.appendChild(el("div", { class: "empty", text:
-      "No path yet. Go to the Chat tab and describe what you want to learn." }));
+    list.appendChild(emptyWithStart(
+      "No path yet. Describe what you want to learn, or look at a worked example."));
     return;
   }
   renderPathSwitcher();
@@ -769,11 +828,14 @@ function renderPathItem(item) {
     on: { click: () => removeItemFromPath(item.item_id, item.title) },
   }));
 
-  const fbRow = el("div", { class: "row" });
+  // Feedback is secondary to the item itself, and marked as such: four
+  // equally-weighted buttons per row were competing with the course title.
+  const fbRow = el("div", { class: "row item-feedback" });
   [["too_easy", "Too easy"], ["too_hard", "Too hard"], ["not_relevant", "Not relevant"], ["liked", "Liked"]]
     .forEach(([signal, label]) => {
       fbRow.appendChild(el("button", {
-        class: "btn btn-mini", text: label, attrs: { type: "button", title: `Give feedback: ${label}` },
+        class: "btn btn-mini btn-quiet", text: label,
+        attrs: { type: "button", title: `Give feedback: ${label}` },
         on: { click: () => sendFeedback(item.item_id, signal) },
       }));
     });
@@ -949,7 +1011,7 @@ async function loadGraph() {
   host.innerHTML = ""; detail.innerHTML = ""; legend.innerHTML = "";
 
   if (!state.profile || !state.profile.goal_id) {
-    host.appendChild(el("div", { class: "empty", text: "Set a goal in the Chat tab first." }));
+    host.appendChild(emptyWithStart("Set a goal and this fills in."));
     return;
   }
 
@@ -1104,7 +1166,7 @@ async function loadPlan() {
   header.innerHTML = ""; list.innerHTML = "";
 
   if (!state.profile || !state.profile.goal_id) {
-    list.appendChild(el("div", { class: "empty", text: "Set a goal in the Chat tab first." }));
+    list.appendChild(emptyWithStart("Set a goal and this fills in."));
     return;
   }
 
@@ -1166,7 +1228,7 @@ async function loadDashboard() {
     $("#dashNext").innerHTML = "";
     $("#dashSkills").innerHTML = "";
     $("#dashDomains").innerHTML = "";
-    kpis.appendChild(el("div", { class: "empty", text: "Set a goal in the Chat tab first." }));
+    kpis.appendChild(emptyWithStart("Set a goal and this fills in."));
     return;
   }
   try {
@@ -1174,6 +1236,37 @@ async function loadDashboard() {
     renderDashboard(state.dashboard);
     renderAchievements(await api(`/api/learners/${state.learnerId}/achievements`));
   } catch (err) { toast(err.message); }
+}
+
+/* Who you are, as distinct from who you are planning for. Without this the
+   Profile tab showed only the learner, and "learner" read as a synonym for
+   the account it actually sits inside. */
+function renderAccount() {
+  const box = $("#accountBox");
+  box.innerHTML = "";
+  const user = state.user;
+  if (!user) {
+    box.appendChild(el("div", { class: "hint", text: "Not signed in." }));
+    return;
+  }
+  const row = (label, value) => el("div", { class: "account-row" }, [
+    el("span", { class: "account-label", text: label }),
+    el("span", { class: "account-value", text: value }),
+  ]);
+  box.appendChild(row("Signed in as", user.is_guest ? "Guest account" : user.email));
+  if (!user.is_guest && user.display_name) box.appendChild(row("Name", user.display_name));
+  box.appendChild(row("Learners", `${user.learners} of ${user.max_learners}`));
+  box.appendChild(row("Goals per learner", `up to ${user.max_paths_per_learner}`));
+
+  if (user.is_guest) {
+    box.appendChild(el("p", { class: "hint", text:
+      "A guest account is real and keeps your work, but it is tied to this "
+      + "browser. Create an account to reach it from anywhere." }));
+    box.appendChild(el("button", {
+      class: "btn btn-primary", text: "Create an account and keep this work",
+      attrs: { type: "button" }, on: { click: upgradeGuest },
+    }));
+  }
 }
 
 function renderAchievements(ach) {
@@ -1198,9 +1291,29 @@ function renderAchievements(ach) {
   xp.appendChild(el("div", { class: "hint", text:
     `${ach.earned_count} of ${ach.total_count} badges earned · 10 XP per hour completed` }));
 
+  // Turning up repeatedly is what finishing a path actually takes, so the
+  // streak sits with the level rather than being buried among the badges.
+  const streak = ach.streak || {};
+  const streakRow = el("div", { class: "streak-row" });
+  const stat = (value, label, on) => el("div", { class: `streak ${on ? "is-on" : ""}` }, [
+    el("div", { class: "streak-value", text: String(value) }),
+    el("div", { class: "streak-label", text: label }),
+  ]);
+  streakRow.appendChild(stat(streak.current_days || 0, "day streak", streak.current_days > 0));
+  streakRow.appendChild(stat(streak.best_days || 0, "best run", false));
+  streakRow.appendChild(stat(`${streak.days_this_week || 0}/7`, "days this week", false));
+  streakRow.appendChild(stat(`${ach.stages_completed || 0}/${ach.stages_total || 0}`,
+    "stages done", false));
+  xp.appendChild(streakRow);
+  xp.appendChild(el("div", { class: "hint", text: streak.active_today
+    ? "You have studied today — the streak is safe."
+    : (s.current_days > 0
+        ? "Finish anything today to keep the streak alive."
+        : "Finish an item today to start a streak.") }));
+
   ach.badges.forEach((b) => {
     grid.appendChild(el("div", {
-      class: "badge" + (b.earned ? " earned" : ""),
+      class: "ach-badge" + (b.earned ? " earned" : ""),
       attrs: { title: b.earned ? b.description : b.hint },
     }, [
       el("span", { class: "icon", text: b.icon }),
@@ -1440,12 +1553,59 @@ function donut(percent) {
   return svg;
 }
 
+/* An empty tab that only says "go to the Chat tab" is a dead end, and it is
+   the first thing a guest sees on five of the seven tabs. Each one now offers
+   the two things a visitor could actually want: watch the product work on a
+   real example, or describe their own goal. */
+const EXAMPLE_GOAL = "goal-data-analyst";
+
+function emptyWithStart(message) {
+  const box = el("div", { class: "empty empty-actionable" });
+  box.appendChild(el("div", { class: "empty-msg", text: message }));
+  const row = el("div", { class: "empty-actions" });
+  row.appendChild(el("button", {
+    class: "btn btn-primary", text: "Build me an example path",
+    attrs: { type: "button", title: "Fills the app with a worked Data Analyst example" },
+    on: { click: (e) => startExamplePath(e.currentTarget) },
+  }));
+  row.appendChild(el("button", {
+    class: "btn", text: "Describe my own goal",
+    attrs: { type: "button" },
+    on: { click: () => { showTab("chat"); $("#chatInput").focus(); } },
+  }));
+  box.appendChild(row);
+  return box;
+}
+
+/* One click to a fully populated app, so every tab has something in it. */
+async function startExamplePath(button) {
+  if (!state.learnerId) return;
+  if (button) { button.disabled = true; button.textContent = "Building…"; }
+  try {
+    state.profile = await api(
+      `/api/learners/${state.learnerId}/profile?regenerate=true`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          goal_id: EXAMPLE_GOAL, experience_level: "beginner", weekly_hours: 8,
+        }),
+      },
+    );
+    await selectLearner(state.learnerId);
+    showTab("path");
+    toast("Here is a worked example. Change anything, or start your own in Chat.", 5000);
+  } catch (err) {
+    toast(err.message, 4000);
+    if (button) { button.disabled = false; button.textContent = "Build me an example path"; }
+  }
+}
+
 /* ---------------------------------------------------------- recommendations */
 async function loadRecommendations() {
   const list = $("#recList");
   list.innerHTML = "";
   if (!state.profile || !state.profile.goal_id) {
-    list.appendChild(el("div", { class: "empty", text: "Set a goal in the Chat tab first." }));
+    list.appendChild(emptyWithStart("Set a goal and this fills in."));
     return;
   }
   const type = $("#recType").value;

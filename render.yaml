@@ -6,22 +6,32 @@
 #      the app runs fine on its rule engine without any provider).
 #
 # The free instance type has no persistent disk and sleeps after 15 minutes of
-# inactivity, so the SQLite file resets on wake and the first request takes
-# ~50 seconds. That is acceptable for a demo: the catalogue is read-only and
-# every learner starts from a chat message anyway. For durable state, raise the
-# plan and attach a disk mounted at /data.
+# inactivity, so the first request after a sleep takes ~50 seconds. Set
+# DATABASE_URL to a managed Postgres (Neon's free tier is enough) and the data
+# outlives the instance — without it, accounts and paths are erased on every
+# wake, which is fine for a throwaway demo and not fine for anything else.
 services:
   - type: web
     name: learning-path-recommender
     runtime: docker
     plan: free
-    region: singapore
+    # Match the region your DATABASE_URL points at. The database is in
+    # us-east-2, and serving from Singapore put a cross-planet round trip
+    # on every query — page loads went from ~200ms to over seven seconds.
+    region: ohio
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
-      # Written on every request; keep it on the writable ephemeral volume.
+      # Only used when DATABASE_URL is unset; the file is erased on each wake.
       - key: LEARNING_DB_PATH
         value: /tmp/learning.db
+      # Managed Postgres, so accounts survive a sleep. Paste the pooled
+      # connection string at deploy time; leave it blank to run on SQLite.
+      - key: DATABASE_URL
+        sync: false
+      # Render serves the app over HTTPS, so the session cookie can be Secure.
+      - key: COOKIE_SECURE
+        value: "1"
       # Prompted for at deploy time and never stored in the repository.
       - key: GEMINI_API_KEY
         sync: false

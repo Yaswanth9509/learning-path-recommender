@@ -15,6 +15,17 @@
   --danger: #b3261e;
   --radius: 10px;
   --shadow: 0 1px 2px rgba(20, 24, 31, .06), 0 4px 12px rgba(20, 24, 31, .05);
+  /* Elevation is a signal, so it is spent sparingly: flat surfaces for
+     ordinary cards, a real shadow only for things that float. */
+  --shadow-raised: 0 6px 24px rgba(20, 24, 31, .10);
+  /* A type scale with actual steps in it. The old one ran .95 -> 1.05rem,
+     which is why every heading read as body text and nothing led the eye. */
+  --step-1: .78rem;
+  --step-2: .86rem;
+  --step-3: 1rem;
+  --step-4: 1.15rem;
+  --step-5: 1.45rem;
+  --step-6: 1.9rem;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
 }
@@ -35,6 +46,7 @@
     --warn-soft: #33280f;
     --danger: #ef8079;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px rgba(0, 0, 0, .3);
+    --shadow-raised: 0 8px 30px rgba(0, 0, 0, .45);
   }
 }
 
@@ -50,28 +62,47 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { line-height: 1.25; margin: 0 0 .4rem; }
-h1 { font-size: 1.05rem; }
-h3 { font-size: .95rem; letter-spacing: .01em; }
+h1, h2, h3 { line-height: 1.25; margin: 0 0 .4rem; text-wrap: balance; }
+h1 { font-size: var(--step-4); font-weight: 660; letter-spacing: -.01em; }
+h2 { font-size: var(--step-5); font-weight: 660; letter-spacing: -.015em; }
+h3 { font-size: var(--step-4); font-weight: 640; letter-spacing: -.005em; }
 p { margin: 0 0 .6rem; }
 
+/* Long prose is easier to read short. Cards that are mostly text cap their
+   measure; grids and tables are exempt because they need the width. */
+.hint, .item-why, .milestone-obj, .summary-box { max-width: 68ch; }
+
 /* ---------------------------------------------------------------- topbar */
+/* The bar and the tabs stick together. Making only the bar sticky left the
+   tabs scrolling away, so on a long path there was no way back to another tab
+   without scrolling to the top first. One sticky wrapper handles both, and
+   copes with the bar wrapping to two rows at narrow widths. */
+.app-header { position: sticky; top: 0; z-index: 20; }
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; padding: .75rem 1.25rem;
   background: var(--surface); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 20; flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 .brand { display: flex; align-items: center; gap: .7rem; }
 .brand-mark {
   display: grid; place-items: center; width: 34px; height: 34px;
   border-radius: 9px; background: var(--accent); color: #fff; font-size: 1.05rem;
 }
-.brand-sub { margin: 0; color: var(--text-dim); font-size: .78rem; }
-.topbar-right { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.brand-sub { margin: 0; color: var(--text-dim); font-size: var(--step-1); }
+.topbar-right { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+/* Which learner you are planning for, and who you are signed in as, are two
+   different questions. The rule between them says so. */
+.topbar-group { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.topbar-group + .topbar-group {
+  padding-left: .75rem; border-left: 1px solid var(--border);
+}
+@media (max-width: 700px) {
+  .topbar-group + .topbar-group { padding-left: 0; border-left: none; }
+}
 
 .badge {
-  font-size: .72rem; padding: .2rem .55rem; border-radius: 999px;
+  font-size: .72rem; font-weight: 550; padding: .2rem .55rem; border-radius: 999px;
   border: 1px solid var(--border); white-space: nowrap;
 }
 .badge-muted { background: var(--surface-2); color: var(--text-dim); }
@@ -111,24 +142,41 @@ input:focus-visible, select:focus-visible, button:focus-visible {
   background: var(--surface); border-bottom: 1px solid var(--border);
   overflow-x: auto;
 }
+/* Anchors jump under a sticky header unless the page knows how tall it is. */
+:target { scroll-margin-top: 8rem; }
 .tab {
   font: inherit; cursor: pointer; background: none; border: none;
   color: var(--text-dim); padding: .6rem .8rem; border-bottom: 2px solid transparent;
   white-space: nowrap;
 }
 .tab:hover { color: var(--text); }
-.tab.is-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab.is-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 620; }
 
 main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .panel { display: none; }
 .panel.is-active { display: block; }
 
+/* Cards are separated by their border, not by stacked shadows. Eight equally
+   shadowed boxes on the dashboard gave every one of them the same importance,
+   which is the same as giving none of them any. */
 .card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow);
+  border-radius: var(--radius); padding: 1.15rem 1.25rem;
   margin-bottom: 1rem;
 }
-.hint { color: var(--text-dim); font-size: .82rem; }
+/* The heading owns the top of its card, with the rule doing the separating. */
+.card > h3:first-child {
+  margin: -.15rem 0 .85rem;
+  padding-bottom: .6rem;
+  border-bottom: 1px solid var(--border);
+}
+.card > h3:first-child + .hint { margin-top: -.55rem; margin-bottom: .8rem; }
+.hint { color: var(--text-dim); font-size: var(--step-2); }
+
+/* Each tab says what it is, so a screenshot or a deep link explains itself. */
+.panel-head { margin: 0 0 1rem; }
+.panel-head h2 { margin: 0 0 .15rem; }
+.panel-head p { margin: 0; color: var(--text-dim); font-size: var(--step-2); max-width: 68ch; }
 
 /* ------------------------------------------------------------------ chat */
 #panel-chat.is-active { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1rem; }
@@ -136,7 +184,7 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .chat-log {
   flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: .7rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow);
+  border-radius: var(--radius); padding: 1rem;
   max-height: 60vh;
 }
 .msg { max-width: 82%; padding: .6rem .8rem; border-radius: 12px; white-space: pre-wrap; }
@@ -146,7 +194,7 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .suggestions { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
 .chat-form { display: flex; gap: .5rem; }
 .chat-form input { flex: 1; }
-.chat-side { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow); height: fit-content; }
+.chat-side { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.15rem 1.25rem; height: fit-content; }
 .steps { padding-left: 1.1rem; margin: .4rem 0; color: var(--text-dim); font-size: .85rem; }
 .steps li { margin-bottom: .4rem; }
 .steps strong { color: var(--text); }
@@ -174,7 +222,7 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 
 .milestone {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 1rem;
+  border-radius: var(--radius); margin-bottom: 1rem;
   overflow: hidden;
 }
 .milestone-head { padding: .85rem 1rem; border-bottom: 1px solid var(--border); }
@@ -201,18 +249,37 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .item-sub { color: var(--text-dim); font-size: .8rem; }
 .item-why { font-size: .82rem; margin-top: .35rem; color: var(--text-dim); }
 .item-why strong { color: var(--text); font-weight: 600; }
-.item-actions { display: flex; flex-direction: column; gap: .3rem; align-items: flex-end; }
-.item-actions .row { display: flex; gap: .25rem; }
+.item-actions { display: flex; flex-direction: column; gap: .35rem; align-items: flex-end; }
+.item-actions .row { display: flex; gap: .15rem; }
+/* Rating an item is an aside, not one of its main controls. Borderless until
+   you reach for it, so the four of them stop competing with the title. */
+.btn-quiet {
+  border-color: transparent; background: transparent; color: var(--text-dim);
+  font-size: .72rem;
+}
+.btn-quiet:hover { border-color: var(--border); color: var(--text); background: var(--surface-2); }
+.item-feedback { margin-top: .1rem; opacity: .85; }
+.item-feedback:hover { opacity: 1; }
 
 /* ------------------------------------------------------------- dashboard */
-.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.kpi-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: .75rem; margin-bottom: 1rem;
+}
+/* The ring tile carries a chart and three lines of text, so it gets two
+   columns wherever there is room. At 150px it wrapped one word per line. */
+.kpi-row > .kpi:has(.ring-wrap) { grid-column: span 2; }
+@media (max-width: 620px) {
+  .kpi-row > .kpi:has(.ring-wrap) { grid-column: auto; }
+}
 .kpi {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: .85rem 1rem; box-shadow: var(--shadow);
+  padding: .95rem 1.1rem; display: flex; flex-direction: column; gap: .1rem;
+  justify-content: center;
 }
-.kpi-label { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); }
-.kpi-value { font-size: 1.6rem; font-weight: 680; line-height: 1.2; }
-.kpi-note { font-size: .76rem; color: var(--text-dim); }
+.kpi-label { font-size: .72rem; text-transform: uppercase; font-weight: 600; letter-spacing: .07em; color: var(--text-dim); }
+.kpi-value { font-size: var(--step-6); font-weight: 680; line-height: 1.15; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.kpi-note { font-size: var(--step-1); color: var(--text-dim); line-height: 1.45; }
 .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
 
 .ring-wrap { display: flex; align-items: center; gap: 1rem; }
@@ -268,7 +335,7 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .rec-list { display: flex; flex-direction: column; gap: .75rem; }
 .rec {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: .9rem 1rem; box-shadow: var(--shadow);
+  padding: 1rem 1.1rem;
 }
 .rec-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; flex-wrap: wrap; }
 .rec-score { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--accent); }
@@ -344,7 +411,38 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .week-item .hrs { font-family: var(--mono); font-size: .76rem; color: var(--text-dim); white-space: nowrap; }
 .tag-continues { font-size: .68rem; color: var(--warn); }
 
+/* --------------------------------------------------------------- account */
+.account-box { display: flex; flex-direction: column; gap: .35rem; }
+.account-row {
+  display: flex; justify-content: space-between; gap: 1rem;
+  padding: .35rem 0; border-bottom: 1px dashed var(--border); font-size: .88rem;
+}
+.account-row:last-of-type { border-bottom: none; }
+.account-label { color: var(--text-dim); }
+.account-value { font-weight: 600; text-align: right; word-break: break-all; }
+.account-box .btn { align-self: flex-start; margin-top: .5rem; }
+
 /* ---------------------------------------------------------- achievements */
+/* Streaks sit with the level, not among the badges: showing up repeatedly is
+   the behaviour the whole roadmap depends on. */
+.streak-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: .5rem; margin: .8rem 0 .5rem;
+}
+.streak {
+  text-align: center; padding: .55rem .4rem; border-radius: 9px;
+  border: 1px solid var(--border); background: var(--surface-2);
+}
+.streak.is-on { border-color: var(--warn); background: var(--warn-soft); }
+.streak-value {
+  font-size: 1.35rem; font-weight: 680; line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.streak.is-on .streak-value { color: var(--warn); }
+.streak-label {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-dim);
+}
 .xp-wrap { margin-bottom: .9rem; }
 .xp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .xp-level { font-weight: 680; }
@@ -352,19 +450,24 @@ main { padding: 1.25rem; max-width: 1180px; margin: 0 auto; }
 .xp-track { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-top: .35rem; }
 .xp-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--good)); }
 .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .5rem; }
-.badge {
+/* Its own class, not `.badge`: that name belongs to the one-line status pills
+   in the header, which set `white-space: nowrap`. Sharing it made these
+   descriptions refuse to wrap and spill over the card beside them. */
+.ach-badge {
   display: flex; gap: .55rem; align-items: flex-start; padding: .55rem .65rem;
   border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2);
+  min-width: 0;
 }
-.badge.earned { background: var(--good-soft); border-color: transparent; }
-.badge .icon { font-size: 1.25rem; line-height: 1.1; filter: grayscale(1); opacity: .45; }
-.badge.earned .icon { filter: none; opacity: 1; }
-.badge .n { font-weight: 620; font-size: .84rem; }
-.badge .d { font-size: .76rem; color: var(--text-dim); }
+.ach-badge.earned { background: var(--good-soft); border-color: transparent; }
+.ach-badge .icon { font-size: 1.25rem; line-height: 1.1; filter: grayscale(1); opacity: .45; }
+.ach-badge.earned .icon { filter: none; opacity: 1; }
+.ach-badge > div { min-width: 0; }
+.ach-badge .n { font-weight: 620; font-size: .84rem; }
+.ach-badge .d { font-size: .76rem; color: var(--text-dim); }
 
 /* --------------------------------------------------------------- sign in */
 body.is-gated { overflow: hidden; }
-body.is-gated .topbar, body.is-gated .tabs, body.is-gated main { display: none; }
+body.is-gated .app-header, body.is-gated main { display: none; }
 
 .auth-gate {
   position: fixed; inset: 0; z-index: 90; overflow-y: auto;
@@ -465,11 +568,11 @@ body.is-gated .topbar, body.is-gated .tabs, body.is-gated main { display: none; 
   animation: sweep .6s cubic-bezier(.2, .7, .3, 1) both;
 }
 
-.item, .rec, .path-card, .kpi, .badge-grid .badge {
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+.item, .rec, .path-card, .kpi, .badge-grid .ach-badge {
+  transition: border-color .18s ease, background .18s ease;
 }
-.item:hover, .rec:hover, .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.badge-grid .badge:hover { transform: translateY(-2px) scale(1.01); }
+.item:hover, .rec:hover, .kpi:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.badge-grid .ach-badge:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
 .btn { transition: transform .12s ease, background .15s ease, filter .15s ease; }
 .btn:active { transform: scale(.97); }
 .tab { transition: color .15s ease, border-color .15s ease; }
@@ -602,14 +705,25 @@ body.is-gated .topbar, body.is-gated .tabs, body.is-gated main { display: none; 
 .gap-explanation { margin: .35rem 0 .5rem; font-size: .86rem; }
 
 /* ----------------------------------------------------------------- toast */
+/* The resting offset is measured from the bottom inset, not as a bare
+   percentage of the box: an empty toast is only ~18px tall, so `120%` left it
+   peeking above the edge as a small blank pill on every page. */
 .toast {
-  position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%) translateY(120%);
+  position: fixed; left: 50%; bottom: 1.5rem;
+  transform: translateX(-50%) translateY(calc(100% + 2rem));
   background: var(--text); color: var(--bg); padding: .55rem 1rem; border-radius: 8px;
   font-size: .85rem; z-index: 60; transition: transform .25s ease; max-width: 90vw;
+  pointer-events: none;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 .empty { color: var(--text-dim); font-size: .9rem; padding: 1.5rem; text-align: center; }
+.empty-actionable {
+  display: flex; flex-direction: column; align-items: center; gap: .8rem;
+  padding: 2.2rem 1.5rem; border: 1px dashed var(--border); border-radius: var(--radius);
+}
+.empty-msg { font-size: var(--step-3); color: var(--text); max-width: 46ch; }
+.empty-actions { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
 
 @media (max-width: 900px) {
   #panel-chat.is-active { grid-template-columns: 1fr; }

@@ -319,9 +319,36 @@ def test_chat_endpoint_survives_a_dead_provider(monkeypatch, client):
     learner_id = client.post("/api/learners", json={}).json()["learner_id"]
     body = client.post(
         "/api/chat",
-        json={"learner_id": learner_id, "message": "I want to be a data analyst"},
+        json={
+            "learner_id": learner_id,
+            "message": "I want to be a data analyst, a beginner with 8 hours a week",
+        },
     ).json()
 
     assert body["source"] == "rules"
     assert body["path_generated"] is True
     assert body["profile"]["goal_id"] == "goal-data-analyst"
+
+
+def test_token_budgets_are_reservations_not_wishes():
+    """Providers rate-limit on tokens *requested*, not tokens used.
+
+    Measured replies run 100-270 tokens. The budgets were 4000 and 3000, which
+    booked roughly twenty times what they spent — on Groq's free tier that was
+    the difference between one message a minute and three. Keep them sized for
+    the replies this app actually produces.
+    """
+    from backend.config import CHAT_MAX_TOKENS, EXTRACT_MAX_TOKENS
+
+    #: Comfortably above the longest reply observed (~270 tokens), while
+    #: leaving room for a model that thinks before answering.
+    assert 600 <= CHAT_MAX_TOKENS <= 2000, (
+        f"CHAT_MAX_TOKENS={CHAT_MAX_TOKENS} is out of proportion to a "
+        "100-270 token reply"
+    )
+    #: The extraction call returns one small JSON object.
+    assert 400 <= EXTRACT_MAX_TOKENS <= 1500, (
+        f"EXTRACT_MAX_TOKENS={EXTRACT_MAX_TOKENS} is out of proportion to a "
+        "small JSON payload"
+    )
+    assert EXTRACT_MAX_TOKENS <= CHAT_MAX_TOKENS

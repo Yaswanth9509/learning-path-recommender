@@ -23,7 +23,16 @@ def _new_learner(client) -> str:
 
 def _with_goal(client, message="I want to be a data analyst") -> str:
     learner_id = _new_learner(client)
-    client.post("/api/chat", json={"learner_id": learner_id, "message": message})
+    body = client.post(
+        "/api/chat", json={"learner_id": learner_id, "message": message}
+    ).json()
+    # The assistant asks for experience and weekly hours before building
+    # anything. Answer it, so callers get a learner who has a path.
+    if not body["path_generated"]:
+        client.post("/api/chat", json={
+            "learner_id": learner_id,
+            "message": "I am a beginner with 8 hours a week",
+        })
     return learner_id
 
 
@@ -279,14 +288,87 @@ def test_vague_goals_are_asked_about_not_guessed(client, message):
     "I want to be a machine learning engineer",
     "I want to be a devops engineer",
 ])
-def test_clear_goals_are_never_interrupted_by_a_question(client, message):
+def test_clear_goals_are_never_asked_which_goal_was_meant(client, message):
+    """A goal we can read is accepted outright.
+
+    What follows is the intake question — experience and weekly hours — not
+    another round of "which of these did you mean?".
+    """
     learner_id = _new_learner(client)
     body = client.post(
         "/api/chat", json={"learner_id": learner_id, "message": message}
     ).json()
 
-    assert body["needs_clarification"] is False
+    assert body["profile"]["goal_id"] is not None, "the goal was not accepted"
+    assert "did you mean" not in body["reply"].lower()
+    assert "which outcome" not in body["reply"].lower()
+
+
+@pytest.mark.parametrize("message", [
+    "I want to be a data analyst",
+    "I want to be a frontend engineer",
+])
+def test_a_goal_alone_is_asked_about_before_a_path_is_built(client, message):
+    """Experience and weekly hours are the learner's to state, not ours to guess."""
+    learner_id = _new_learner(client)
+    asked = client.post(
+        "/api/chat", json={"learner_id": learner_id, "message": message}
+    ).json()
+
+    assert asked["path_generated"] is False
+    assert asked["needs_clarification"] is True
+    assert "You decide" in asked["suggested_replies"]
+
+    built = client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "I am a beginner with 6 hours a week",
+    }).json()
+    assert built["path_generated"] is True
+    assert built["profile"]["weekly_hours"] == 6
+    assert built["profile"]["experience_level"] == "beginner"
+
+
+def test_the_learner_can_hand_the_choice_back(client):
+    """"You decide" is the one licence to assume, and it builds immediately."""
+    learner_id = _new_learner(client)
+    body = client.post("/api/chat", json={
+        "learner_id": learner_id,
+        "message": "I want to be a data analyst, you decide the rest",
+    }).json()
+
     assert body["path_generated"] is True
+    assert body["profile"]["weekly_hours"] == assistant.INTAKE_DEFAULT_HOURS
+    assert body["profile"]["experience_level"] == assistant.INTAKE_DEFAULT_LEVEL
+
+
+def test_an_unanswered_intake_question_still_names_its_assumptions(client):
+    """If we fall back to defaults, the reply says which ones and why."""
+    learner_id = _new_learner(client)
+    client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "I want to be a data analyst",
+    })
+    built = client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "just 4 hours a week",
+    }).json()
+
+    assert built["path_generated"] is True
+    assert built["profile"]["weekly_hours"] == 4
+    # Hours were given, the level was not — so the level is the stated guess.
+    assert "assumed" in built["reply"].lower()
+    assert assistant.INTAKE_DEFAULT_LEVEL in built["reply"].lower()
+
+
+def test_a_question_asked_mid_intake_is_answered_not_swallowed(client):
+    """The intake question must not turn every follow-up into a path build."""
+    learner_id = _new_learner(client)
+    client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "I want to be a data analyst",
+    })
+    body = client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "what does a data analyst actually do?",
+    }).json()
+
+    assert body["path_generated"] is False
+    assert body["profile"]["goal_id"] == "goal-data-analyst"
 
 
 def test_a_suggested_reply_resolves_the_ambiguity(client):
@@ -299,9 +381,14 @@ def test_a_suggested_reply_resolves_the_ambiguity(client):
     answer = client.post("/api/chat", json={
         "learner_id": learner_id, "message": first["suggested_replies"][0],
     }).json()
-    assert answer["needs_clarification"] is False
-    assert answer["path_generated"] is True
-    assert answer["profile"]["goal_id"] is not None
+    assert answer["profile"]["goal_id"] is not None, "the reply did not resolve the goal"
+
+    # Resolving the goal hands over to the intake question, which builds it.
+    built = client.post("/api/chat", json={
+        "learner_id": learner_id, "message": "I am a beginner with 8 hours a week",
+    }).json()
+    assert built["needs_clarification"] is False
+    assert built["path_generated"] is True
 
 
 def test_follow_up_questions_are_never_treated_as_ambiguous_goals(client):

@@ -395,6 +395,23 @@ class Badge(BaseModel):
     hint: str = ""
 
 
+class Streak(BaseModel):
+    """Consecutive days with at least one item completed.
+
+    Counted from completion timestamps that already exist, so it costs no new
+    storage and cannot disagree with the progress record.
+    """
+
+    #: Days in the run ending today or yesterday. Zero once a day is missed.
+    current_days: int = 0
+    #: The best run ever recorded, which a broken streak does not reset.
+    best_days: int = 0
+    #: Distinct days studied in the last seven.
+    days_this_week: int = 0
+    #: True when today already counts, so the UI can say "keep it going".
+    active_today: bool = False
+
+
 class Achievements(BaseModel):
     xp: int
     level: int
@@ -404,6 +421,10 @@ class Achievements(BaseModel):
     badges: list[Badge]
     earned_count: int
     total_count: int
+    streak: Streak = Field(default_factory=Streak)
+    #: Stages finished, and how many there are, for per-stage rewards.
+    stages_completed: int = 0
+    stages_total: int = 0
 
 
 # ----------------------------------------------------------------- assistant

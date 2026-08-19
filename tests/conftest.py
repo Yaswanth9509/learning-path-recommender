@@ -2,7 +2,8 @@
 
 The LLM is disabled for every test so results are deterministic and no test ever
 touches the network or spends tokens. The rule engine is exercised instead —
-which is exactly the path that must work when no API key is configured.
+which is exactly the path that must work when no API key is configured. The
+database is pinned to SQLite for the same reason.
 """
 
 from __future__ import annotations
@@ -18,6 +19,11 @@ sys.path.insert(0, str(ROOT))
 
 os.environ["DISABLE_LLM"] = "1"
 os.environ.pop("ANTHROPIC_API_KEY", None)
+
+# Empty, not absent: `config.load_dotenv` fills in anything the environment does
+# not already define, so popping this would let a real `DATABASE_URL` from .env
+# reach the tests and send every query to a Postgres server over the network.
+os.environ["DATABASE_URL"] = ""
 
 # The suite fires far more requests per minute than a human ever would, so the
 # limiter is off by default here. `tests/test_security.py` turns it back on

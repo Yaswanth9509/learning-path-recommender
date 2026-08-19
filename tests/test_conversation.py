@@ -22,6 +22,18 @@ def _say(client, learner_id: str, message: str) -> dict:
     ).json()
 
 
+def _start_path(client, learner_id: str, message: str) -> dict:
+    """State a goal and answer the intake question, leaving a built path.
+
+    The assistant asks for experience and weekly hours before it builds
+    anything, so a goal statement on its own is deliberately not enough.
+    """
+    body = _say(client, learner_id, message)
+    if not body["path_generated"]:
+        body = _say(client, learner_id, "I am a beginner with 8 hours a week")
+    return body
+
+
 # ---------------------------------------------------------------- typos
 @pytest.mark.parametrize("message,expected", [
     ("i wnat to be data analist", "goal-data-analyst"),
@@ -58,7 +70,10 @@ def test_shorthand_is_expanded_before_matching():
 
 def test_a_typo_still_builds_a_path_end_to_end(client):
     learner_id = _new_learner(client)
-    body = _say(client, learner_id, "i wnat to be a data analist, 6 hrs a week")
+    # The hours are stated, so only the experience level is still missing.
+    asked = _say(client, learner_id, "i wnat to be a data analist, 6 hrs a week")
+    assert asked["path_generated"] is False
+    body = _say(client, learner_id, "I am a complete beginner")
     assert body["path_generated"] is True
     assert body["profile"]["goal_id"] == "goal-data-analyst"
     assert body["profile"]["weekly_hours"] == 6
@@ -96,7 +111,7 @@ def test_i_dont_know_offers_a_way_in_rather_than_repeating_the_question(client):
 
 def test_frustration_is_answered_with_something_actionable(client):
     learner_id = _new_learner(client)
-    _say(client, learner_id, "I want to be a data analyst")
+    _start_path(client, learner_id, "I want to be a data analyst")
     reply = _say(client, learner_id, "this is useless").lower() if False else _say(
         client, learner_id, "this is useless")["reply"].lower()
     assert any(word in reply for word in ("hours", "profile", "goal", "change"))
@@ -104,7 +119,7 @@ def test_frustration_is_answered_with_something_actionable(client):
 
 def test_thanks_is_brief(client):
     learner_id = _new_learner(client)
-    _say(client, learner_id, "I want to be a data analyst")
+    _start_path(client, learner_id, "I want to be a data analyst")
     reply = _say(client, learner_id, "thanks")["reply"]
     assert len(reply) < 300
 
@@ -189,7 +204,7 @@ def test_declares_existing_knowledge():
 # ------------------------------------------------------------- reassurance
 def test_feeling_overwhelmed_gets_a_concrete_answer(client):
     learner_id = _new_learner(client)
-    _say(client, learner_id, "I want to be a machine learning engineer")
+    _start_path(client, learner_id, "I want to be a machine learning engineer")
 
     reply = _say(client, learner_id, "is it too much for me")["reply"].lower()
     assert "hours" in reply
@@ -202,7 +217,7 @@ def test_the_name_reads_as_one_sentence(client):
     learner_id = _new_learner(client)
     client.patch(f"/api/learners/{learner_id}/profile?regenerate=false",
                  json={"name": "Priya"})
-    _say(client, learner_id, "I want to be a data analyst")
+    _start_path(client, learner_id, "I want to be a data analyst")
 
     reply = _say(client, learner_id, "wat shud i do first")["reply"]
     assert "Priya, " in reply

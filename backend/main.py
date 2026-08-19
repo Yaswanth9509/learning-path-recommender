@@ -23,6 +23,7 @@ from . import (
     profiling,
     recommender,
     security,
+    sqlstore,
 )
 from .catalog import Catalog, CatalogError, get_catalog
 from .db import Database, get_db
@@ -329,6 +330,12 @@ def health() -> dict:
             "items": len(catalog.items),
             "goals": len(catalog.goals),
         },
+        # Which engine is configured, read from the environment rather than
+        # from a live connection. This is a liveness probe — Render points its
+        # health check here — so it must answer while a serverless database is
+        # suspended. Waking Neon took over fifteen seconds on a cold start,
+        # which would have failed the deploy's health check.
+        "storage": "postgres" if sqlstore.database_url() else "sqlite",
         "security": security.status(),
     }
 
@@ -561,7 +568,10 @@ def chat(
                 interpretation=interpretation,
                 profile=db.get_profile(profile.learner_id),
                 path_generated=False,
-                source="rules",
+                # Not a fallback: the assistant is deliberately asking rather
+                # than guessing, and the UI must not report it as the model
+                # having failed.
+                source="assistant",
                 suggested_replies=options,
                 needs_clarification=True,
             )
@@ -581,9 +591,16 @@ def chat(
         and interpretation.confidence >= assistant.GOAL_SWITCH_CONFIDENCE
         and assistant.reads_as_goal_statement(message)
     )
+    # The goal is known but no path exists yet, which is the gap between the
+    # intake question and its answer. A path that is merely missing still
+    # counts as a goal statement; one we are deliberately waiting on does not,
+    # or every follow-up question would rebuild the path under a new goal.
+    answering_intake = profile.goal_id is not None and existing_path is None
+    first_goal = profile.goal_id is None and existing_path is None
+
     is_goal_statement = interpretation.goal_id is not None and (
         profile.goal_id is None
-        or existing_path is None
+        or (existing_path is None and not answering_intake)
         or ((switching or restated) and interpretation.goal_id != profile.goal_id)
     )
 
@@ -612,6 +629,27 @@ def chat(
             profile.preferred_formats = interpretation.preferred_formats
         db.save_profile(profile)
 
+        # Where the path starts and how long it runs are the learner's to say.
+        # Ask once, before building anything — unless they told us to choose.
+        missing = assistant.intake_gaps(interpretation)
+        if first_goal and missing and not assistant.defers_to_assistant(message):
+            question, options = assistant.intake_question(
+                catalog.goals[profile.goal_id], missing
+            )
+            db.add_message(profile.learner_id, "assistant", question)
+            return ChatResponse(
+                reply=question,
+                interpretation=interpretation,
+                profile=db.get_profile(profile.learner_id),
+                path_generated=False,
+                # Not a fallback: the assistant is deliberately asking rather
+                # than guessing, and the UI must not report it as the model
+                # having failed.
+                source="assistant",
+                suggested_replies=options,
+                needs_clarification=True,
+            )
+
         path = _regenerate(
             catalog, db, profile, notes=["Path created from your goal description."]
         )
@@ -620,6 +658,43 @@ def chat(
             catalog, profile, path, interpretation, use_provider,
             all_paths=db.list_paths(profile.learner_id),
         )
+    elif answering_intake and (
+        interpretation.experience_level
+        or interpretation.weekly_hours
+        or assistant.defers_to_assistant(message)
+    ):
+        # Only a message that actually answers the intake question builds the
+        # path. Anything else — a question, a change of subject — is answered
+        # normally below, and the intake question simply stays open.
+        if interpretation.experience_level:
+            profile.experience_level = interpretation.experience_level
+        if interpretation.weekly_hours:
+            profile.weekly_hours = interpretation.weekly_hours
+        db.save_profile(profile)
+
+        # Anything still unstated keeps the profile default, which is already
+        # in place — so nothing is overwritten here. A fact only counts as
+        # assumed when neither the goal message nor this answer supplied it.
+        already_stated = assistant.interpret_goal(
+            catalog, profile.goal_text or "", use_provider=False
+        )
+        assumed = [
+            gap
+            for gap in assistant.intake_gaps(interpretation)
+            if gap in assistant.intake_gaps(already_stated)
+        ]
+
+        path = _regenerate(
+            catalog, db, profile, notes=["Path created from your goal description."]
+        )
+        path_generated = True
+        reply, source = assistant.acknowledge_goal(
+            catalog, profile, path, interpretation, use_provider,
+            all_paths=db.list_paths(profile.learner_id),
+        )
+        # Only flag an assumption the learner did not ask us to make.
+        if assumed and not assistant.defers_to_assistant(message):
+            reply += assistant.intake_assumption_note(assumed)
     else:
         reply, source = assistant.answer(
             catalog,

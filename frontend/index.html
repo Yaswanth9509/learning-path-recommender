@@ -59,6 +59,7 @@
   </div>
 </div>
 
+<div class="app-header">
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark" aria-hidden="true">◈</span>
@@ -68,19 +69,25 @@
     </div>
   </div>
   <div class="topbar-right">
-    <div class="engine-switch" role="group" aria-label="Assistant engine">
-      <button id="engineAuto" class="seg" type="button" data-engine="auto">Gemini</button>
-      <button id="engineRules" class="seg" type="button" data-engine="rules">Standard</button>
+    <div class="topbar-group" role="group" aria-label="Assistant engine">
+      <div class="engine-switch">
+        <button id="engineAuto" class="seg" type="button" data-engine="auto">Gemini</button>
+        <button id="engineRules" class="seg" type="button" data-engine="rules">Standard</button>
+      </div>
+      <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
     </div>
-    <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
-    <select id="learnerSelect" aria-label="Select learner"></select>
-    <button id="renameLearnerBtn" class="btn btn-ghost" type="button"
-            title="Rename this learner">Rename</button>
-    <button id="newLearnerBtn" class="btn btn-ghost" type="button">New learner</button>
-    <span id="userChip" class="user-chip" hidden></span>
-    <button id="keepWorkBtn" class="btn btn-primary" type="button" hidden
-            title="Create an account and keep everything you have done">Save my work</button>
-    <button id="signOutBtn" class="btn btn-ghost" type="button" hidden>Sign out</button>
+    <div class="topbar-group" role="group" aria-label="Learner">
+      <select id="learnerSelect" aria-label="Select learner"></select>
+      <button id="renameLearnerBtn" class="btn btn-ghost btn-mini" type="button"
+              title="Rename this learner">Rename</button>
+      <button id="newLearnerBtn" class="btn btn-ghost btn-mini" type="button">New learner</button>
+    </div>
+    <div class="topbar-group" role="group" aria-label="Account">
+      <span id="userChip" class="user-chip" hidden></span>
+      <button id="keepWorkBtn" class="btn btn-primary" type="button" hidden
+              title="Create an account and keep everything you have done">Save my work</button>
+      <button id="signOutBtn" class="btn btn-ghost btn-mini" type="button" hidden>Sign out</button>
+    </div>
   </div>
 </header>
 
@@ -93,6 +100,7 @@
   <button class="tab" role="tab" data-tab="explore">Recommendations</button>
   <button class="tab" role="tab" data-tab="profile">Profile</button>
 </nav>
+</div>
 
 <main>
   <!-- ------------------------------------------------------------ CHAT -->
@@ -121,6 +129,10 @@
 
   <!-- ------------------------------------------------------------ PATH -->
   <section id="panel-path" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Your path</h2>
+      <p>Every step in prerequisite order, with the reason it earned its place.</p>
+    </div>
     <div id="pathSwitcher" class="path-switcher"></div>
     <div id="pathHeader" class="path-header"></div>
     <div id="gapBox" class="gap-box"></div>
@@ -129,6 +141,10 @@
 
   <!-- ----------------------------------------------------- SKILL GRAPH -->
   <section id="panel-graph" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Skill graph</h2>
+      <p>What depends on what, and how far through the chain you are.</p>
+    </div>
     <div class="card">
       <h3>Prerequisite graph</h3>
       <p class="hint">
@@ -145,12 +161,20 @@
 
   <!-- ----------------------------------------------------- WEEKLY PLAN -->
   <section id="panel-plan" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Weekly plan</h2>
+      <p>Your roadmap divided into the hours you actually said you have.</p>
+    </div>
     <div id="planHeader" class="path-header"></div>
     <div id="planWeeks" class="plan-weeks"></div>
   </section>
 
   <!-- ------------------------------------------------------- DASHBOARD -->
   <section id="panel-dashboard" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Dashboard</h2>
+      <p>Progress, pace and what to do next, measured against the plan.</p>
+    </div>
     <div id="dashKpis" class="kpi-row"></div>
     <div class="card">
       <h3>Your paths</h3>
@@ -182,6 +206,10 @@
 
   <!-- --------------------------------------------------------- EXPLORE -->
   <section id="panel-explore" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Recommendations</h2>
+      <p>Ranked against your goal and your gaps, with the score broken down.</p>
+    </div>
     <div class="filters">
       <label>Type
         <select id="recType">
@@ -202,9 +230,23 @@
 
   <!-- --------------------------------------------------------- PROFILE -->
   <section id="panel-profile" class="panel" role="tabpanel">
+    <div class="panel-head">
+      <h2>Profile</h2>
+      <p>Your account, and the learner whose plan you are looking at.</p>
+    </div>
+    <div class="card">
+      <h3>Your account</h3>
+      <p class="hint">Signing in is what keeps your work. Everything below belongs
+        to this account and is invisible to anyone else.</p>
+      <div id="accountBox" class="account-box"></div>
+    </div>
     <div class="dash-grid">
       <div class="card">
-        <h3>Learner profile</h3>
+        <h3>This learner</h3>
+        <p class="hint">A <strong>learner</strong> is a person you are planning
+          for — usually yourself. One account can keep several, each with their
+          own goals and progress, so you can plan for someone else without
+          mixing it into your own path.</p>
         <form id="profileForm" class="profile-form">
           <label>Name <input type="text" id="pfName" /></label>
           <label>Goal

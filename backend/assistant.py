@@ -147,7 +147,9 @@ def _interpretation_system(catalog: Catalog) -> str:
         "want to learn, and map it onto a fixed catalog.\n\n"
         "Rules:\n"
         "- goal_id MUST be one of the listed goal ids, or null if none fits.\n"
-        "- experience_level is one of beginner, intermediate, advanced, or null.\n"
+        "- experience_level is one of beginner, intermediate, advanced, or null. "
+        "Give it only if the learner says how much they already know. Naming a "
+        "goal is not a statement of experience — use null and let the app ask.\n"
         "- declared_skills are skills the learner says they ALREADY have.\n"
         "- extra_target_skills are catalog skills they explicitly want that the "
         "goal does not already imply. Use skill ids only.\n"
@@ -548,6 +550,114 @@ def clarification(catalog: Catalog, text: str) -> tuple[str, list[str]] | None:
             "here are some common destinations:"
         )
     return question, replies
+
+
+# The values used when the learner asks us to choose. They are the profile
+# defaults too, but naming them here makes it explicit that reaching for them
+# is a decision, not an accident.
+INTAKE_DEFAULT_LEVEL = "beginner"
+INTAKE_DEFAULT_HOURS = 8
+
+_DEFER_PHRASES = (
+    "you decide", "you choose", "you pick", "your call", "up to you",
+    "whatever you think", "whatever you like", "you know best", "i don't mind",
+    "i dont mind", "no preference", "doesn't matter", "doesnt matter",
+    "just pick", "just choose", "surprise me", "use the default",
+    "your choice", "either way", "anything is fine", "whatever works",
+)
+
+
+def defers_to_assistant(text: str) -> bool:
+    """True when the learner has explicitly handed the decision back to us.
+
+    Assuming a level and a study budget is only acceptable when asked for; this
+    is the phrase test that licenses it.
+    """
+    return _mentions(_normalise(text), _DEFER_PHRASES)
+
+
+def intake_gaps(interpretation: GoalInterpretation) -> list[str]:
+    """Which of the two facts that shape a path the learner never gave us.
+
+    Experience level decides where the path starts and weekly hours decide how
+    long it runs. Guessing either one quietly produces a plan built for
+    somebody else, so the caller asks instead.
+    """
+    missing = []
+    if not interpretation.experience_level:
+        missing.append("experience")
+    if not interpretation.weekly_hours:
+        missing.append("time")
+    return missing
+
+
+_INTAKE_REPLIES: dict[str, list[str]] = {
+    "experience": [
+        "I am a complete beginner",
+        "I know some of the basics",
+        "I already work in this area",
+    ],
+    "time": [
+        "About 4 hours a week",
+        "About 8 hours a week",
+        "About 15 hours a week",
+    ],
+    "experience+time": [
+        "Complete beginner, about 5 hours a week",
+        "Some of the basics, about 8 hours a week",
+        "Already working in it, about 15 hours a week",
+    ],
+}
+
+
+def intake_question(goal: Goal, missing: list[str]) -> tuple[str, list[str]]:
+    """Ask for the missing intake facts before building anything.
+
+    Returns the question and the replies that would answer it in one tap. The
+    shape mirrors `clarification()`: ask precisely, explain the cost of getting
+    it wrong, and make answering cheap.
+    """
+    key = "+".join(missing)
+    replies = list(_INTAKE_REPLIES.get(key, _INTAKE_REPLIES["experience+time"]))
+    replies.append("You decide")
+
+    if key == "experience+time":
+        question = (
+            f"{goal.title} it is. Two things decide what this path actually "
+            "looks like, and I would rather ask than guess: how much of this "
+            "do you already know, and how much time can you give it in a "
+            "normal week? The first sets where the path starts, the second "
+            "sets how long it runs."
+        )
+    elif key == "experience":
+        question = (
+            f"{goal.title} it is. How much of this do you already know? That "
+            "decides where the path starts — begin too high and you will be "
+            "lost, too low and you will be bored."
+        )
+    else:
+        question = (
+            f"{goal.title} it is. How much time can you give this in a normal "
+            "week? I would rather plan against your real week than an "
+            "optimistic one, so the deadlines mean something."
+        )
+    return question, replies
+
+
+def intake_assumption_note(assumed: list[str]) -> str:
+    """Say plainly which numbers we picked, so they can be corrected."""
+    if not assumed:
+        return ""
+    parts = []
+    if "experience" in assumed:
+        parts.append(f"you are starting as a {INTAKE_DEFAULT_LEVEL}")
+    if "time" in assumed:
+        parts.append(f"you have about {INTAKE_DEFAULT_HOURS} hours a week")
+    joined = " and ".join(parts)
+    return (
+        f"\n\nI have assumed {joined}. Tell me if either is wrong and I will "
+        "rebuild the path around the real numbers."
+    )
 
 
 def _interpret_with_rules(catalog: Catalog, text: str) -> GoalInterpretation:

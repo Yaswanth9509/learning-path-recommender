@@ -283,3 +283,61 @@ def test_complete_returns_provider_name(monkeypatch):
 
 def test_complete_with_no_provider_returns_nones():
     assert llm.complete("S", MESSAGES, 50) == (None, None)
+
+
+def test_every_request_identifies_the_client():
+    """urllib's default User-Agent gets the request blocked before auth.
+
+    Groq sits behind Cloudflare, which answers "403 error code: 1010" to
+    `Python-urllib/3.x` without ever looking at the key. The app then degrades
+    to the rule engine, which reads as a bad model rather than a blocked
+    request.
+    """
+    from backend import llm
+
+    captured = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self):
+            return b'{"ok": true}'
+
+    def fake_urlopen(request, timeout=None):
+        captured["headers"] = dict(request.header_items())
+        return FakeResponse()
+
+    original = llm.urllib.request.urlopen
+    llm.urllib.request.urlopen = fake_urlopen
+    try:
+        llm._post_json("https://example.invalid/v1", {"a": 1}, {})
+    finally:
+        llm.urllib.request.urlopen = original
+
+    # urllib title-cases header names.
+    agent = {k.lower(): v for k, v in captured["headers"].items()}.get("user-agent", "")
+    assert agent, "no User-Agent was sent"
+    assert "python-urllib" not in agent.lower(), (
+        f"the default urllib agent is sent and will be blocked: {agent!r}"
+    )
+    assert agent == llm.USER_AGENT
+
+
+def test_no_provider_pins_a_retired_model_id():
+    """A pinned id that the provider retires 404s for every user.
+
+    Groq's `llama-3.3-70b-versatile` disappeared exactly this way, and Gemini's
+    `gemini-2.0-flash` before it — hence the `-latest` alias there.
+    """
+    from backend.llm import DEFAULT_MODELS
+
+    assert DEFAULT_MODELS["groq"] != "llama-3.3-70b-versatile", (
+        "this Groq model id no longer exists"
+    )
+    assert "latest" in DEFAULT_MODELS["gemini"], (
+        "the Gemini default must stay on a -latest alias"
+    )

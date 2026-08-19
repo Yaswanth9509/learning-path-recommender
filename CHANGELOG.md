@@ -3,6 +3,71 @@
 All notable changes to this project are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] — 2026-08-19
+
+Accounts that survive a restart, a catalogue that is not only for developers,
+and a pass over the interface for clarity rather than motion.
+
+### Added
+
+- **Accounts, sessions and per-user isolation.** Register, sign in, or use the
+  app as a guest; every learner, path and message is scoped to one account and
+  invisible to any other. A guest can turn into a real account in place,
+  keeping everything they have already done.
+- **Several paths per learner.** Up to three goals run side by side with one
+  active at a time, switchable from the Path tab and visible on the dashboard.
+- **The assistant asks before it assumes.** Experience level and weekly hours
+  are requested once, up front, because they decide where a path starts and how
+  long it runs. Say "you decide" and it chooses, and says which numbers it
+  chose. Previously it silently assumed beginner and eight hours a week.
+- **Postgres support via `DATABASE_URL`.** The same SQL runs on either engine;
+  with the variable unset the app is stdlib `sqlite3` exactly as before. A
+  deployment needs it: a free instance has no persistent disk, so a SQLite file
+  and every account in it are erased whenever the instance sleeps. Includes a
+  one-shot retry without `channel_binding` for hosts that refuse it, and
+  reconnection when a serverless database suspends an idle connection.
+- **Five domains outside software** — Business & Product, Marketing, Design,
+  Finance & Accounting, and Mathematics — bringing the catalogue to 85 skills,
+  139 items and 14 goals. Mathematics is a *subject* rather than a career,
+  which the catalogue previously had no example of.
+- **Empty tabs now offer a way forward.** "Set a goal in the Chat tab first"
+  was a dead end on five of the seven tabs and the first thing a visitor saw.
+  Each one now builds a worked example in one click, or jumps to the chat.
+- **`storage` in `/api/health`**, so a deployment can be checked rather than
+  assumed. `sqlite` on a disk-less host means state is lost on every sleep.
+
+### Fixed
+
+- **The dashboard overflowed into itself.** `.badge` was two components at
+  once: the one-line status pills in the header, which set
+  `white-space: nowrap`, and the multi-line achievement tiles. The tiles
+  inherited the nowrap and their descriptions ran through the card beside them
+  and off the panel, so the whole page scrolled sideways at narrow widths.
+  The tiles now carry their own class.
+- **`Rename`, `New learner` and `Save my work` did nothing.** All three were in
+  the markup, styled, and bound to no handler at all — `Save my work` had a
+  complete `upgradeGuest()` implementation that nothing ever called. A test now
+  fails if any button in the page has no handler.
+- **A blank pill floated at the bottom of every page.** The toast hid itself
+  with `translateY(120%)`, and 120% of an empty ~18px box does not clear a
+  1.5rem inset.
+- **Four database round trips ran one after another on every page load.** The
+  path, the path list and the conversation are independent; only the profile
+  has to come first. Invisible against a local file, about six seconds against
+  a database in another region.
+
+### Changed
+
+- **A type scale with actual steps in it.** Headings ran .95rem to 1.05rem
+  against 15px body text, so nothing led the eye and every card carried the
+  same weight. Cards are now separated by their border rather than by eight
+  identical shadows, and each tab states what it is.
+- **The header is grouped**, into the engine, the learner, and the account,
+  instead of eight controls in one undifferentiated row.
+- **`render.yaml` deploys to `ohio`**, matching the region of the database it
+  is pointed at. Serving from Singapore against a `us-east-2` database put a
+  cross-planet round trip on every query.
+
 ## [1.3.0] — 2026-08-18
 
 Deployment readiness, and a conversation layer that survives real users.
