@@ -205,7 +205,13 @@ class Database:
         return int(rows[0]["n"]) if rows else 0
 
     def adopt_orphan_learners(self, user_id: str) -> int:
-        """Give learners created before sign-in existed to their first owner."""
+        """Give every unowned learner to `user_id`.
+
+        A one-time migration for a database that predates accounts. It is not
+        safe to run automatically on a shared instance — an unowned learner is
+        just as likely to be an anonymous visitor's as it is to be a leftover —
+        so the caller opts in explicitly.
+        """
         with self._lock:
             cursor = self._conn.execute(
                 "UPDATE profiles SET user_id = ? WHERE user_id = ''", (user_id,)

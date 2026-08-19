@@ -164,6 +164,7 @@ $$(".auth-tab").forEach((tab) => {
     authMode = tab.dataset.auth;
     $$(".auth-tab").forEach((t) => t.classList.toggle("is-active", t === tab));
     $("#authNameRow").hidden = authMode !== "register";
+    $("#authRecoveryRow").hidden = authMode !== "register";
     $("#authSubmit").textContent = authMode === "register" ? "Create account" : "Sign in";
     $("#authPassword").autocomplete =
       authMode === "register" ? "new-password" : "current-password";
@@ -178,6 +179,8 @@ $("#authForm").addEventListener("submit", async (event) => {
     email: $("#authEmail").value.trim(),
     password: $("#authPassword").value,
     display_name: $("#authName").value.trim(),
+    recovery_question: $("#authQuestion").value.trim(),
+    recovery_answer: $("#authAnswer").value,
   };
   const submit = $("#authSubmit");
   submit.disabled = true;
@@ -190,6 +193,72 @@ $("#authForm").addEventListener("submit", async (event) => {
   } finally {
     submit.disabled = false;
   }
+});
+
+/* Recovery without a mail service: the account carries a question its holder
+   wrote, and an answer hashed like a password. Two steps, because the question
+   has to be fetched before it can be asked. */
+function showRecover(show) {
+  $("#recoverForm").hidden = !show;
+  $("#authForm").hidden = show;
+  $("#forgotBtn").hidden = show;
+  $$(".auth-tabs")[0].hidden = show;
+  if (!show) {
+    $("#recoverStep2").hidden = true;
+    $("#recoverError").hidden = true;
+    $("#recoverForm").reset();
+  }
+}
+
+function recoverError(message) {
+  const box = $("#recoverError");
+  box.textContent = message || "";
+  box.hidden = !message;
+}
+
+$("#forgotBtn").addEventListener("click", () => {
+  showRecover(true);
+  $("#recoverEmail").value = $("#authEmail").value.trim();
+  $("#recoverEmail").focus();
+});
+$("#recoverCancel").addEventListener("click", () => showRecover(false));
+
+$("#recoverLookup").addEventListener("click", async () => {
+  recoverError("");
+  const email = $("#recoverEmail").value.trim();
+  if (!email) { recoverError("Enter the email address on the account."); return; }
+  try {
+    const found = await api("/api/auth/recovery-question", {
+      method: "POST", body: JSON.stringify({ email }),
+    });
+    // The server answers with a question either way, so this never reveals
+    // whether an address is registered.
+    $("#recoverQuestion").textContent = found.question;
+    $("#recoverStep2").hidden = false;
+    $("#recoverAnswer").focus();
+  } catch (err) { recoverError(err.message); }
+});
+
+$("#recoverForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  recoverError("");
+  const body = {
+    email: $("#recoverEmail").value.trim(),
+    answer: $("#recoverAnswer").value,
+    password: $("#recoverPassword").value,
+  };
+  if (!body.answer || !body.password) {
+    recoverError("Answer the question and choose a new password."); return;
+  }
+  try {
+    await api("/api/auth/reset-password", { method: "POST", body: JSON.stringify(body) });
+    showRecover(false);
+    authMode = "login";
+    $("#authEmail").value = body.email;
+    $("#authPassword").value = "";
+    $("#authPassword").focus();
+    toast("Password changed. Sign in with the new one.", 5000);
+  } catch (err) { recoverError(err.message); }
 });
 
 $("#guestBtn").addEventListener("click", async () => {
@@ -415,6 +484,7 @@ async function selectLearner(id) {
   state.path = null;
 
   renderEngineSwitch();
+  graphGoalId = null;
 
   // The path, the path list and the conversation are three independent reads.
   // Awaited one after another they queued four round trips back to back, which
@@ -574,6 +644,17 @@ function skillName(id) {
 }
 
 /* ---------------------------------------------------------- several paths */
+/* Goals are careers, subjects, exams or certifications. Grouping the picker
+   by kind keeps a thirty-item list readable, and stops an exam reading as a
+   job title. */
+const KIND_ORDER = [
+  ["job", "Careers"],
+  ["exam", "Exams"],
+  ["certification", "Certifications"],
+  ["subject", "Subjects"],
+];
+const KIND_LABEL = { job: "Career", exam: "Exam", certification: "Certification", subject: "Subject" };
+
 const MAX_PATHS = 3;
 
 async function loadPaths() {
@@ -614,8 +695,17 @@ function renderPathSwitcher() {
     const picker = el("select", { class: "path-add", attrs: { "aria-label": "Add another goal" } });
     picker.appendChild(el("option", { text: "+ Add a goal", attrs: { value: "" } }));
     const taken = new Set(paths.map((p) => p.goal_id));
-    state.goals.filter((g) => !taken.has(g.id)).forEach((g) => {
-      picker.appendChild(el("option", { text: g.title, attrs: { value: g.id } }));
+    const available = state.goals.filter((g) => !taken.has(g.id));
+    // Thirty goals in one flat list is a wall. Group them by what finishing
+    // actually means, in the order people tend to look for them.
+    KIND_ORDER.forEach(([kind, label]) => {
+      const inKind = available.filter((g) => (g.kind || "job") === kind);
+      if (!inKind.length) return;
+      const group = el("optgroup", { attrs: { label } });
+      inKind.forEach((g) => {
+        group.appendChild(el("option", { text: g.title, attrs: { value: g.id } }));
+      });
+      picker.appendChild(group);
     });
     picker.addEventListener("change", () => {
       if (picker.value) addPath(picker.value);
@@ -702,7 +792,14 @@ function renderPath() {
   renderPathSwitcher();
   const path = state.path;
 
-  header.appendChild(el("div", { class: "path-title", text: path.goal_title }));
+  const goalMeta = (state.goals || []).find((g) => g.id === path.goal_id);
+  const title = el("div", { class: "path-title", text: path.goal_title });
+  if (goalMeta && KIND_LABEL[goalMeta.kind] && goalMeta.kind !== "job") {
+    title.appendChild(el("span", {
+      class: `goal-kind kind-${goalMeta.kind}`, text: KIND_LABEL[goalMeta.kind],
+    }));
+  }
+  header.appendChild(title);
   header.appendChild(el("div", { class: "path-summary", text: path.summary }));
   if (path.adaptation_notes && path.adaptation_notes.length) {
     header.appendChild(el("div", { class: "hint", text: "Latest change: " + path.adaptation_notes.join(" ") }));
@@ -1004,11 +1101,15 @@ function svgEl(tag, attrs = {}) {
   return node;
 }
 
+/* Which goal the graph is showing. Null means the active path. */
+let graphGoalId = null;
+
 async function loadGraph() {
   const host = $("#graphHost");
   const detail = $("#graphDetail");
   const legend = $("#graphLegend");
   host.innerHTML = ""; detail.innerHTML = ""; legend.innerHTML = "";
+  renderGraphSwitcher();
 
   if (!state.profile || !state.profile.goal_id) {
     host.appendChild(emptyWithStart("Set a goal and this fills in."));
@@ -1016,7 +1117,9 @@ async function loadGraph() {
   }
 
   let graph;
-  try { graph = await api(`/api/learners/${state.learnerId}/graph`); }
+  const query = new URLSearchParams();
+  if (graphGoalId) query.set("goal_id", graphGoalId);
+  try { graph = await api(`/api/learners/${state.learnerId}/graph?${query}`); }
   catch (err) { toast(err.message); return; }
 
   if (!graph.nodes.length) {
@@ -1037,8 +1140,34 @@ async function loadGraph() {
   detail.appendChild(el("div", { class: "m", text: "Click any skill to see what teaches it and what it unlocks." }));
 }
 
+/* A learner can run three goals at once, so the graph is not stuck on
+   whichever one is active. Same shape as the switcher on the Path tab. */
+function renderGraphSwitcher() {
+  const host = $("#graphSwitcher");
+  host.innerHTML = "";
+  const paths = state.paths || [];
+  if (paths.length < 2) return;
+
+  const active = graphGoalId || state.profile?.goal_id;
+  paths.forEach((p) => {
+    const chip = el("button", {
+      class: "path-chip" + (p.goal_id === active ? " is-selected" : "")
+        + (p.completed ? " is-done" : ""),
+      attrs: { type: "button", title: `Show the skill graph for ${p.goal_title}` },
+      on: { click: () => { graphGoalId = p.goal_id; loadGraph(); } },
+    }, [
+      el("span", { class: "path-chip-title", text: p.goal_title }),
+      el("span", { class: "path-chip-meta", text: `${Math.round(p.percent)}%` }),
+    ]);
+    const bar = el("span", { class: "path-chip-bar" });
+    bar.appendChild(el("span", { attrs: { style: `width:${p.percent}%` } }));
+    chip.appendChild(bar);
+    host.appendChild(chip);
+  });
+}
+
 function buildGraphSvg(graph, detail) {
-  const NW = 150, NH = 46, GAPX = 74, GAPY = 16, PADX = 26, PADY = 34;
+  const NW = 186, NH = 60, GAPX = 88, GAPY = 22, PADX = 30, PADY = 40;
   const colW = NW + GAPX;
   const width = PADX * 2 + graph.layer_count * NW + (graph.layer_count - 1) * GAPX;
   const height = PADY * 2 + graph.widest_layer * (NH + GAPY);
@@ -1105,11 +1234,11 @@ function buildGraphSvg(graph, detail) {
       class: `node-rect ${n.state}${n.is_target ? " target" : ""}`,
     }));
 
-    const name = svgEl("text", { x: p.x + 10, y: p.y + 19, class: "node-label" });
-    name.textContent = n.name.length > 24 ? n.name.slice(0, 23) + "…" : n.name;
+    const name = svgEl("text", { x: p.x + 14, y: p.y + 24, class: "node-label" });
+    name.textContent = n.name.length > 26 ? n.name.slice(0, 25) + "…" : n.name;
     group.appendChild(name);
 
-    const sub = svgEl("text", { x: p.x + 10, y: p.y + 34, class: "node-sub" });
+    const sub = svgEl("text", { x: p.x + 14, y: p.y + 43, class: "node-sub" });
     sub.textContent = n.state === "mastered"
       ? "✓ already held"
       : (n.milestone ? `stage ${n.milestone}` : n.domain);
@@ -1254,7 +1383,27 @@ function renderAccount() {
     el("span", { class: "account-value", text: value }),
   ]);
   box.appendChild(row("Signed in as", user.is_guest ? "Guest account" : user.email));
-  if (!user.is_guest && user.display_name) box.appendChild(row("Name", user.display_name));
+  if (!user.is_guest) {
+    const nameRow = row("Name", user.display_name || "not set");
+    nameRow.appendChild(el("button", {
+      class: "btn btn-mini btn-ghost", text: "Change",
+      attrs: { type: "button", title: "Change the name on this account" },
+      on: { click: renameAccount },
+    }));
+    box.appendChild(nameRow);
+
+    const recoveryRow = row(
+      "Recovery question",
+      user.has_recovery ? "set" : "not set — you could not reset your password",
+    );
+    recoveryRow.appendChild(el("button", {
+      class: "btn btn-mini btn-ghost",
+      text: user.has_recovery ? "Change" : "Set one",
+      attrs: { type: "button" },
+      on: { click: setRecoveryQuestion },
+    }));
+    box.appendChild(recoveryRow);
+  }
   box.appendChild(row("Learners", `${user.learners} of ${user.max_learners}`));
   box.appendChild(row("Goals per learner", `up to ${user.max_paths_per_learner}`));
 
@@ -1267,6 +1416,39 @@ function renderAccount() {
       attrs: { type: "button" }, on: { click: upgradeGuest },
     }));
   }
+}
+
+/* The account name, as distinct from a learner's name. `set_display_name`
+   existed on the server and nothing ever called it. */
+async function renameAccount() {
+  const current = state.user?.display_name || "";
+  const name = (window.prompt("Name on your account", current) || "").trim();
+  if (!name || name === current) return;
+  try {
+    state.user = await api("/api/auth/profile", {
+      method: "PATCH", body: JSON.stringify({ display_name: name }),
+    });
+    renderUserChip();
+    renderAccount();
+    toast(`Account name changed to ${state.user.display_name}.`);
+  } catch (err) { toast(err.message, 4000); }
+}
+
+/* The only way back into an account, so it can be set after the fact too. */
+async function setRecoveryQuestion() {
+  const question = (window.prompt(
+    "A question only you can answer", "What did I call my first bike?") || "").trim();
+  if (!question) return;
+  const answer = (window.prompt("Your answer (capitals and spacing do not matter)") || "").trim();
+  if (!answer) return;
+  try {
+    await api("/api/auth/recovery", {
+      method: "PUT", body: JSON.stringify({ question, answer }),
+    });
+    await refreshUser();
+    renderAccount();
+    toast("Recovery question saved.");
+  } catch (err) { toast(err.message, 4000); }
 }
 
 function renderAchievements(ach) {

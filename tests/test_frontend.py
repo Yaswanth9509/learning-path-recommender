@@ -149,12 +149,17 @@ def test_every_button_in_the_page_is_wired_to_something():
     for selector in re.findall(r"""closest\??\.?\(\s*["']([^"']+)["']""", JS):
         delegated.update(re.findall(r"\.([A-Za-z0-9_-]+)", selector))
 
+    # A `type="submit"` button is wired by its form, and every form in this
+    # page has a submit handler — asserted just below, so this cannot rot into
+    # a loophole.
     unwired = []
     for tag in re.findall(r"<button[^>]*>", HTML):
         found = re.search(r"""\bid=["']([A-Za-z0-9_-]+)["']""", tag)
         if not found:
             continue
         button = found.group(1)
+        if 'type="submit"' in tag:
+            continue  # its form's submit handler runs it
         if re.search(rf"""["'#]{re.escape(button)}["']""", JS):
             continue  # referenced by id somewhere in the client
         classes = set(re.findall(r"""\bclass=["']([^"']*)["']""", tag)[0].split()) \
@@ -164,6 +169,18 @@ def test_every_button_in_the_page_is_wired_to_something():
         unwired.append(button)
 
     assert unwired == [], f"buttons in index.html that app.js never handles: {unwired}"
+
+
+def test_every_form_actually_handles_its_own_submit():
+    """Submit buttons are exempted above, so the forms must earn that."""
+    forms = re.findall(r"""<form[^>]*\bid=["']([A-Za-z0-9_-]+)["']""", HTML)
+    assert forms, "no id'd forms found — did the markup change shape?"
+    for form_id in forms:
+        handled = re.search(
+            rf"""["']#{re.escape(form_id)}["']\s*\)\s*\.addEventListener\(\s*["']submit["']""",
+            JS,
+        )
+        assert handled, f"<form id={form_id}> has no submit handler"
 
 
 def test_the_status_pill_class_is_not_reused_for_achievement_tiles():

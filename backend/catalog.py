@@ -20,6 +20,18 @@ DATA_DIR = Path(__file__).parent / "data"
 #: reference guide. It supports a skill but is never scheduled into a path:
 #: coverage is only ever satisfied by a course (see `_select_courses`).
 ITEM_TYPES = {"course", "project", "assessment", "resource"}
+
+#: What a goal is for. Everything was implicitly a job before subjects and
+#: exams existed in the catalogue.
+GOAL_KINDS = {"job", "subject", "exam", "certification"}
+
+#: How each kind reads in a sentence: "your path to <outcome>".
+GOAL_OUTCOMES = {
+    "job": "working as",
+    "subject": "learning",
+    "exam": "sitting",
+    "certification": "certifying in",
+}
 FORMATS = {"video", "interactive", "reading", "project"}
 COSTS = {"free", "paid"}
 
@@ -72,6 +84,15 @@ class Goal:
     typical_roles: tuple[str, ...]
     keywords: tuple[str, ...]
     target_skills: tuple[str, ...]
+    #: What finishing this path actually means. A roadmap toward an exam is not
+    #: a roadmap toward a job, and saying "become a GATE" would be nonsense, so
+    #: the wording downstream keys off this.
+    kind: str = "job"
+
+    @property
+    def outcome(self) -> str:
+        """How to refer to the finish line in a sentence."""
+        return GOAL_OUTCOMES.get(self.kind, GOAL_OUTCOMES["job"])
 
 
 @dataclass
@@ -241,6 +262,7 @@ def load_catalog() -> Catalog:
             typical_roles=tuple(row.get("typical_roles", [])),
             keywords=tuple(k.lower() for k in row.get("keywords", [])),
             target_skills=tuple(row["target_skills"]),
+            kind=row.get("kind", "job"),
         )
         for row in goal_rows
     }
@@ -351,8 +373,13 @@ def validate(catalog: Catalog) -> None:
             f"no course teaches these skills: {sorted(missing)}"
         )
 
-    # 6. Goals reference real skills.
+    # 6. Goals reference real skills, and say what kind of goal they are.
     for goal in catalog.goals.values():
+        if goal.kind not in GOAL_KINDS:
+            raise CatalogError(
+                f"goal '{goal.id}' has unknown kind '{goal.kind}'; "
+                f"expected one of {sorted(GOAL_KINDS)}"
+            )
         if not goal.target_skills:
             raise CatalogError(f"goal '{goal.id}' has no target skills")
         for sid in goal.target_skills:

@@ -224,3 +224,77 @@ def test_new_domains_are_reachable_from_plain_language(phrase, expected, catalog
     from backend import assistant
 
     assert assistant._interpret_with_rules(catalog, phrase).goal_id == expected
+
+
+
+# --------------------------------------------------------------- goal kinds
+def test_every_goal_says_what_kind_of_goal_it_is(catalog):
+    """A roadmap toward an exam is not a roadmap toward a job."""
+    from backend.catalog import GOAL_KINDS
+
+    for goal in catalog.goals.values():
+        assert goal.kind in GOAL_KINDS, f"{goal.id} has kind {goal.kind!r}"
+
+
+def test_the_catalogue_covers_all_four_kinds(catalog):
+    """People learn for a job, a subject, an exam, or a certificate."""
+    kinds = {goal.kind for goal in catalog.goals.values()}
+    assert kinds == {"job", "subject", "exam", "certification"}, kinds
+
+
+def test_exams_and_subjects_are_not_phrased_as_jobs(catalog):
+    """"I want to become a GATE" is nonsense."""
+    from backend.assistant import goal_phrase
+
+    assert goal_phrase(catalog.goals["goal-gate-cs"]).startswith("I want to crack")
+    assert goal_phrase(catalog.goals["goal-ug-economics"]).startswith("I want to study")
+    assert goal_phrase(catalog.goals["goal-cfa-1"]).startswith("I want to get")
+    assert goal_phrase(catalog.goals["goal-data-analyst"]).startswith("I want to become")
+
+
+NON_JOB_GOALS = [
+    "goal-jee", "goal-neet", "goal-gate-cs", "goal-upsc", "goal-cat",
+    "goal-gre", "goal-gmat", "goal-ielts", "goal-toefl", "goal-sat",
+    "goal-cfa-1", "goal-cloud-cert",
+    "goal-ug-cs", "goal-ug-economics", "goal-ug-psychology",
+    "goal-pg-datascience",
+]
+
+
+@pytest.mark.parametrize("goal_id", NON_JOB_GOALS)
+def test_every_exam_and_subject_builds_a_real_path(goal_id, catalog):
+    """Content is only real if the planner can actually schedule it."""
+    from backend.models import LearnerProfile
+    from backend.pathgen import generate_path
+    from backend.profiling import derive
+
+    profile = LearnerProfile(
+        learner_id="kinds", goal_id=goal_id, experience_level="beginner",
+        weekly_hours=10,
+    )
+    path = generate_path(catalog, derive(catalog, profile), goal_id)
+    items = [item for milestone in path.milestones for item in milestone.items]
+    assert len(path.milestones) >= 2, f"{goal_id} is a one-stage path"
+    assert len(items) >= 4, f"{goal_id} scheduled only {len(items)} items"
+
+    taught: set[str] = set()
+    for item in items:
+        entry = catalog.items[item.item_id]
+        unmet = {s for s in entry.requires if s in catalog.skills} - taught
+        assert not unmet, f"{item.item_id} scheduled before {sorted(unmet)}"
+        taught.update(entry.teaches)
+
+
+@pytest.mark.parametrize("phrase,expected", [
+    ("i want to crack gate", "goal-gate-cs"),
+    ("preparing for neet", "goal-neet"),
+    ("i want to clear upsc", "goal-upsc"),
+    ("JEE preparation", "goal-jee"),
+    ("i want to do masters in data science", "goal-pg-datascience"),
+    ("undergraduate computer science syllabus", "goal-ug-cs"),
+    ("i want to become a data analyst", "goal-data-analyst"),
+])
+def test_exams_and_degrees_are_reachable_from_plain_language(phrase, expected, catalog):
+    from backend import assistant
+
+    assert assistant._interpret_with_rules(catalog, phrase).goal_id == expected

@@ -363,6 +363,22 @@ def declares_existing_knowledge(text: str) -> bool:
     return "?" not in text and any(p in normalised for p in _KNOWLEDGE_PHRASES)
 
 
+def goal_phrase(goal: Goal) -> str:
+    """How a learner would say they want this goal.
+
+    "I want to become a GATE" is nonsense. An exam is sat, a subject is
+    learned, a certification is earned, and only a job is become.
+    """
+    if goal.kind == "exam":
+        return f"I want to crack {goal.title}"
+    if goal.kind == "certification":
+        return f"I want to get {goal.title}"
+    if goal.kind == "subject":
+        return f"I want to study {goal.title}"
+    article = "an" if goal.title[:1].upper() in "AEIOU" else "a"
+    return f"I want to become {article} {goal.title}"
+
+
 def _spread_of_goals(catalog: Catalog, seed: list[Goal], limit: int = 4) -> list[Goal]:
     """A short, varied menu: one goal per domain, seeded with any near-matches."""
     chosen = list(seed)
@@ -517,18 +533,12 @@ def clarification(catalog: Catalog, text: str) -> tuple[str, list[str]] | None:
     opener = small_talk(catalog, text, has_path=False)
     if opener is not None:
         return opener, [
-            f"I want to become {'an' if goal.title[:1].upper() in 'AEIOU' else 'a'} "
-            f"{goal.title}"
-            for goal in _spread_of_goals(catalog, [])
+            goal_phrase(goal) for goal in _spread_of_goals(catalog, [])
         ]
 
     near = [goal for goal, _ in ranked[:2]]
     options = _spread_of_goals(catalog, near)
-    replies = [
-        f"I want to become {'an' if goal.title[:1].upper() in 'AEIOU' else 'a'} "
-        f"{goal.title}"
-        for goal in options
-    ]
+    replies = [goal_phrase(goal) for goal in options]
 
     if len(near) >= 2:
         first, second = near[0].title, near[1].title
@@ -1277,6 +1287,7 @@ def suggested_replies(
     if path is None:
         return [
             "I want to become a data analyst",
+            "I want to crack GATE (Computer Science)",
             "Help me move into AI engineering",
             "I know some JavaScript and want a frontend job",
             "I'm a senior engineer moving into cloud architecture",

@@ -29,7 +29,8 @@
       "eda",
       "bi-dashboards",
       "math-stats"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-data-scientist",
@@ -58,7 +59,8 @@
       "model-evaluation",
       "data-viz",
       "responsible-ai"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-ml-engineer",
@@ -88,7 +90,8 @@
       "deep-learning",
       "experiment-tracking",
       "mlops"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-ai-engineer",
@@ -122,7 +125,8 @@
       "llm-engineering",
       "rag-systems",
       "responsible-ai"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-frontend",
@@ -155,7 +159,8 @@
       "ui-accessibility",
       "testing",
       "web-performance"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-fullstack",
@@ -188,7 +193,8 @@
       "auth-security",
       "testing",
       "nextjs"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-devops",
@@ -221,7 +227,8 @@
       "kubernetes",
       "iac",
       "observability"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-cloud-architect",
@@ -253,7 +260,8 @@
       "cloud-security",
       "observability",
       "system-design"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-sre",
@@ -284,7 +292,8 @@
       "ci-cd",
       "sre",
       "system-design"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-product-manager",
@@ -317,7 +326,8 @@
       "stakeholder-comms",
       "agile-delivery",
       "product-analytics"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-digital-marketer",
@@ -350,7 +360,8 @@
       "paid-acquisition",
       "email-lifecycle",
       "marketing-analytics"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-ux-designer",
@@ -385,7 +396,8 @@
       "prototyping",
       "usability-testing",
       "accessibility-design"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-financial-analyst",
@@ -417,7 +429,8 @@
       "financial-modelling",
       "corporate-finance",
       "valuation"
-    ]
+    ],
+    "kind": "job"
   },
   {
     "id": "goal-mathematics",
@@ -448,6 +461,499 @@
       "linear-algebra",
       "probability",
       "discrete-math"
+    ],
+    "kind": "subject"
+  },
+  {
+    "id": "goal-jee",
+    "title": "JEE (Engineering Entrance)",
+    "domain": "Sciences",
+    "kind": "exam",
+    "description": "Physics, Chemistry and Mathematics to the depth an engineering entrance demands, with mocks under real timing.",
+    "typical_roles": [
+      "Engineering aspirant"
+    ],
+    "keywords": [
+      "jee",
+      "jee main",
+      "jee advanced",
+      "iit",
+      "engineering entrance",
+      "engineering exam",
+      "pcm",
+      "crack jee",
+      "clear jee",
+      "jee preparation",
+      "prepare for jee",
+      "iit jee",
+      "jee mains"
+    ],
+    "target_skills": [
+      "physics-mechanics",
+      "physics-em",
+      "physics-modern",
+      "chemistry-physical",
+      "chemistry-organic",
+      "algebra",
+      "calculus",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-neet",
+    "title": "NEET (Medical Entrance)",
+    "domain": "Sciences",
+    "kind": "exam",
+    "description": "Biology, Chemistry and Physics for the medical entrance, weighted the way the paper is.",
+    "typical_roles": [
+      "Medical aspirant"
+    ],
+    "keywords": [
+      "neet",
+      "medical entrance",
+      "mbbs",
+      "medical exam",
+      "pcb",
+      "biology exam",
+      "crack neet",
+      "clear neet",
+      "neet preparation",
+      "prepare for neet",
+      "neet ug",
+      "neet exam"
+    ],
+    "target_skills": [
+      "biology-botany",
+      "biology-zoology",
+      "biology-molecular",
+      "chemistry-physical",
+      "chemistry-organic",
+      "physics-mechanics",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-gate-cs",
+    "title": "GATE (Computer Science)",
+    "domain": "Computer Science",
+    "kind": "exam",
+    "description": "The full CS syllabus — algorithms, systems, theory and engineering mathematics — with full-length mocks.",
+    "typical_roles": [
+      "GATE aspirant",
+      "M.Tech applicant",
+      "PSU applicant"
+    ],
+    "keywords": [
+      "gate",
+      "gate cs",
+      "gate exam",
+      "m.tech",
+      "mtech",
+      "psu",
+      "computer science exam",
+      "crack gate",
+      "clear gate",
+      "gate preparation",
+      "prepare for gate",
+      "gate cse",
+      "gate computer science",
+      "gate 2026"
+    ],
+    "target_skills": [
+      "prog-fundamentals",
+      "data-structures",
+      "algorithms",
+      "operating-systems",
+      "dbms",
+      "computer-networks",
+      "computer-architecture",
+      "theory-of-computation",
+      "discrete-math",
+      "engineering-maths"
+    ]
+  },
+  {
+    "id": "goal-upsc",
+    "title": "UPSC Civil Services",
+    "domain": "Humanities & Social Science",
+    "kind": "exam",
+    "description": "Polity, history, geography, economy, environment and ethics, with the answer writing the mains actually rewards.",
+    "typical_roles": [
+      "Civil services aspirant",
+      "IAS aspirant"
+    ],
+    "keywords": [
+      "upsc",
+      "civil services",
+      "ias",
+      "ips",
+      "prelims",
+      "mains",
+      "cse",
+      "crack upsc",
+      "clear upsc",
+      "upsc preparation",
+      "prepare for upsc",
+      "upsc exam",
+      "civil services exam",
+      "ias exam"
+    ],
+    "target_skills": [
+      "indian-polity",
+      "indian-history",
+      "geography-core",
+      "economics-basics",
+      "current-affairs",
+      "ethics-essay",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-cat",
+    "title": "CAT (MBA Entrance)",
+    "domain": "Aptitude & Reasoning",
+    "kind": "exam",
+    "description": "Quant, data interpretation, logical reasoning and verbal ability, drilled for speed under sectional timing.",
+    "typical_roles": [
+      "MBA aspirant"
+    ],
+    "keywords": [
+      "cat",
+      "mba entrance",
+      "mba exam",
+      "iim",
+      "xat",
+      "quant",
+      "aptitude exam",
+      "crack cat",
+      "clear cat",
+      "cat preparation",
+      "prepare for cat",
+      "cat exam",
+      "cat 2026"
+    ],
+    "target_skills": [
+      "quantitative-aptitude",
+      "data-interpretation",
+      "logical-reasoning",
+      "verbal-ability",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-gre",
+    "title": "GRE",
+    "domain": "Language",
+    "kind": "exam",
+    "description": "Verbal reasoning, quantitative reasoning and analytical writing for graduate admission.",
+    "typical_roles": [
+      "Graduate school applicant"
+    ],
+    "keywords": [
+      "gre",
+      "graduate record",
+      "grad school exam",
+      "masters abroad",
+      "gre preparation",
+      "prepare for gre",
+      "gre exam",
+      "gre verbal",
+      "gre quant"
+    ],
+    "target_skills": [
+      "academic-vocabulary",
+      "english-reading",
+      "english-writing",
+      "quantitative-aptitude",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-gmat",
+    "title": "GMAT",
+    "domain": "Aptitude & Reasoning",
+    "kind": "exam",
+    "description": "Quantitative, verbal and data insight for business school admission.",
+    "typical_roles": [
+      "Business school applicant"
+    ],
+    "keywords": [
+      "gmat",
+      "business school",
+      "mba abroad",
+      "data insight",
+      "gmat preparation",
+      "prepare for gmat",
+      "gmat exam"
+    ],
+    "target_skills": [
+      "quantitative-aptitude",
+      "data-interpretation",
+      "verbal-ability",
+      "english-reading",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-ielts",
+    "title": "IELTS",
+    "domain": "Language",
+    "kind": "exam",
+    "description": "All four papers — listening, reading, writing and speaking — prepared against the band descriptors.",
+    "typical_roles": [
+      "Study or work abroad applicant"
+    ],
+    "keywords": [
+      "ielts",
+      "english test",
+      "band score",
+      "study abroad",
+      "pte",
+      "ielts preparation",
+      "prepare for ielts",
+      "ielts exam",
+      "ielts band",
+      "ielts academic"
+    ],
+    "target_skills": [
+      "english-grammar",
+      "english-listening",
+      "english-reading",
+      "english-writing",
+      "english-speaking"
+    ]
+  },
+  {
+    "id": "goal-toefl",
+    "title": "TOEFL",
+    "domain": "Language",
+    "kind": "exam",
+    "description": "Academic English across all four skills, in the integrated-task format TOEFL uses.",
+    "typical_roles": [
+      "Study abroad applicant"
+    ],
+    "keywords": [
+      "toefl",
+      "toefl ibt",
+      "academic english",
+      "english proficiency",
+      "toefl preparation",
+      "prepare for toefl",
+      "toefl exam"
+    ],
+    "target_skills": [
+      "english-grammar",
+      "academic-vocabulary",
+      "english-listening",
+      "english-reading",
+      "english-writing"
+    ]
+  },
+  {
+    "id": "goal-sat",
+    "title": "SAT",
+    "domain": "Aptitude & Reasoning",
+    "kind": "exam",
+    "description": "Reading, writing and maths for undergraduate admission abroad.",
+    "typical_roles": [
+      "Undergraduate applicant"
+    ],
+    "keywords": [
+      "sat",
+      "digital sat",
+      "undergraduate admission",
+      "college board",
+      "sat preparation",
+      "prepare for sat",
+      "sat exam",
+      "sat maths"
+    ],
+    "target_skills": [
+      "english-reading",
+      "english-grammar",
+      "algebra",
+      "quantitative-aptitude",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-cfa-1",
+    "title": "CFA Level I",
+    "domain": "Finance & Accounting",
+    "kind": "certification",
+    "description": "Ethics, financial reporting, corporate finance and quantitative methods to Level I standard.",
+    "typical_roles": [
+      "Investment analyst",
+      "Research associate"
+    ],
+    "keywords": [
+      "cfa",
+      "cfa level 1",
+      "chartered financial analyst",
+      "investment exam",
+      "cfa exam",
+      "cfa preparation",
+      "cfa l1"
+    ],
+    "target_skills": [
+      "accounting-basics",
+      "financial-statements",
+      "corporate-finance",
+      "valuation",
+      "probability",
+      "ethics-essay"
+    ]
+  },
+  {
+    "id": "goal-cloud-cert",
+    "title": "Cloud Architect Certification",
+    "domain": "Cloud & DevOps",
+    "kind": "certification",
+    "description": "The architecture, networking and security a cloud associate exam tests, built on real deployments rather than flashcards.",
+    "typical_roles": [
+      "Cloud engineer",
+      "Solutions architect"
+    ],
+    "keywords": [
+      "aws certification",
+      "azure certification",
+      "solutions architect exam",
+      "cloud certification",
+      "saa",
+      "az-104",
+      "aws solutions architect",
+      "cloud exam",
+      "aws exam",
+      "azure exam",
+      "get certified in cloud"
+    ],
+    "target_skills": [
+      "cloud-fundamentals",
+      "linux",
+      "networking",
+      "iac",
+      "docker",
+      "cloud-security",
+      "exam-strategy"
+    ]
+  },
+  {
+    "id": "goal-ug-cs",
+    "title": "Undergraduate Computer Science",
+    "domain": "Computer Science",
+    "kind": "subject",
+    "description": "The core of a CS degree: programming, data structures, algorithms, systems and theory.",
+    "typical_roles": [
+      "Undergraduate student"
+    ],
+    "keywords": [
+      "computer science degree",
+      "b.tech cs",
+      "btech",
+      "bsc computer science",
+      "cs undergrad",
+      "cs syllabus",
+      "undergraduate computer science",
+      "cs degree",
+      "computer science syllabus",
+      "b.tech computer science"
+    ],
+    "target_skills": [
+      "prog-fundamentals",
+      "data-structures",
+      "algorithms",
+      "operating-systems",
+      "dbms",
+      "computer-networks",
+      "discrete-math",
+      "theory-of-computation"
+    ]
+  },
+  {
+    "id": "goal-ug-economics",
+    "title": "Undergraduate Economics",
+    "domain": "Humanities & Social Science",
+    "kind": "subject",
+    "description": "Micro, macro and the quantitative methods an economics degree is built on.",
+    "typical_roles": [
+      "Undergraduate student",
+      "Economics student"
+    ],
+    "keywords": [
+      "economics degree",
+      "ba economics",
+      "bsc economics",
+      "economics undergrad",
+      "economics syllabus",
+      "economics degree course",
+      "study economics"
+    ],
+    "target_skills": [
+      "economics-basics",
+      "microeconomics",
+      "macroeconomics",
+      "algebra",
+      "probability",
+      "research-methods"
+    ]
+  },
+  {
+    "id": "goal-ug-psychology",
+    "title": "Undergraduate Psychology",
+    "domain": "Humanities & Social Science",
+    "kind": "subject",
+    "description": "The core of a psychology degree, including the statistics that make its findings readable.",
+    "typical_roles": [
+      "Undergraduate student",
+      "Psychology student"
+    ],
+    "keywords": [
+      "psychology degree",
+      "ba psychology",
+      "psychology undergrad",
+      "psychology syllabus",
+      "psychology",
+      "study psychology",
+      "psychology course"
+    ],
+    "target_skills": [
+      "psychology-intro",
+      "research-methods",
+      "probability",
+      "communication"
+    ]
+  },
+  {
+    "id": "goal-pg-datascience",
+    "title": "Postgraduate Data Science",
+    "domain": "Data & AI",
+    "kind": "subject",
+    "description": "A taught masters shape: the mathematics first, then machine learning, then a research-grade project.",
+    "typical_roles": [
+      "Masters student",
+      "Research student"
+    ],
+    "keywords": [
+      "masters data science",
+      "msc data science",
+      "postgraduate data science",
+      "pg data science",
+      "data science degree",
+      "masters in data science",
+      "ms data science",
+      "m.tech data science",
+      "data science masters",
+      "postgraduate in data science",
+      "pg in data science"
+    ],
+    "target_skills": [
+      "linear-algebra",
+      "probability",
+      "python",
+      "ml-foundations",
+      "supervised-ml",
+      "model-evaluation",
+      "research-methods"
     ]
   }
 ]

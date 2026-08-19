@@ -45,9 +45,15 @@ from . import config  # noqa: F401  — importing it loads .env before we read i
 #: balancer or uptime check never needs the secret.
 PUBLIC_API_PATHS = frozenset({"/api/health"})
 CHAT_PATH = "/api/chat"
+#: Account recovery. Rare for a real user, constant for anyone guessing
+#: at a security answer, so it gets its own tight budget.
+RECOVERY_PATHS = frozenset({
+    "/api/auth/recovery-question", "/api/auth/reset-password",
+})
 
 DEFAULT_PER_MINUTE = 240
 DEFAULT_CHAT_PER_MINUTE = 20
+DEFAULT_RECOVERY_PER_MINUTE = 5
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -128,6 +134,7 @@ class Gate:
         api_key: str,
         per_minute: int,
         chat_per_minute: int,
+        recovery_per_minute: int,
         trust_proxy: bool,
     ) -> None:
         self.enabled = enabled
@@ -135,10 +142,12 @@ class Gate:
         self.trust_proxy = trust_proxy
         self.general = RateLimiter(per_minute)
         self.chat = RateLimiter(chat_per_minute)
+        self.recovery = RateLimiter(recovery_per_minute)
 
     def reset(self) -> None:
         self.general.reset()
         self.chat.reset()
+        self.recovery.reset()
 
 
 def _build(**overrides) -> Gate:
@@ -153,6 +162,10 @@ def _build(**overrides) -> Gate:
         chat_per_minute=overrides.get(
             "chat_per_minute",
             _env_int("RATE_LIMIT_CHAT_PER_MINUTE", DEFAULT_CHAT_PER_MINUTE),
+        ),
+        recovery_per_minute=overrides.get(
+            "recovery_per_minute",
+            _env_int("RATE_LIMIT_RECOVERY_PER_MINUTE", DEFAULT_RECOVERY_PER_MINUTE),
         ),
         trust_proxy=overrides.get(
             "trust_proxy", _env_flag("TRUST_PROXY_HEADER", False)
@@ -192,6 +205,7 @@ def status() -> dict:
         "rate_limit_enabled": gate.enabled,
         "rate_limit_per_minute": gate.general.limit,
         "chat_rate_limit_per_minute": gate.chat.limit,
+        "recovery_rate_limit_per_minute": gate.recovery.limit,
     }
 
 
@@ -234,6 +248,14 @@ def _rate_limit(request: Request, path: str) -> Optional[JSONResponse]:
     if not gate.enabled:
         return None
     caller = _caller(request)
+    if request.method == "POST" and path in RECOVERY_PATHS:
+        retry_after = gate.recovery.check(f"recovery:{caller}")
+        if retry_after is not None:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "too many recovery attempts — try again shortly"},
+                headers={"Retry-After": str(retry_after)},
+            )
     if request.method == "POST" and path == CHAT_PATH:
         retry_after = gate.chat.check(f"chat:{caller}")
         if retry_after is not None:

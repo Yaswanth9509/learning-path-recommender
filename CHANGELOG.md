@@ -3,6 +3,69 @@
 All notable changes to this project are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.0] — 2026-08-19
+
+Closes three ways one learner's data could reach another, and opens the
+catalogue to the two reasons people learn that are not a job.
+
+### Security
+
+- **A caller with no session could read, rewrite and delete any learner.** The
+  ownership check only ran when a session existed, so an unauthenticated
+  request reached anyone's learner knowing only its id — and `DELETE` really
+  did destroy it. A learner now belongs to exactly one workspace, an account or
+  the ownerless one, and the caller must be in the same one.
+- **`/api/chat` had no ownership check at all.** It reads the whole path as
+  context and writes to the conversation, so it could be pointed at a stranger's
+  learner. It also saved new learners unowned even when signed in, so you could
+  not see a learner you had just created by talking to it.
+- **Registering adopted every unowned learner.** Intended to migrate a database
+  that predates accounts; in practice an anonymous visitor created learners and
+  the next person to register inherited them. Now behind
+  `ADOPT_ORPHAN_LEARNERS`, off by default.
+
+### Added
+
+- **Goals declare what kind of goal they are** — `job`, `subject`, `exam` or
+  `certification` — and the wording follows, in the suggestions, the picker and
+  the path header.
+- **Exams and degrees**: JEE, NEET, GATE (CS), UPSC, CAT, GRE, GMAT, IELTS,
+  TOEFL, SAT, CFA Level I, a cloud architect certification, and undergraduate
+  Computer Science, Economics and Psychology plus postgraduate Data Science.
+  Four new domains — Sciences, Humanities & Social Science, Language, and
+  Aptitude & Reasoning — take the catalogue to 122 skills, 182 items, 30 goals.
+- **The skill graph covers every path, not just the active one**, with a
+  switcher and a `goal_id` parameter on the endpoint.
+- **Change your account name**, and **recover a forgotten password.** Each
+  account carries a question its holder wrote and an answer hashed like a
+  password, because there is no mail service to send a reset token through.
+  It is a speed bump rather than authentication — an answer has less entropy
+  than a password — but it raises the cost from knowing an email address to
+  knowing an email address and one fact about that person, and unlike a
+  recovery code it is something people actually remember. The question
+  endpoint answers for unknown addresses too, so it cannot be used to find
+  which emails are registered, and both endpoints have their own tight rate
+  limit.
+
+### Fixed
+
+- **The weekly plan was malformed.** Each row has three children — title, hours,
+  bar — but was laid out as a two-item flex, so the hours landed mid-row and the
+  bar became a third column.
+- **The skill graph looked inert.** Clicking always worked; nothing said so. The
+  boxes now lift and fill on hover, the selected one keeps a ring, and the
+  detail panel reads as a panel. Nodes are larger and better spaced.
+- **Recommendations were cramped**, with the score bars crushed against their
+  labels and the buttons hard against the bars.
+- **The engine switch left the global header** for the chat sidebar, where the
+  choice actually applies.
+
+### Changed
+
+- A full visual pass: a violet brand gradient, a type scale with real steps,
+  border-led cards, and a background drawn as the thing the product is about —
+  a prerequisite graph, inline SVG so nothing is fetched from another host.
+
 ## [1.4.0] — 2026-08-19
 
 Accounts that survive a restart, a catalogue that is not only for developers,

@@ -846,5 +846,356 @@
       "calculus"
     ],
     "description": "Make calculus rigorous: sequences, continuity and proof written properly."
+  },
+  {
+    "id": "algorithms",
+    "name": "Algorithms",
+    "domain": "Computer Science",
+    "level": 2,
+    "prerequisites": [
+      "data-structures"
+    ],
+    "description": "Sorting, searching, greedy, divide and conquer, dynamic programming, and the complexity analysis that tells you which to reach for."
+  },
+  {
+    "id": "operating-systems",
+    "name": "Operating Systems",
+    "domain": "Computer Science",
+    "level": 2,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "Processes, threads, scheduling, memory management, deadlock and file systems — what the machine is doing underneath your program."
+  },
+  {
+    "id": "dbms",
+    "name": "Database Management Systems",
+    "domain": "Computer Science",
+    "level": 2,
+    "prerequisites": [
+      "sql"
+    ],
+    "description": "The relational model, normalisation, indexing, transactions and concurrency control, from the inside rather than as a user."
+  },
+  {
+    "id": "computer-networks",
+    "name": "Computer Networks",
+    "domain": "Computer Science",
+    "level": 2,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "The layered model, TCP/IP, routing, and what actually happens between a request and a response."
+  },
+  {
+    "id": "computer-architecture",
+    "name": "Computer Organisation",
+    "domain": "Computer Science",
+    "level": 2,
+    "prerequisites": [
+      "prog-fundamentals"
+    ],
+    "description": "Number systems, instruction sets, pipelining, cache and memory hierarchy."
+  },
+  {
+    "id": "theory-of-computation",
+    "name": "Theory of Computation",
+    "domain": "Computer Science",
+    "level": 3,
+    "prerequisites": [
+      "discrete-math"
+    ],
+    "description": "Automata, regular and context-free languages, decidability — the limits of what a machine can be asked to do."
+  },
+  {
+    "id": "physics-mechanics",
+    "name": "Mechanics",
+    "domain": "Sciences",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Kinematics, Newton's laws, work and energy, momentum and rotation."
+  },
+  {
+    "id": "physics-em",
+    "name": "Electromagnetism & Waves",
+    "domain": "Sciences",
+    "level": 2,
+    "prerequisites": [
+      "physics-mechanics",
+      "calculus"
+    ],
+    "description": "Electrostatics, current, magnetism, induction, and oscillations and waves through to optics."
+  },
+  {
+    "id": "physics-modern",
+    "name": "Modern Physics",
+    "domain": "Sciences",
+    "level": 3,
+    "prerequisites": [
+      "physics-em"
+    ],
+    "description": "Photoelectric effect, atomic structure, nuclei and semiconductors."
+  },
+  {
+    "id": "chemistry-physical",
+    "name": "Physical Chemistry",
+    "domain": "Sciences",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Mole concept, thermodynamics, equilibrium, kinetics and electrochemistry."
+  },
+  {
+    "id": "chemistry-organic",
+    "name": "Organic Chemistry",
+    "domain": "Sciences",
+    "level": 2,
+    "prerequisites": [
+      "chemistry-physical"
+    ],
+    "description": "Nomenclature, isomerism, reaction mechanisms and named reactions."
+  },
+  {
+    "id": "chemistry-inorganic",
+    "name": "Inorganic Chemistry",
+    "domain": "Sciences",
+    "level": 2,
+    "prerequisites": [
+      "chemistry-physical"
+    ],
+    "description": "Periodic trends, chemical bonding, coordination compounds and the chemistry of the blocks."
+  },
+  {
+    "id": "biology-botany",
+    "name": "Botany",
+    "domain": "Sciences",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Plant physiology, morphology, reproduction and ecology."
+  },
+  {
+    "id": "biology-zoology",
+    "name": "Zoology",
+    "domain": "Sciences",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Human physiology, animal diversity, reproduction and evolution."
+  },
+  {
+    "id": "biology-molecular",
+    "name": "Genetics & Molecular Biology",
+    "domain": "Sciences",
+    "level": 2,
+    "prerequisites": [
+      "biology-botany",
+      "biology-zoology"
+    ],
+    "description": "Inheritance, DNA, gene expression and biotechnology."
+  },
+  {
+    "id": "engineering-maths",
+    "name": "Engineering Mathematics",
+    "domain": "Sciences",
+    "level": 2,
+    "prerequisites": [
+      "calculus",
+      "linear-algebra"
+    ],
+    "description": "Differential equations, complex analysis, numerical methods and transforms as engineering courses use them."
+  },
+  {
+    "id": "indian-polity",
+    "name": "Polity & Governance",
+    "domain": "Humanities & Social Science",
+    "level": 1,
+    "prerequisites": [],
+    "description": "The constitution, the organs of state, federalism and how policy is actually made."
+  },
+  {
+    "id": "indian-history",
+    "name": "History",
+    "domain": "Humanities & Social Science",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Ancient, medieval and modern history, with the freedom struggle in detail."
+  },
+  {
+    "id": "geography-core",
+    "name": "Geography",
+    "domain": "Humanities & Social Science",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Physical, human and economic geography, and reading a map properly."
+  },
+  {
+    "id": "economics-basics",
+    "name": "Economics Fundamentals",
+    "domain": "Humanities & Social Science",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Scarcity, markets, supply and demand, and what the headline indicators actually measure."
+  },
+  {
+    "id": "microeconomics",
+    "name": "Microeconomics",
+    "domain": "Humanities & Social Science",
+    "level": 2,
+    "prerequisites": [
+      "economics-basics",
+      "algebra"
+    ],
+    "description": "Consumer and producer theory, market structures, and welfare."
+  },
+  {
+    "id": "macroeconomics",
+    "name": "Macroeconomics",
+    "domain": "Humanities & Social Science",
+    "level": 2,
+    "prerequisites": [
+      "economics-basics"
+    ],
+    "description": "National income, money and banking, inflation, growth and fiscal policy."
+  },
+  {
+    "id": "current-affairs",
+    "name": "Current Affairs & Environment",
+    "domain": "Humanities & Social Science",
+    "level": 2,
+    "prerequisites": [
+      "indian-polity"
+    ],
+    "description": "Reading the news as syllabus: schemes, institutions, environment and international relations."
+  },
+  {
+    "id": "ethics-essay",
+    "name": "Ethics & Essay Writing",
+    "domain": "Humanities & Social Science",
+    "level": 2,
+    "prerequisites": [
+      "communication"
+    ],
+    "description": "Applied ethics, case studies, and building an argument long enough to hold an essay together."
+  },
+  {
+    "id": "psychology-intro",
+    "name": "Introduction to Psychology",
+    "domain": "Humanities & Social Science",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Cognition, development, personality and the major schools of thought."
+  },
+  {
+    "id": "research-methods",
+    "name": "Research Methods & Statistics",
+    "domain": "Humanities & Social Science",
+    "level": 2,
+    "prerequisites": [
+      "probability"
+    ],
+    "description": "Designing a study, sampling, and testing a hypothesis without fooling yourself."
+  },
+  {
+    "id": "english-grammar",
+    "name": "English Grammar & Usage",
+    "domain": "Language",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Tense, agreement, articles, prepositions and the errors tests are built from."
+  },
+  {
+    "id": "academic-vocabulary",
+    "name": "Academic Vocabulary",
+    "domain": "Language",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar"
+    ],
+    "description": "The high-frequency academic word list, roots, and using register deliberately."
+  },
+  {
+    "id": "english-reading",
+    "name": "Reading Comprehension",
+    "domain": "Language",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar"
+    ],
+    "description": "Reading long passages under time, for argument and inference rather than detail."
+  },
+  {
+    "id": "english-writing",
+    "name": "Academic Writing",
+    "domain": "Language",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar",
+      "communication"
+    ],
+    "description": "Task response, coherence, and writing to a rubric and a clock."
+  },
+  {
+    "id": "english-listening",
+    "name": "Listening Skills",
+    "domain": "Language",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar"
+    ],
+    "description": "Note-taking from lectures and conversations across accents."
+  },
+  {
+    "id": "english-speaking",
+    "name": "Speaking & Fluency",
+    "domain": "Language",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar"
+    ],
+    "description": "Fluency, pronunciation and holding an argument aloud under assessment."
+  },
+  {
+    "id": "quantitative-aptitude",
+    "name": "Quantitative Aptitude",
+    "domain": "Aptitude & Reasoning",
+    "level": 1,
+    "prerequisites": [
+      "algebra"
+    ],
+    "description": "Arithmetic, ratios, percentages, time and work — accuracy at speed."
+  },
+  {
+    "id": "logical-reasoning",
+    "name": "Logical Reasoning",
+    "domain": "Aptitude & Reasoning",
+    "level": 1,
+    "prerequisites": [],
+    "description": "Puzzles, arrangements, syllogisms and pattern recognition."
+  },
+  {
+    "id": "data-interpretation",
+    "name": "Data Interpretation",
+    "domain": "Aptitude & Reasoning",
+    "level": 2,
+    "prerequisites": [
+      "quantitative-aptitude"
+    ],
+    "description": "Tables, graphs and caselets, read quickly and calculated approximately."
+  },
+  {
+    "id": "verbal-ability",
+    "name": "Verbal Ability",
+    "domain": "Aptitude & Reasoning",
+    "level": 2,
+    "prerequisites": [
+      "english-grammar"
+    ],
+    "description": "Para-jumbles, critical reasoning, summary and sentence correction."
+  },
+  {
+    "id": "exam-strategy",
+    "name": "Exam Strategy",
+    "domain": "Aptitude & Reasoning",
+    "level": 2,
+    "prerequisites": [],
+    "description": "Sectional timing, attempt order, negative-marking maths and revision planning — the part that turns preparation into a score."
   }
 ]

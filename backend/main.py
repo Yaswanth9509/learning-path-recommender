@@ -138,6 +138,9 @@ def _user_view(user, db: Database) -> dict:
         "learners": db.count_learners(user.id),
         "max_learners": accounts.MAX_LEARNERS_PER_USER,
         "max_paths_per_learner": MAX_ACTIVE_PATHS,
+        # So the Profile tab can offer to set one on an account that predates
+        # recovery questions, without ever sending the question itself.
+        "has_recovery": bool(db.accounts.recovery_question_for(user.email)),
     }
 
 
@@ -148,11 +151,22 @@ def register(response: Response, payload: dict = Body(...), db: Database = Depen
             str(payload.get("email", "")),
             str(payload.get("password", "")),
             str(payload.get("display_name", "")),
+            recovery_question=str(payload.get("recovery_question", "")),
+            recovery_answer=str(payload.get("recovery_answer", "")),
         )
     except accounts.AuthError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    # Learners made before anyone signed in belong to whoever signs up first.
-    db.adopt_orphan_learners(user.id)
+    # Learners with no owner are NOT adopted by default. The feature exists to
+    # migrate a database that predates accounts, but on any instance reachable
+    # by more than one person it leaks: an anonymous visitor creates learners,
+    # and the next person to register inherits them. Off unless asked for.
+    if _env_flag("ADOPT_ORPHAN_LEARNERS", False):
+        adopted = db.adopt_orphan_learners(user.id)
+        if adopted:
+            log.warning(
+                "adopted %d unowned learner(s) into %s because "
+                "ADOPT_ORPHAN_LEARNERS is set", adopted, user.id,
+            )
     _set_session(response, db, user)
     return _user_view(user, db)
 
@@ -206,6 +220,82 @@ def whoami(user=Depends(current_user), db: Database = Depends(db_dep)) -> dict:
     return {"signed_in": True, **_user_view(user, db)}
 
 
+@app.patch("/api/auth/profile")
+def update_account(
+    payload: dict = Body(...),
+    user=Depends(require_user),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Change your own account details. Only the display name so far."""
+    name = str(payload.get("display_name", "")).strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="display name must not be empty")
+    if len(name) > 80:
+        raise HTTPException(status_code=400, detail="display name is too long")
+    db.accounts.set_display_name(user.id, name)
+    updated = db.accounts.get_user(user.id)
+    return _user_view(updated, db)
+
+
+@app.post("/api/auth/recovery-question")
+def recovery_question(payload: dict = Body(...), db: Database = Depends(db_dep)) -> dict:
+    """The question set on an account, so it can be put back to the asker.
+
+    Always answers 200 with a question, inventing a plausible one when the
+    address is unknown. Saying "no such account" here would turn this into a
+    way to test which email addresses are registered.
+    """
+    email = str(payload.get("email", "")).strip()
+    question = db.accounts.recovery_question_for(email)
+    return {"question": question or DECOY_QUESTION, "known": bool(question)}
+
+
+#: Shown when an address has no account, or predates recovery questions. The
+#: answer will simply never match, which is the same outcome as a wrong guess.
+DECOY_QUESTION = "What is the name of the place you grew up in?"
+
+
+@app.post("/api/auth/reset-password")
+def reset_password(payload: dict = Body(...), db: Database = Depends(db_dep)) -> dict:
+    """Set a new password, gated on the account's recovery answer.
+
+    A speed bump rather than authentication — see `Accounts.reset_password`.
+    Rate limited hard, because guessing an answer is cheap otherwise.
+    """
+    if not _env_flag("ALLOW_PASSWORD_RESET", True):
+        raise HTTPException(
+            status_code=403, detail="password reset is disabled on this instance"
+        )
+    try:
+        user = db.accounts.reset_password(
+            str(payload.get("email", "")),
+            str(payload.get("answer", "")),
+            str(payload.get("password", "")),
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    log.warning("password reset via recovery question for %s", user.email)
+    return {"email": user.email, "reset": True}
+
+
+@app.put("/api/auth/recovery")
+def set_recovery(
+    payload: dict = Body(...),
+    user=Depends(require_user),
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Set or change your own recovery question."""
+    try:
+        db.accounts.set_recovery(
+            user.id,
+            str(payload.get("question", "")),
+            str(payload.get("answer", "")),
+        )
+    except accounts.AuthError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"question": str(payload.get("question", "")).strip(), "set": True}
+
+
 @app.patch("/api/auth/password", status_code=204)
 def change_password(
     payload: dict = Body(...), user=Depends(require_user), db: Database = Depends(db_dep)
@@ -223,10 +313,20 @@ def _load_profile(db: Database, learner_id: str, user=None) -> LearnerProfile:
     profile = db.get_profile(learner_id)
     if profile is None:
         raise HTTPException(status_code=404, detail=f"unknown learner '{learner_id}'")
-    # A learner owned by someone else is not found, rather than forbidden: the
-    # caller learns nothing about whether that id exists.
+    # A learner belongs to exactly one workspace: an account, or — when nobody
+    # is signed in, which is how the tests and a local run behave — the
+    # ownerless one. The caller must be in the same workspace.
+    #
+    # This used to read `if user is not None and owner and ...`, which let two
+    # things through: a signed-in user could reach any ownerless learner, and a
+    # caller with no session at all could reach *anyone's* learner by id —
+    # read it, rewrite it, or delete it outright.
+    #
+    # Not found rather than forbidden, so the caller learns nothing about
+    # whether that id exists.
     owner = db.owner_of(learner_id) or ""
-    if user is not None and owner and owner != user.id:
+    caller = user.id if user is not None else ""
+    if owner != caller:
         raise HTTPException(status_code=404, detail=f"unknown learner '{learner_id}'")
     return profile
 
@@ -349,6 +449,8 @@ def list_goals(catalog: Catalog = Depends(catalog_dep)) -> list[dict]:
             "title": goal.title,
             "domain": goal.domain,
             "description": goal.description,
+            "kind": goal.kind,
+            "outcome": goal.outcome,
             "typical_roles": list(goal.typical_roles),
             "target_skills": list(goal.target_skills),
             "target_skill_names": [catalog.skill_name(s) for s in goal.target_skills],
@@ -530,6 +632,7 @@ def chat(
     payload: ChatRequest,
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
+    user=Depends(current_user),
 ) -> ChatResponse:
     """Conversational entry point.
 
@@ -543,8 +646,16 @@ def chat(
 
     profile = db.get_profile(payload.learner_id)
     if profile is None:
+        # An unseen id starts a learner in the caller's own workspace. Without
+        # the owner it landed unowned, so a signed-in user could not see the
+        # learner they had just created by talking to it.
         profile = LearnerProfile(learner_id=payload.learner_id)
-        db.save_profile(profile)
+        db.save_profile(profile, user_id=user.id if user is not None else "")
+    else:
+        # Chat reads the learner's whole path as context and writes to their
+        # conversation, so it needs the same ownership gate as every other
+        # learner route.
+        _load_profile(db, payload.learner_id, user)
 
     db.add_message(profile.learner_id, "user", message)
     existing_path = db.get_path(profile.learner_id, profile.goal_id)
@@ -1179,12 +1290,28 @@ def _path_and_profile(
 @app.get("/api/learners/{learner_id}/graph", response_model=SkillGraph)
 def get_skill_graph(
     learner_id: str,
+    goal_id: Optional[str] = Query(
+        None, description="Graph this goal instead of the active one"
+    ),
     catalog: Catalog = Depends(catalog_dep),
     db: Database = Depends(db_dep),
     user=Depends(current_user),
 ) -> SkillGraph:
-    """The prerequisite DAG this learner's path was generated from."""
-    profile, path = _path_and_profile(catalog, db, learner_id, user)
+    """The prerequisite DAG a path was generated from.
+
+    Defaults to the active path. A learner running several goals can ask for
+    any of them by id, so the graph is not stuck on whichever one happens to
+    be active.
+    """
+    profile = _load_profile(db, learner_id, user)
+    if goal_id:
+        path = db.get_path(learner_id, goal_id)
+        if path is None:
+            raise HTTPException(
+                status_code=404, detail=f"no path for goal '{goal_id}'"
+            )
+    else:
+        _, path = _path_and_profile(catalog, db, learner_id, user)
     derived = profiling.derive(catalog, profile)
     return insights.build_graph(
         catalog, derived, path, db.get_progress(learner_id)

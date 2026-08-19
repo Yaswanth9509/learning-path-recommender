@@ -44,16 +44,60 @@
           <input type="password" id="authPassword" autocomplete="current-password"
                  required minlength="8" placeholder="At least 8 characters" />
         </label>
+        <div id="authRecoveryRow" hidden>
+          <label>A question only you can answer
+            <input type="text" id="authQuestion" maxlength="160"
+                   placeholder="e.g. What did I call my first bike?" />
+          </label>
+          <label>Your answer
+            <input type="text" id="authAnswer" autocomplete="off" maxlength="120"
+                   placeholder="Something you will not forget" />
+          </label>
+          <p class="hint auth-recovery-note">
+            This is how you get back in if you forget your password. Capitals
+            and spacing do not matter. Pick something nobody could look up.
+          </p>
+        </div>
         <p id="authError" class="auth-error" role="alert" hidden></p>
         <button id="authSubmit" class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+      <button id="forgotBtn" class="btn btn-ghost btn-mini auth-forgot" type="button">
+        Forgot your password?
+      </button>
+
+      <form id="recoverForm" class="auth-form auth-recover" hidden>
+        <div class="auth-recover-head">
+          <strong>Reset your password</strong>
+          <button id="recoverCancel" class="btn btn-ghost btn-mini" type="button">Back</button>
+        </div>
+        <label>Email
+          <input type="email" id="recoverEmail" autocomplete="email" required
+                 placeholder="you@example.com" />
+        </label>
+        <button id="recoverLookup" class="btn btn-block" type="button">Continue</button>
+
+        <div id="recoverStep2" hidden>
+          <p id="recoverQuestion" class="auth-recover-q"></p>
+          <label>Your answer
+            <input type="text" id="recoverAnswer" autocomplete="off" maxlength="120" />
+          </label>
+          <label>New password
+            <input type="password" id="recoverPassword" autocomplete="new-password"
+                   minlength="8" placeholder="At least 8 characters" />
+          </label>
+          <button id="recoverSubmit" class="btn btn-primary btn-block" type="submit">
+            Set new password
+          </button>
+        </div>
+        <p id="recoverError" class="auth-error" role="alert" hidden></p>
       </form>
 
       <div class="auth-or"><span>or</span></div>
       <button id="guestBtn" class="btn btn-block" type="button">Try it as a guest</button>
       <p class="hint auth-note">
         A guest account works fully and needs no email. Passwords are hashed and
-        stored only on this server — there is no password reset, so use something
-        you will remember.
+        stored only on this server. If you forget your password, your recovery
+        question is the only way back in — there is no email to reset through.
       </p>
     </div>
   </div>
@@ -69,13 +113,6 @@
     </div>
   </div>
   <div class="topbar-right">
-    <div class="topbar-group" role="group" aria-label="Assistant engine">
-      <div class="engine-switch">
-        <button id="engineAuto" class="seg" type="button" data-engine="auto">Gemini</button>
-        <button id="engineRules" class="seg" type="button" data-engine="rules">Standard</button>
-      </div>
-      <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
-    </div>
     <div class="topbar-group" role="group" aria-label="Learner">
       <select id="learnerSelect" aria-label="Select learner"></select>
       <button id="renameLearnerBtn" class="btn btn-ghost btn-mini" type="button"
@@ -115,7 +152,19 @@
       </form>
     </div>
     <aside class="chat-side">
-      <h3>How this works</h3>
+      <h3>Which engine answers</h3>
+      <div class="engine-row" role="group" aria-label="Assistant engine">
+        <div class="engine-switch">
+          <button id="engineAuto" class="seg" type="button" data-engine="auto">Gemini</button>
+          <button id="engineRules" class="seg" type="button" data-engine="rules">Standard</button>
+        </div>
+        <span id="engineBadge" class="badge badge-muted" title="Assistant mode">checking…</span>
+      </div>
+      <p class="hint">The Standard engine is deterministic and offline. If the
+        model runs out of quota it answers instead, and every reply says which
+        one produced it.</p>
+
+      <h3 class="engine-after">How this works</h3>
       <ol class="steps">
         <li><strong>Describe your goal</strong> in plain language.</li>
         <li>The <strong>profiling engine</strong> reads your level, hours, and existing skills.</li>
@@ -153,6 +202,7 @@
         it is covered. Columns are dependency depth — left to right is the order
         you learn in.
       </p>
+      <div id="graphSwitcher" class="path-switcher"></div>
       <div class="legend" id="graphLegend"></div>
       <div id="graphHost" class="graph-host"></div>
       <div id="graphDetail" class="graph-detail"></div>

@@ -261,7 +261,7 @@ dependency**: the whole layer is stdlib `urllib`.
 
 ## Catalog integrity
 
-85 skills, 139 learning items, 14 goals across nine domains — validated
+122 skills, 182 learning items, 30 goals across fourteen domains — validated
 exhaustively at import. `CatalogError` is raised for:
 
 - a prerequisite that does not resolve, or a skill requiring itself
@@ -275,12 +275,22 @@ This runs at startup and in `run.py`, so broken data fails loudly instead of
 producing a subtly wrong roadmap. To extend the catalog, edit
 `backend/data/{skills,courses,goals}.json` and run the tests.
 
-The catalogue is deliberately not only for developers. Alongside Data & AI, Web
-Development and Cloud & DevOps sit **Business & Product, Marketing, Design,
-Finance & Accounting and Mathematics** — and Mathematics is a *subject* rather
-than a job title, because wanting to learn something is a goal even when no
-role is attached to it. Every goal is reachable from plain language ("I want to
-become a product manager", "help me get better at maths"), and every one is
+The catalogue is deliberately not only for developers, and not only for jobs.
+Every goal declares its **kind** — `job`, `subject`, `exam` or `certification` —
+because a roadmap toward an exam is not a roadmap toward a job, and "become a
+GATE" is nonsense. The wording follows: you *crack* an exam, *study* a subject,
+*get* a certification, *become* a role.
+
+| Kind | Examples |
+|---|---|
+| Career | Data Analyst, UX Designer, Product Manager, DevOps Engineer, Financial Analyst |
+| Exam | JEE, NEET, GATE (CS), UPSC, CAT, GRE, GMAT, IELTS, TOEFL, SAT |
+| Certification | CFA Level I, Cloud Architect |
+| Subject | Undergraduate CS / Economics / Psychology, Postgraduate Data Science, Mathematics |
+
+Fourteen domains, including Sciences, Humanities & Social Science, Language and
+Aptitude & Reasoning. Every goal is reachable from plain language ("i want to
+crack gate", "preparing for neet", "masters in data science"), and every one is
 asserted to produce a real, prerequisite-ordered path in `test_catalog.py`.
 
 ---
@@ -300,9 +310,14 @@ Signing in is optional by design, and the door is not a wall:
 - Every learner, path and message is scoped to one account. Another account
   cannot list them and cannot read them by id — asserted in `test_accounts.py`.
 
-There is no email verification and no password reset, because both need a mail
-service the project does not have. That is an honest limit of a demo rather
-than an oversight.
+There is no email verification, because that needs a mail service the project
+does not have. Recovery works without one: each account carries a question its
+holder wrote and an answer hashed like a password. That is a speed bump rather
+than authentication — an answer has less entropy than a password — but it
+raises the cost from knowing an email address to knowing an email address and
+one fact about that person, and unlike a recovery code it is something people
+actually remember. The question endpoint answers for unknown addresses too, so
+it cannot be used to discover which emails are registered.
 
 ### More than one goal at a time
 
@@ -380,7 +395,7 @@ Interactive docs at `/docs` while the server runs.
 
 ## Testing
 
-**448 tests at 90% branch coverage**, all offline and deterministic — no
+**500 tests at 90% branch coverage**, all offline and deterministic — no
 network, no API key, no tokens. The database is pinned to SQLite for the
 same reason, so a configured `DATABASE_URL` can never send a test suite to
 a real server.
@@ -393,7 +408,7 @@ python -m ruff check .
 
 The load-bearing test is `assert_prerequisites_respected` — it walks a path in
 the exact order a learner would and fails if any item is reached before the
-skills it requires. It runs across all 14 goals × 3 experience levels.
+skills it requires. It runs across all 30 goals × 3 experience levels.
 
 <details>
 <summary><strong>What each suite proves</strong></summary>
@@ -466,7 +481,7 @@ backend/
   models.py  db.py  sqlstore.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               448 tests, all offline
+tests/                               500 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py
