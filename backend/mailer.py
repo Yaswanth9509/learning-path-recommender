@@ -27,7 +27,7 @@ TIMEOUT_SECONDS = 10
 #: signature", with nothing in it that mentions the real cause. Any User-Agent
 #: of our own is accepted. Measured against the live API: identical requests
 #: fail without this header and succeed with it.
-USER_AGENT = "learning-path-recommender/1.0 (+https://github.com/Yaswanth9509)"
+USER_AGENT = "rungs/1.0 (+https://github.com/Yaswanth9509)"
 
 
 class MailError(RuntimeError):
@@ -70,7 +70,7 @@ class NullMailer:
 class BrevoMailer:
     api_key: str
     sender: str
-    sender_name: str = "Learning Path Recommender"
+    sender_name: str = "Rungs"
     configured: bool = True
 
     def send(self, message: Message) -> None:
@@ -125,12 +125,12 @@ def build_mailer():
     return BrevoMailer(
         api_key=key,
         sender=sender,
-        sender_name=os.environ.get("MAIL_FROM_NAME", "Learning Path Recommender").strip()
-        or "Learning Path Recommender",
+        sender_name=os.environ.get("MAIL_FROM_NAME", "Rungs").strip()
+        or "Rungs",
     )
 
 
-RESET_SUBJECT = "Reset your Learning Path Recommender password"
+RESET_SUBJECT = "Reset your Rungs password"
 
 RESET_BODY = """\
 Someone asked to reset the password on the account for {email}.

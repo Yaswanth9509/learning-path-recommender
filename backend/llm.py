@@ -39,7 +39,7 @@ PRIORITY = ("anthropic", "gemini", "groq", "openrouter", "ollama")
 #: unknown id surfaces as a provider error and falls back to the rule engine
 #: rather than breaking the app.
 #: Sent on every provider request. See `_post_json`.
-USER_AGENT = "learning-path-recommender/1.4 (+https://github.com/Yaswanth9509/learning-path-recommender)"
+USER_AGENT = "rungs/1.4 (+https://github.com/Yaswanth9509/learning-path-recommender)"
 
 DEFAULT_MODELS = {
     "anthropic": "claude-opus-5",
@@ -372,7 +372,7 @@ def _build(name: str) -> Optional[Provider]:
             extra={
                 "headers": {
                     "HTTP-Referer": "http://localhost",
-                    "X-Title": "Learning Path Recommender",
+                    "X-Title": "Rungs",
                 }
             },
         )

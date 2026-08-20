@@ -1,4 +1,4 @@
-"""HTTP API and static hosting for the Personalised Learning Path Recommender."""
+"""HTTP API and static hosting for Rungs — prerequisite-ordered learning paths, explained."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ log = logging.getLogger("api")
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 app = FastAPI(
-    title="AI-Powered Personalised Learning Path Recommender",
+    title="Rungs",
     description=(
         "Conversational goal capture, learner profiling, prerequisite-aware "
         "path generation, explainable recommendations, and progress tracking."

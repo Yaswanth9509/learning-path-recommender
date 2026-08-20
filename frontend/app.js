@@ -1,4 +1,4 @@
-/* Learning Path Recommender — client.
+/* Rungs — client.
    No framework, no build step, no external requests. */
 
 const API = "";

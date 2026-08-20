@@ -141,10 +141,10 @@ def test_openrouter_sends_attribution_headers(monkeypatch):
     monkeypatch.setattr(llm, "_post_json", recorder)
     provider = llm.OpenAICompatProvider(
         name="openrouter", model="m", api_key="k", base_url="https://o.test/api/v1",
-        extra={"headers": {"X-Title": "Learning Path Recommender"}},
+        extra={"headers": {"X-Title": "Rungs"}},
     )
     provider.complete("S", MESSAGES, 50)
-    assert recorder.headers["X-Title"] == "Learning Path Recommender"
+    assert recorder.headers["X-Title"] == "Rungs"
 
 
 def test_openai_compatible_empty_choices_returns_none(monkeypatch):

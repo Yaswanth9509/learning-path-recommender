@@ -12,7 +12,7 @@
 # wake, which is fine for a throwaway demo and not fine for anything else.
 services:
   - type: web
-    name: learning-path-recommender
+    name: rungs
     runtime: docker
     plan: free
     # Match the region your DATABASE_URL points at. The database is in

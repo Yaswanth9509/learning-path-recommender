@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "learning-path-recommender"
+name = "rungs"
 version = "1.0.0"
 description = "Prerequisite-ordered, explainable learning paths generated from a goal stated in plain language."
 readme = "README.md"
@@ -36,7 +36,7 @@ dev = [
 ]
 
 [project.scripts]
-learning-path-recommender = "run:main"
+rungs = "run:main"
 
 [tool.setuptools]
 packages = ["backend"]

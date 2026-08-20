@@ -32,7 +32,7 @@ def test_catalog_endpoints(client):
 def test_index_page_is_served(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert "Learning Path Recommender" in response.text
+    assert "Rungs" in response.text
 
 
 # ----------------------------------------------------------------- learners

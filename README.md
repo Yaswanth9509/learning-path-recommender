@@ -1,6 +1,11 @@
-# AI-Powered Personalised Learning Path Recommender
+# Rungs
 
-**Tell it what you want to become. Get back the order to learn it in.**
+**Prerequisite-ordered learning paths, explained.**
+
+*Tell it what you want to become. Get back the order to learn it in.*
+
+A ladder's rungs are climbed in order, and none can be reached before the
+one below it. That is the whole idea.
 
 Recommending *relevant* courses is easy, and it is not the problem. Learners get
 stuck on **sequence**. So this system generates a roadmap from a prerequisite
@@ -490,8 +495,8 @@ Ids are pattern-checked, messages capped at 2000 characters, and every response
 carries `nosniff`, `DENY`, and `same-origin`.
 
 ```bash
-docker build -t learning-path-recommender .
-docker run -p 8000:8000 -v lpr-data:/data --env-file .env learning-path-recommender
+docker build -t rungs .
+docker run -p 8000:8000 -v lpr-data:/data --env-file .env rungs
 ```
 
 Non-root, with SQLite on a volume. State is one file (`LEARNING_DB_PATH`);
