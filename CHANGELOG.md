@@ -36,16 +36,20 @@ catalogue to the two reasons people learn that are not a job.
   Aptitude & Reasoning — take the catalogue to 122 skills, 182 items, 30 goals.
 - **The skill graph covers every path, not just the active one**, with a
   switcher and a `goal_id` parameter on the endpoint.
-- **Change your account name**, and **recover a forgotten password.** Each
-  account carries a question its holder wrote and an answer hashed like a
-  password, because there is no mail service to send a reset token through.
-  It is a speed bump rather than authentication — an answer has less entropy
-  than a password — but it raises the cost from knowing an email address to
-  knowing an email address and one fact about that person, and unlike a
-  recovery code it is something people actually remember. The question
-  endpoint answers for unknown addresses too, so it cannot be used to find
-  which emails are registered, and both endpoints have their own tight rate
-  limit.
+- **Change your account name**, and **recover a forgotten password by emailed
+  link.** `POST /api/auth/forgot` mails a single-use token that expires in 30
+  minutes and stores only its hash; spending it sets the new password and ends
+  every existing session. Asking again retires the previous link. The reply is
+  identical for a real account, a guest and an unknown address, so it cannot be
+  used to find which emails are registered, and both endpoints share a tight
+  rate limit.
+
+  This replaces the self-written security question that shipped earlier in this
+  release. The question was chosen only because there was no mail service; it
+  could never help an account that had not set one up, and it left the reset
+  screen showing a decoy question that could not work. Mail goes over Brevo's
+  HTTPS API rather than SMTP, because Render's free tier blocks ports 25, 465
+  and 587.
 
 ### Fixed
 

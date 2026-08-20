@@ -310,14 +310,23 @@ Signing in is optional by design, and the door is not a wall:
 - Every learner, path and message is scoped to one account. Another account
   cannot list them and cannot read them by id — asserted in `test_accounts.py`.
 
-There is no email verification, because that needs a mail service the project
-does not have. Recovery works without one: each account carries a question its
-holder wrote and an answer hashed like a password. That is a speed bump rather
-than authentication — an answer has less entropy than a password — but it
-raises the cost from knowing an email address to knowing an email address and
-one fact about that person, and unlike a recovery code it is something people
-actually remember. The question endpoint answers for unknown addresses too, so
-it cannot be used to discover which emails are registered.
+A forgotten password is reset by emailed link. `POST /api/auth/forgot` mails a
+single-use token that expires in 30 minutes; only its SHA-256 hash is stored,
+so a leaked database hands over nothing usable. Spending the link sets the new
+password and ends every existing session, because somebody resetting has
+either lost the password or lost the account. Asking again retires the previous
+link, so an older email cannot be replayed.
+
+The endpoint always answers the same `202` — unknown address, guest address or
+real account alike — so it cannot be used to discover which emails are
+registered. That property is exact here; the recovery question it replaced
+could only approximate it with a decoy.
+
+Mail goes out over Brevo's HTTPS API rather than SMTP, because Render's free
+tier blocks outbound traffic to ports 25, 465 and 587 — an SMTP transport works
+on a laptop and times out once deployed. Set `BREVO_API_KEY`, `MAIL_FROM` and
+`PUBLIC_BASE_URL` to enable it; leave them unset and the endpoint reports
+itself unavailable while the rest of the app is unaffected.
 
 ### More than one goal at a time
 

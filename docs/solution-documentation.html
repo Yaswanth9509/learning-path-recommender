@@ -406,7 +406,7 @@
           <text x="264" y="296">declared + implied skills</text>
           <text x="264" y="312">+ prior learning history</text>
           <text x="264" y="396">required − known</text>
-          <text x="508" y="174">85 skills · 139 items · 14 goals</text>
+          <text x="508" y="174">122 skills · 182 items · 30 goals</text>
           <text x="508" y="190">validated DAG, checked at import</text>
           <text x="508" y="296">topological layers</text>
           <text x="508" y="312">greedy course cover</text>
@@ -480,7 +480,7 @@
     <h3>Graph algorithms — the core</h3>
     <ul>
       <li><strong>Transitive closure</strong> over the prerequisite DAG, in both directions: downward from the goal to compute everything required, and downward from declared skills to credit everything implied.</li>
-      <li><strong>Kahn's algorithm</strong> for cycle detection, run at import over all 85 skills. A cycle makes any ordering impossible, so it fails loudly at startup rather than silently at generation.</li>
+      <li><strong>Kahn's algorithm</strong> for cycle detection, run at import over all 122 skills. A cycle makes any ordering impossible, so it fails loudly at startup rather than silently at generation.</li>
       <li><strong>Layered topological sort</strong> — not a single linear order, but dependency <em>levels</em>, so items that could be studied in parallel are grouped and can be scheduled together in one milestone.</li>
       <li><strong>Greedy set cover</strong> per layer: a course teaching three outstanding skills covers all three, so a learner is never sent to two courses where one would do.</li>
     </ul>
@@ -698,7 +698,7 @@
     </div>
 
     <p>
-      448 tests run in about fifteen seconds with no network, no API key, and
+      518 tests run in about half a minute with no network, no API key, and
       no tokens spent, at 90% branch coverage. The database is pinned to
       SQLite for the same reason the model is disabled: a configured
       <code>DATABASE_URL</code> must never send a test run to a real server. The load-bearing one is
@@ -746,8 +746,8 @@
     </div>
 
     <ul>
-      <li><strong>The catalogue is curated, not integrated.</strong> 139 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
-      <li><strong>No password recovery.</strong> Accounts exist and are isolated per user, but there is no email verification and no reset, because both need a mail service the project does not have. A learner who forgets their password makes a new account. That is an honest limit of a demo rather than an oversight.</li>
+      <li><strong>The catalogue is curated, not integrated.</strong> 182 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
+      <li><strong>Email deliverability is not guaranteed.</strong> A forgotten password is reset by single-use emailed link, sent through Brevo's HTTPS API on its free tier. The sender is a free-provider address, which cannot be DKIM-signed as itself, so some mail will land in spam until a domain is authenticated — a DNS change, not a code change. There is still no address verification at sign-up.</li>
       <li><strong>One connection, serialised.</strong> Every query goes through a single connection behind a lock — correct and simple for one process, and enough for a demo, but a busy deployment would want a pool. The seam is one module, so that is a contained change.</li>
       <li><strong>Rate limiting is in-process.</strong> Correct for one process; a multi-replica deployment would need a shared store.</li>
       <li><strong>Pace uses completion timestamps only.</strong> It cannot yet distinguish "studied five hours on Sunday" from "an hour a day", and does not model format-specific drop-off — the next honest signal to add.</li>
@@ -768,7 +768,7 @@ python run.py                      # http://127.0.0.1:8000
 
 # tests and lint
 pip install -r requirements-dev.txt
-python -m pytest                   # 448 tests, offline
+python -m pytest                   # 518 tests, offline
 python -m ruff check .
 
 # or containerised
