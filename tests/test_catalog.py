@@ -352,3 +352,30 @@ def test_the_catalogue_carries_no_invented_ratings():
     )
     carrying = [i["id"] for i in raw if "rating" in i or "learners" in i]
     assert not carrying, f"items still carrying invented numbers: {carrying}"
+
+
+def test_every_url_is_a_plausible_https_link():
+    """Offline shape check. The network verification happened once, at
+    authoring time; the suite must never reach for a socket to pass.
+    """
+    import re
+    bad = []
+    for item in get_catalog().items.values():
+        if not item.url:
+            continue
+        if not re.match(r"^https://[a-z0-9.-]+\.[a-z]{2,}(/|$)", item.url, re.I):
+            bad.append(f"{item.id} -> {item.url}")
+    assert not bad, f"urls that are not plain https links: {bad}"
+
+
+def test_leetcode_practice_sets_point_at_study_plans():
+    """A study plan is a curated multi-hour set, which is what an assessment
+    item represents. A single problem is twenty minutes and does not match.
+    """
+    leet = {i.id: i.url for i in get_catalog().items.values()
+            if i.url and "leetcode.com" in i.url}
+    assert leet, "the LeetCode practice sets have gone"
+    for item_id, url in leet.items():
+        assert "/studyplan/" in url, (
+            f"{item_id} links to {url}, which is not a study plan"
+        )

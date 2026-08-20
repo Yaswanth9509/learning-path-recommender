@@ -1235,6 +1235,23 @@
     "url": "https://leetcode.com/studyplan/top-sql-50/"
   },
   {
+    "id": "a-pandas",
+    "title": "Introduction to Pandas: Practice Set",
+    "provider": "LeetCode",
+    "type": "assessment",
+    "level": 1,
+    "hours": 2,
+    "format": "interactive",
+    "cost": "free",
+    "domain": "Data & AI",
+    "teaches": [],
+    "requires": [
+      "data-wrangling"
+    ],
+    "description": "Dataframe tasks that check the wrangling skills a path assumes.",
+    "url": "https://leetcode.com/studyplan/introduction-to-pandas/"
+  },
+  {
     "id": "a-stats",
     "title": "AP Statistics",
     "provider": "Khan Academy",

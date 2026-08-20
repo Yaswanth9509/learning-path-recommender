@@ -349,6 +349,32 @@ to the rule engine silently and keeps working — which means you can be reading
 rule-engine output and concluding the model is bad. The badge and the per-reply
 line make that visible rather than mysterious.
 
+### The catalogue
+
+Every course points at a free, canonical resource — MIT OpenCourseWare,
+OpenStax, Khan Academy, MDN, freeCodeCamp, Kaggle Learn, Hugging Face, official
+documentation — credited to whoever published it. Each URL was fetched before
+it shipped, and the check retries: several of these hosts sit behind Cloudflare
+and answer `403` to an automated request at random, so one failure is not
+evidence a link is dead.
+
+Projects and self-assessments carry no URL and are attributed to nobody. They
+are work the learner does, not a page somebody else hosts.
+
+Items carry no rating and no learner count. Both existed once and both were
+invented, which was harmless while the providers were invented too and stopped
+being harmless when they became real — a fabricated `4.7` beside *MIT
+OpenCourseWare* borrows authority this project has no right to lend.
+
+Five assessments link to LeetCode study plans. **Completion is self-marked, and
+that is a limit rather than an oversight:** LeetCode exposes no way for a third
+party to ask whether a given user has solved a given problem. Its `status`
+field is null without an authenticated session, the only per-problem signal is
+a recent-submissions list hard-capped at twenty entries with no pagination, and
+nothing proves the person typing a username owns it. Polling it would also be
+against their terms. So the app asks, the same way it asks about every other
+item.
+
 ### Where the data lives
 
 By default the whole application state is one SQLite file you can delete to
