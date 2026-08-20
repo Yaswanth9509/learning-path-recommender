@@ -1159,12 +1159,19 @@ function renderPathItem(item) {
     });
   statusSelect.addEventListener("change", () => setProgress(item.item_id, statusSelect.value));
   actions.appendChild(statusSelect);
-  actions.appendChild(explainButton(item.item_id));
-  actions.appendChild(el("button", {
+
+  /* Explain and Remove used to be two more rows stacked under the status,
+     making four separate rows of controls in a narrow gutter — the busiest
+     thing on the page, next to the item title it was supposed to serve.
+     They are one row of two related actions. */
+  const secondary = el("div", { class: "row" });
+  secondary.appendChild(explainButton(item.item_id));
+  secondary.appendChild(el("button", {
     class: "btn btn-mini btn-danger", text: "Remove",
     attrs: { type: "button", title: "Drop this from the path and find another route" },
     on: { click: () => removeItemFromPath(item.item_id, item.title) },
   }));
+  actions.appendChild(secondary);
 
   // Feedback is secondary to the item itself, and marked as such: four
   // equally-weighted buttons per row were competing with the course title.
@@ -1786,7 +1793,11 @@ function renderPace(pace) {
   const [label, badgeClass] = PACE_LABELS[pace.status] || PACE_LABELS.unknown;
   const head = el("div", { class: "pace-head" });
   head.appendChild(el("h3", { text: "Your actual pace" }));
-  head.appendChild(el("span", { class: `badge ${badgeClass}`, text: label }));
+  // With no history the label is the word "Pace", which restates the heading
+  // it sits beside. A badge that says nothing is worse than no badge.
+  if (pace.status !== "unknown") {
+    head.appendChild(el("span", { class: `badge ${badgeClass}`, text: label }));
+  }
   card.appendChild(head);
   card.appendChild(el("div", { class: "pace-message", text: pace.message }));
 
@@ -1834,11 +1845,14 @@ function renderDashboard(d) {
   const kpis = $("#dashKpis");
   kpis.innerHTML = "";
 
+  // The label sits above the figure in every tile, so it does here too. It
+  // used to sit beside the donut, which left the four cards' labels on four
+  // different baselines and made the row read as two designs side by side.
   const ringCard = el("div", { class: "kpi" });
+  ringCard.appendChild(el("div", { class: "kpi-label", text: "Overall progress" }));
   const ringWrap = el("div", { class: "ring-wrap" });
   ringWrap.appendChild(donut(d.overall_percent));
   ringWrap.appendChild(el("div", {}, [
-    el("div", { class: "kpi-label", text: "Overall progress" }),
     el("div", { class: "kpi-note", text: `${d.items_completed} of ${d.items_total} items` }),
     el("div", { class: "kpi-note", text: d.streak_note }),
   ]));

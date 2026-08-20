@@ -7,8 +7,11 @@
    1. Depth is earned. A hairline border plus a one-pixel inner highlight
       reads as a real surface; stacked drop shadows just read as noise. Only
       things that genuinely float — the modal, the toast — get a shadow.
-   2. Colour means something. Violet is the product, amber is a streak,
-      emerald is done, rose is destructive. Nothing is tinted for decoration.
+   2. Colour means status, never category. Violet is the product and the
+      thing in progress, emerald is done, amber is a gap or a streak — some
+      thing wanting attention — and rose is destructive. Item kinds are
+      neutral: what a thing *is* must not be dressed as how it is *going*.
+      Nothing is tinted for decoration.
 
    Motion is short, purposeful, and removed under prefers-reduced-motion.
    ========================================================================= */
@@ -60,6 +63,9 @@
   --ring: 0 0 0 3px color-mix(in srgb, var(--brand) 26%, transparent);
 
   /* A scale with real steps, so a heading never reads as body text. */
+  /* Caps micro-labels: CORE, ASSESSMENT, SKILLS MASTERED. Four rules
+     were hand-rolling this at .64-.66rem with no token behind it. */
+  --t-2xs: .65rem;
   --t-xs: .74rem;
   --t-sm: .82rem;
   --t-base: .93rem;
@@ -399,13 +405,15 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
 .path-summary { color: var(--text-soft); font-size: var(--t-base); }
 /* An exam is not a job. The label says which kind of finish line this is. */
 .goal-kind {
-  margin-left: .6rem; font-size: .64rem; font-weight: 700; letter-spacing: .07em;
+  margin-left: .6rem; font-size: var(--t-2xs); font-weight: 700; letter-spacing: .07em;
   text-transform: uppercase; padding: .22rem .55rem; border-radius: var(--radius-pill);
   vertical-align: middle;
 }
-.kind-exam { background: var(--warn-soft); color: var(--warn); }
-.kind-certification { background: var(--good-soft); color: var(--good); }
-.kind-subject { background: var(--brand-soft); color: var(--brand); }
+/* Neutral, deliberately: see the note on `.role-*` below. What kind of goal
+   this is says nothing about how it is going. */
+.kind-exam, .kind-certification, .kind-subject, .kind-role {
+  background: var(--surface-2); color: var(--text-dim);
+}
 .path-switcher { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 /* The children are inline spans, so the chip lays them out itself: title and
    percentage share the first line, the bar takes the whole second one. */
@@ -492,13 +500,18 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
 .item.is-done::before { opacity: 1; background: var(--good); }
 
 .item-role {
-  font-size: .64rem; text-transform: uppercase; letter-spacing: .07em;
+  font-size: var(--t-2xs); text-transform: uppercase; letter-spacing: .07em;
   padding: .22rem .5rem; border-radius: 5px; font-weight: 700;
   background: var(--surface-2); color: var(--text-dim); white-space: nowrap;
 }
-.role-core { background: var(--brand-soft); color: var(--brand); }
-.role-project { background: var(--warn-soft); color: var(--warn); }
-.role-assessment { background: var(--good-soft); color: var(--good); }
+/* Category, not status — so no status colour. These borrowed the state
+   palette: `assessment` was emerald, the colour this file uses for done, so
+   an assessment nobody had started rendered green beside the words "Not
+   started"; `project` was amber, the attention colour. The word in the chip
+   already says which kind it is, and colour is reserved for how it is going. */
+.role-core, .role-project, .role-assessment {
+  background: var(--surface-2); color: var(--text-dim);
+}
 .item-title { font-weight: 620; font-size: var(--t-base); letter-spacing: -.01em; }
 .item-sub { color: var(--text-dim); font-size: var(--t-xs); }
 
@@ -647,13 +660,13 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
 .path-card-bar { width: 100%; height: 6px; border-radius: var(--radius-pill); background: var(--surface); overflow: hidden; }
 .path-card-bar > span { display: block; height: 100%; background: var(--grad-brand); }
 .path-card.is-done .path-card-bar > span { background: var(--good); }
-.path-card-foot { font-family: var(--mono); font-size: var(--t-xs); color: var(--text-dim); }
+.path-card-foot { font-size: var(--t-xs); color: var(--text-dim); }
 
 /* ------------------------------------------------------------ achievements */
 .xp-wrap { margin-bottom: 1rem; }
 .xp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .xp-level { font-weight: 680; font-size: var(--t-md); letter-spacing: -.015em; }
-.xp-num { font-family: var(--mono); font-size: var(--t-xs); color: var(--text-dim); }
+.xp-num { font-size: var(--t-xs); color: var(--text-dim); }
 .xp-track { height: 10px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; margin-top: .45rem; }
 .xp-fill { display: block; height: 100%; background: var(--grad-brand); border-radius: inherit; }
 
@@ -678,7 +691,7 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
   background-clip: text; color: transparent;
 }
 .streak-label {
-  font-size: .66rem; text-transform: uppercase; letter-spacing: .07em;
+  font-size: var(--t-2xs); text-transform: uppercase; letter-spacing: .07em;
   color: var(--text-dim); font-weight: 600;
 }
 
@@ -734,7 +747,7 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
 .rec-heading { margin: .5rem 0 -.1rem; }
 .rec-heading h3 { margin: 0; font-size: var(--t-md); }
 .rec-flag {
-  display: inline-block; font-size: .64rem; font-weight: 700; letter-spacing: .06em;
+  display: inline-block; font-size: var(--t-2xs); font-weight: 700; letter-spacing: .06em;
   text-transform: uppercase; padding: .18rem .55rem; border-radius: var(--radius-pill);
   margin: 0 .3rem .5rem 0;
 }
@@ -1067,7 +1080,7 @@ body.is-gated .app-header, body.is-gated main { display: none; }
   .item { grid-template-columns: auto minmax(0, 1fr); }
   .item-actions { grid-column: 1 / -1; flex-direction: row; align-items: center; flex-wrap: wrap; }
   .domain-row { grid-template-columns: 110px minmax(0, 1fr) auto; }
-  .explain-row { grid-template-columns: minmax(0, 1fr) 2.6rem 2.8rem minmax(0, 1fr); font-size: .72rem; }
+  .explain-row { grid-template-columns: minmax(0, 1fr) 2.6rem 2.8rem minmax(0, 1fr); font-size: var(--t-2xs); }
 }
 @media (max-width: 700px) {
   .topbar-group + .topbar-group { padding-left: 0; border-left: none; }

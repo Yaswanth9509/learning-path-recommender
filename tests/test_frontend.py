@@ -347,3 +347,38 @@ def test_the_rationale_is_collapsed_by_default():
         "the per-item rationale is no longer a disclosure"
     )
     assert ".item-why summary" in CSS
+
+
+def test_item_kind_does_not_borrow_the_status_palette():
+    """`assessment` was emerald — the colour this file uses for done.
+
+    An assessment nobody had started rendered green beside the words "Not
+    started". Category must not be dressed as state.
+    """
+    for rule in ("role-core", "role-project", "role-assessment",
+                 "kind-exam", "kind-certification", "kind-subject"):
+        block = re.search(rf"\.{rule}\b[^{{]*\{{([^}}]*)\}}", CSS)
+        assert block, f".{rule} has no rule any more"
+        body = block.group(1)
+        for status_colour in ("--good", "--warn", "--danger", "--brand"):
+            assert status_colour not in body, (
+                f".{rule} uses the status colour {status_colour}: {body.strip()}"
+            )
+
+
+def test_no_hand_rolled_type_sizes_outside_the_scale():
+    """Twelve one-offs bypassed the token scale before this.
+
+    SVG text is exempt: it sets px inside a scaled viewBox, where rem does not
+    behave the same way.
+    """
+    svg_rules = ("ring-text", "node-label", "node-sub", "layer-label")
+    offenders = []
+    for match in re.finditer(r"([^{}]+)\{([^}]*font-size:\s*([^;}]+)[^}]*)\}", CSS):
+        selector, _, size = match.group(1).strip(), match.group(2), match.group(3).strip()
+        if size.startswith("var(") or size.endswith("em") or "px" not in size and "rem" not in size:
+            continue
+        if any(name in selector for name in svg_rules) or selector.startswith("body"):
+            continue
+        offenders.append(f"{selector.splitlines()[-1].strip()} -> {size}")
+    assert not offenders, f"font sizes outside the token scale: {offenders}"
