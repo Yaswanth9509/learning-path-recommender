@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
 
 #: Token budgets. On models with thinking enabled these cap thinking plus
 #: response text together, so both leave deliberate headroom.
@@ -49,9 +48,3 @@ def load_dotenv(path: Path | None = None) -> None:
 
 load_dotenv()
 
-
-def get_settings() -> dict[str, Any]:
-    """Current assistant configuration, as reported by /api/health."""
-    from . import llm
-
-    return llm.status()

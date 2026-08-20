@@ -266,7 +266,7 @@ dependency**: the whole layer is stdlib `urllib`.
 
 ## Catalog integrity
 
-122 skills, 182 learning items, 30 goals across fourteen domains — validated
+122 skills, 183 learning items, 30 goals across fourteen domains — validated
 exhaustively at import. `CatalogError` is raised for:
 
 - a prerequisite that does not resolve, or a skill requiring itself

@@ -371,9 +371,3 @@ def get_db() -> Database:
                 _db = Database()
     return _db
 
-
-def reset_db_singleton(db: Optional[Database] = None) -> None:
-    """Test hook: swap the process-wide database."""
-    global _db
-    with _db_lock:
-        _db = db

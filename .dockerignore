@@ -23,3 +23,6 @@ make_zip.py
 README.md
 CONTRIBUTING.md
 CHANGELOG.md
+# Only shrinks the build context: the COPY list never reaches for these.
+docs
+

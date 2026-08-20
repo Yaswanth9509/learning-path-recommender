@@ -68,6 +68,17 @@ app = FastAPI(
 # `security.py` for the environment variables that tighten it for a deployment.
 app.middleware("http")(security.gate_request)
 
+# `ALLOWED_ORIGINS` defaults to `*`, which is safe only because credentials are
+# off: with `allow_credentials=False` a browser will not attach the session
+# cookie to a cross-origin request, so a permissive origin list grants a
+# stranger's page nothing it could not already fetch unauthenticated. The two
+# settings are a pair. Turning credentials on without naming exact origins
+# would hand any site the ability to act as a signed-in user, and browsers
+# reject `*` with credentials for precisely that reason.
+#
+# This app serves its own frontend from the same origin, so nothing here needs
+# CORS at all today. It matters if the frontend is ever hosted separately, at
+# which point both halves have to change together.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=security.allowed_origins(),

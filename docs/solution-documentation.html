@@ -407,7 +407,7 @@
           <text x="264" y="296">declared + implied skills</text>
           <text x="264" y="312">+ prior learning history</text>
           <text x="264" y="396">required − known</text>
-          <text x="508" y="174">122 skills · 182 items · 30 goals</text>
+          <text x="508" y="174">122 skills · 183 items · 30 goals</text>
           <text x="508" y="190">validated DAG, checked at import</text>
           <text x="508" y="296">topological layers</text>
           <text x="508" y="312">greedy course cover</text>
@@ -699,7 +699,7 @@
     </div>
 
     <p>
-      518 tests run in about half a minute with no network, no API key, and
+      525 tests run in about half a minute with no network, no API key, and
       no tokens spent, at 90% branch coverage. The database is pinned to
       SQLite for the same reason the model is disabled: a configured
       <code>DATABASE_URL</code> must never send a test run to a real server. The load-bearing one is
@@ -747,7 +747,7 @@
     </div>
 
     <ul>
-      <li><strong>The catalogue is curated, not integrated.</strong> 182 items with realistic metadata stand in for a provider feed. The reference resources carry real canonical links; the sample courses do not, and the UI offers a search rather than fabricating a dead one. Integrating a real provider API is a data-layer change, not an architectural one.</li>
+      <li><strong>The catalogue is curated, not integrated.</strong> 183 items, each pointing at a real free resource — MIT OpenCourseWare, OpenStax, Khan Academy, MDN, official documentation — verified reachable before it shipped. What is curated is the <em>selection</em>: a human chose which resource teaches which skill, where a production system would ingest a provider feed and map it automatically. That is a data-layer change, not an architectural one.</li>
       <li><strong>Email deliverability is not guaranteed.</strong> A forgotten password is reset by single-use emailed link, sent through Brevo's HTTPS API on its free tier. The sender is a free-provider address, which cannot be DKIM-signed as itself, so some mail will land in spam until a domain is authenticated — a DNS change, not a code change. There is still no address verification at sign-up.</li>
       <li><strong>One connection, serialised.</strong> Every query goes through a single connection behind a lock — correct and simple for one process, and enough for a demo, but a busy deployment would want a pool. The seam is one module, so that is a contained change.</li>
       <li><strong>Rate limiting is in-process.</strong> Correct for one process; a multi-replica deployment would need a shared store.</li>
@@ -769,7 +769,7 @@ python run.py                      # http://127.0.0.1:8000
 
 # tests and lint
 pip install -r requirements-dev.txt
-python -m pytest                   # 518 tests, offline
+python -m pytest                   # 525 tests, offline
 python -m ruff check .
 
 # or containerised

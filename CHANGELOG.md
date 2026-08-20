@@ -33,7 +33,7 @@ catalogue to the two reasons people learn that are not a job.
   TOEFL, SAT, CFA Level I, a cloud architect certification, and undergraduate
   Computer Science, Economics and Psychology plus postgraduate Data Science.
   Four new domains — Sciences, Humanities & Social Science, Language, and
-  Aptitude & Reasoning — take the catalogue to 122 skills, 182 items, 30 goals.
+  Aptitude & Reasoning — take the catalogue to 122 skills, 183 items, 30 goals.
 - **The skill graph covers every path, not just the active one**, with a
   switcher and a `goal_id` parameter on the endpoint.
 - **Change your account name**, and **recover a forgotten password by emailed
