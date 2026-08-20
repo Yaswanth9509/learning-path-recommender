@@ -496,12 +496,17 @@ carries `nosniff`, `DENY`, and `same-origin`.
 
 ```bash
 docker build -t rungs .
-docker run -p 8000:8000 -v lpr-data:/data --env-file .env rungs
+docker run -p 8000:8000 -v rungs-data:/data --env-file .env rungs
 ```
 
-Non-root, with SQLite on a volume. State is one file (`LEARNING_DB_PATH`);
-delete it to reset. Nothing else to migrate or back up. The container honours
-`$PORT`, so it runs unchanged on Render, Railway, Fly, or Cloud Run.
+A 280 MB single-stage image running as a non-root user (`uid 10001`), with
+SQLite on a volume. State is one file at `LEARNING_DB_PATH`; delete it to
+reset, and nothing else needs migrating or backing up — destroying the
+container and recreating it against the same volume keeps every account.
+Unset `DATABASE_URL` and it uses that file; set it and the identical SQL runs
+against Postgres instead. The container honours `$PORT`, so it runs unchanged
+on Render, Railway, Fly, or Cloud Run, and its `HEALTHCHECK` reports
+`healthy` once the catalogue validates and the app answers.
 
 **Deploying to Render:** [`render.yaml`](render.yaml) is a ready blueprint —
 *New → Blueprint → pick this repo*, then set `GEMINI_API_KEY` when prompted (or
@@ -521,7 +526,7 @@ backend/
   models.py  db.py  sqlstore.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               500 tests, all offline
+tests/                               525 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py
