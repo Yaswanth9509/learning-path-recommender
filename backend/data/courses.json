@@ -1,13 +1,11 @@
 [
   {
     "id": "c-prog-101",
-    "title": "Programming Foundations with Python",
-    "provider": "OpenLearn",
+    "title": "Scientific Computing with Python",
+    "provider": "freeCodeCamp",
     "type": "course",
     "level": 1,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 184000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -16,17 +14,16 @@
       "python"
     ],
     "requires": [],
-    "description": "Build core programming intuition and write real Python from day one."
+    "description": "Build core programming intuition and write real Python from day one.",
+    "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/"
   },
   {
     "id": "c-python-alt",
     "title": "Python for Everybody",
-    "provider": "CampusX",
+    "provider": "py4e (Charles Severance)",
     "type": "course",
     "level": 1,
     "hours": 22,
-    "rating": 4.8,
-    "learners": 412000,
     "format": "video",
     "cost": "free",
     "domain": "Foundations",
@@ -36,17 +33,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "A gentle, widely loved introduction to Python for non-specialists."
+    "description": "A gentle, widely loved introduction to Python for non-specialists.",
+    "url": "https://www.py4e.com/"
   },
   {
     "id": "c-cli-git",
-    "title": "Command Line and Git Essentials",
-    "provider": "DevPath",
+    "title": "Pro Git",
+    "provider": "Git SCM",
     "type": "course",
     "level": 1,
     "hours": 12,
-    "rating": 4.6,
-    "learners": 96000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -54,17 +50,16 @@
       "cli-git"
     ],
     "requires": [],
-    "description": "Work confidently in the shell and collaborate with Git branching workflows."
+    "description": "Work confidently in the shell and collaborate with Git branching workflows.",
+    "url": "https://git-scm.com/book/en/v2"
   },
   {
     "id": "c-sql-101",
-    "title": "SQL for Data Work",
-    "provider": "OpenLearn",
+    "title": "SQLBolt: Interactive SQL Lessons",
+    "provider": "SQLBolt",
     "type": "course",
     "level": 1,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 221000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -72,17 +67,16 @@
       "sql"
     ],
     "requires": [],
-    "description": "Query, join, and aggregate relational data with confidence."
+    "description": "Query, join, and aggregate relational data with confidence.",
+    "url": "https://sqlbolt.com/"
   },
   {
     "id": "c-sql-alt",
-    "title": "Advanced SQL for Analytics",
-    "provider": "DataForge",
+    "title": "Mode SQL Tutorial: Advanced SQL",
+    "provider": "Mode",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.5,
-    "learners": 58000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Foundations",
@@ -90,17 +84,16 @@
       "sql"
     ],
     "requires": [],
-    "description": "Window functions, CTEs, and query tuning for analytical workloads."
+    "description": "Window functions, CTEs, and query tuning for analytical workloads.",
+    "url": "https://mode.com/sql-tutorial/"
   },
   {
     "id": "c-stats",
-    "title": "Statistics & Probability for Data",
-    "provider": "QuantAcademy",
+    "title": "Statistics and Probability",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 2,
     "hours": 35,
-    "rating": 4.6,
-    "learners": 132000,
     "format": "video",
     "cost": "paid",
     "domain": "Foundations",
@@ -108,17 +101,16 @@
       "math-stats"
     ],
     "requires": [],
-    "description": "Inference, distributions, and experiment design grounded in real datasets."
+    "description": "Inference, distributions, and experiment design grounded in real datasets.",
+    "url": "https://www.khanacademy.org/math/statistics-probability"
   },
   {
     "id": "c-dsa",
-    "title": "Data Structures & Algorithms in Python",
-    "provider": "CampusX",
+    "title": "Problem Solving with Algorithms and Data Structures using Python",
+    "provider": "Runestone Academy",
     "type": "course",
     "level": 2,
     "hours": 45,
-    "rating": 4.5,
-    "learners": 149000,
     "format": "video",
     "cost": "paid",
     "domain": "Foundations",
@@ -128,17 +120,16 @@
     "requires": [
       "python"
     ],
-    "description": "Complexity analysis and the data structures behind efficient systems."
+    "description": "Complexity analysis and the data structures behind efficient systems.",
+    "url": "https://runestone.academy/ns/books/published/pythonds/index.html"
   },
   {
     "id": "c-testing",
-    "title": "Automated Testing Fundamentals",
-    "provider": "DevPath",
+    "title": "pytest: Automated Testing in Python",
+    "provider": "pytest",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.4,
-    "learners": 47000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -148,17 +139,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "Write tests that catch regressions without slowing delivery."
+    "description": "Write tests that catch regressions without slowing delivery.",
+    "url": "https://docs.pytest.org/en/stable/"
   },
   {
     "id": "c-pandas",
-    "title": "Data Wrangling with pandas",
-    "provider": "DataForge",
+    "title": "10 Minutes to pandas",
+    "provider": "pandas",
     "type": "course",
     "level": 2,
     "hours": 25,
-    "rating": 4.7,
-    "learners": 163000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -168,17 +158,16 @@
     "requires": [
       "python"
     ],
-    "description": "Reshape messy real-world data into analysis-ready tables."
+    "description": "Reshape messy real-world data into analysis-ready tables.",
+    "url": "https://pandas.pydata.org/docs/user_guide/10min.html"
   },
   {
     "id": "c-viz",
-    "title": "Data Visualization & Storytelling",
-    "provider": "DataForge",
+    "title": "Data Visualization",
+    "provider": "Kaggle Learn",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 88000,
     "format": "video",
     "cost": "paid",
     "domain": "Data & AI",
@@ -188,17 +177,16 @@
     "requires": [
       "data-wrangling"
     ],
-    "description": "Choose the right chart and build a narrative decision-makers act on."
+    "description": "Choose the right chart and build a narrative decision-makers act on.",
+    "url": "https://www.kaggle.com/learn/data-visualization"
   },
   {
     "id": "c-eda",
-    "title": "Exploratory Data Analysis in Practice",
-    "provider": "DataForge",
+    "title": "Pandas: Exploratory Data Analysis",
+    "provider": "Kaggle Learn",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.5,
-    "learners": 71000,
     "format": "project",
     "cost": "paid",
     "domain": "Data & AI",
@@ -209,17 +197,16 @@
       "data-wrangling",
       "math-stats"
     ],
-    "description": "Profile unfamiliar datasets and surface the questions worth asking."
+    "description": "Profile unfamiliar datasets and surface the questions worth asking.",
+    "url": "https://www.kaggle.com/learn/pandas"
   },
   {
     "id": "c-bi",
-    "title": "Building BI Dashboards",
-    "provider": "MetricLab",
+    "title": "Matplotlib Tutorials",
+    "provider": "Matplotlib",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.4,
-    "learners": 52000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Data & AI",
@@ -230,17 +217,16 @@
       "sql",
       "data-viz"
     ],
-    "description": "Model metrics and ship dashboards teams actually use."
+    "description": "Model metrics and ship dashboards teams actually use.",
+    "url": "https://matplotlib.org/stable/tutorials/index.html"
   },
   {
     "id": "c-ml-found",
-    "title": "Machine Learning Foundations",
-    "provider": "QuantAcademy",
+    "title": "Machine Learning Crash Course",
+    "provider": "Google",
     "type": "course",
     "level": 2,
     "hours": 40,
-    "rating": 4.8,
-    "learners": 298000,
     "format": "video",
     "cost": "free",
     "domain": "Data & AI",
@@ -251,17 +237,16 @@
       "math-stats",
       "python"
     ],
-    "description": "The concepts every practitioner needs before touching a model."
+    "description": "The concepts every practitioner needs before touching a model.",
+    "url": "https://developers.google.com/machine-learning/crash-course"
   },
   {
     "id": "c-supervised",
-    "title": "Supervised Learning: Regression & Classification",
-    "provider": "QuantAcademy",
+    "title": "Supervised Learning",
+    "provider": "scikit-learn",
     "type": "course",
     "level": 2,
     "hours": 35,
-    "rating": 4.7,
-    "learners": 186000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Data & AI",
@@ -271,17 +256,16 @@
     "requires": [
       "ml-foundations"
     ],
-    "description": "Train, tune, and reason about predictive models on labelled data."
+    "description": "Train, tune, and reason about predictive models on labelled data.",
+    "url": "https://scikit-learn.org/stable/supervised_learning.html"
   },
   {
     "id": "c-ml-alt",
-    "title": "Applied Machine Learning End-to-End",
-    "provider": "DataForge",
+    "title": "Intro to Machine Learning",
+    "provider": "Kaggle Learn",
     "type": "course",
     "level": 2,
     "hours": 45,
-    "rating": 4.6,
-    "learners": 94000,
     "format": "project",
     "cost": "paid",
     "domain": "Data & AI",
@@ -293,17 +277,16 @@
       "python",
       "math-stats"
     ],
-    "description": "One project-led path from raw data through to a deployed prediction."
+    "description": "One project-led path from raw data through to a deployed prediction.",
+    "url": "https://www.kaggle.com/learn/intro-to-machine-learning"
   },
   {
     "id": "c-unsupervised",
-    "title": "Unsupervised Learning & Clustering",
-    "provider": "QuantAcademy",
+    "title": "Unsupervised Learning",
+    "provider": "scikit-learn",
     "type": "course",
     "level": 2,
     "hours": 25,
-    "rating": 4.4,
-    "learners": 64000,
     "format": "video",
     "cost": "paid",
     "domain": "Data & AI",
@@ -313,17 +296,16 @@
     "requires": [
       "ml-foundations"
     ],
-    "description": "Find structure in unlabelled data with clustering and decomposition."
+    "description": "Find structure in unlabelled data with clustering and decomposition.",
+    "url": "https://scikit-learn.org/stable/unsupervised_learning.html"
   },
   {
     "id": "c-feature",
-    "title": "Feature Engineering at Scale",
-    "provider": "DataForge",
+    "title": "Feature Engineering",
+    "provider": "Kaggle Learn",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 41000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Data & AI",
@@ -334,17 +316,16 @@
       "supervised-ml",
       "data-wrangling"
     ],
-    "description": "Turn raw signals into features that measurably move model performance."
+    "description": "Turn raw signals into features that measurably move model performance.",
+    "url": "https://www.kaggle.com/learn/feature-engineering"
   },
   {
     "id": "c-modeleval",
-    "title": "Model Evaluation & Validation",
-    "provider": "QuantAcademy",
+    "title": "Model Evaluation",
+    "provider": "scikit-learn",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 57000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -354,17 +335,16 @@
     "requires": [
       "supervised-ml"
     ],
-    "description": "Pick honest metrics, validate properly, and diagnose failure modes."
+    "description": "Pick honest metrics, validate properly, and diagnose failure modes.",
+    "url": "https://scikit-learn.org/stable/modules/model_evaluation.html"
   },
   {
     "id": "c-exp",
-    "title": "Experiment Tracking & Reproducible ML",
-    "provider": "MLWorks",
+    "title": "MLflow: Experiment Tracking",
+    "provider": "MLflow",
     "type": "course",
     "level": 2,
     "hours": 14,
-    "rating": 4.3,
-    "learners": 29000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -375,17 +355,16 @@
       "ml-foundations",
       "cli-git"
     ],
-    "description": "Version data, code, and runs so any result can be reproduced."
+    "description": "Version data, code, and runs so any result can be reproduced.",
+    "url": "https://mlflow.org/docs/latest/index.html"
   },
   {
     "id": "c-respai",
-    "title": "Responsible AI & Model Governance",
-    "provider": "MLWorks",
+    "title": "Responsible AI Practices",
+    "provider": "Google",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 33000,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -395,17 +374,16 @@
     "requires": [
       "model-evaluation"
     ],
-    "description": "Fairness, interpretability, and the documentation reviewers ask for."
+    "description": "Fairness, interpretability, and the documentation reviewers ask for.",
+    "url": "https://ai.google/responsibility/responsible-ai-practices/"
   },
   {
     "id": "c-dl",
-    "title": "Deep Learning Specialisation",
-    "provider": "NeuralSchool",
+    "title": "Dive into Deep Learning",
+    "provider": "D2L.ai",
     "type": "course",
     "level": 3,
     "hours": 60,
-    "rating": 4.8,
-    "learners": 312000,
     "format": "video",
     "cost": "paid",
     "domain": "Data & AI",
@@ -416,17 +394,16 @@
       "supervised-ml",
       "data-structures"
     ],
-    "description": "Neural architectures and the training craft behind modern models."
+    "description": "Neural architectures and the training craft behind modern models.",
+    "url": "https://d2l.ai/"
   },
   {
     "id": "c-nlp",
-    "title": "NLP with Transformers",
-    "provider": "NeuralSchool",
+    "title": "Hugging Face NLP Course",
+    "provider": "Hugging Face",
     "type": "course",
     "level": 3,
     "hours": 45,
-    "rating": 4.7,
-    "learners": 128000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Data & AI",
@@ -436,17 +413,16 @@
     "requires": [
       "deep-learning"
     ],
-    "description": "Tokenisation through fine-tuning for production language tasks."
+    "description": "Tokenisation through fine-tuning for production language tasks.",
+    "url": "https://huggingface.co/learn/nlp-course/chapter1/1"
   },
   {
     "id": "c-cv",
-    "title": "Computer Vision with Deep Learning",
-    "provider": "NeuralSchool",
+    "title": "CS231n: Convolutional Neural Networks for Visual Recognition",
+    "provider": "Stanford CS231n",
     "type": "course",
     "level": 3,
     "hours": 45,
-    "rating": 4.6,
-    "learners": 86000,
     "format": "video",
     "cost": "paid",
     "domain": "Data & AI",
@@ -456,17 +432,16 @@
     "requires": [
       "deep-learning"
     ],
-    "description": "Convolutional and vision-transformer models for image understanding."
+    "description": "Convolutional and vision-transformer models for image understanding.",
+    "url": "https://cs231n.github.io/"
   },
   {
     "id": "c-vector",
-    "title": "Embeddings & Vector Search",
-    "provider": "MLWorks",
+    "title": "Vector Databases Explained",
+    "provider": "Pinecone",
     "type": "course",
     "level": 3,
     "hours": 18,
-    "rating": 4.5,
-    "learners": 38000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -476,17 +451,16 @@
     "requires": [
       "nlp"
     ],
-    "description": "Embedding models, similarity metrics, and ANN indexes that stay fast."
+    "description": "Embedding models, similarity metrics, and ANN indexes that stay fast.",
+    "url": "https://www.pinecone.io/learn/vector-database/"
   },
   {
     "id": "c-llm",
-    "title": "Building LLM Applications",
-    "provider": "MLWorks",
+    "title": "Building LLM Applications with LangChain",
+    "provider": "LangChain",
     "type": "course",
     "level": 3,
     "hours": 30,
-    "rating": 4.8,
-    "learners": 121000,
     "format": "project",
     "cost": "paid",
     "domain": "Data & AI",
@@ -497,17 +471,16 @@
       "nlp",
       "rest-api"
     ],
-    "description": "Prompting, tool use, evaluation harnesses, and shipping an LLM service."
+    "description": "Prompting, tool use, evaluation harnesses, and shipping an LLM service.",
+    "url": "https://python.langchain.com/docs/introduction/"
   },
   {
     "id": "c-rag",
-    "title": "Retrieval-Augmented Generation Systems",
-    "provider": "MLWorks",
+    "title": "Retrieval-Augmented Generation Cookbook",
+    "provider": "Hugging Face",
     "type": "course",
     "level": 3,
     "hours": 26,
-    "rating": 4.7,
-    "learners": 67000,
     "format": "project",
     "cost": "paid",
     "domain": "Data & AI",
@@ -518,17 +491,16 @@
       "llm-engineering",
       "vector-search"
     ],
-    "description": "Chunking, retrieval quality, grounding, and citation-backed answers."
+    "description": "Chunking, retrieval quality, grounding, and citation-backed answers.",
+    "url": "https://huggingface.co/learn/cookbook/rag_zephyr_langchain"
   },
   {
     "id": "c-mlops",
-    "title": "MLOps: Deploying & Monitoring Models",
-    "provider": "MLWorks",
+    "title": "MLOps Principles",
+    "provider": "ml-ops.org",
     "type": "course",
     "level": 3,
     "hours": 40,
-    "rating": 4.6,
-    "learners": 74000,
     "format": "project",
     "cost": "paid",
     "domain": "Data & AI",
@@ -540,17 +512,16 @@
       "docker",
       "ci-cd"
     ],
-    "description": "Serve models reliably and catch drift before your users do."
+    "description": "Serve models reliably and catch drift before your users do.",
+    "url": "https://ml-ops.org/"
   },
   {
     "id": "c-htmlcss",
-    "title": "HTML & CSS from Scratch",
-    "provider": "WebCraft",
+    "title": "Structuring Content with HTML",
+    "provider": "MDN Web Docs",
     "type": "course",
     "level": 1,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 276000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -558,17 +529,16 @@
       "html-css"
     ],
     "requires": [],
-    "description": "Semantic markup and modern layout with Flexbox and Grid."
+    "description": "Semantic markup and modern layout with Flexbox and Grid.",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content"
   },
   {
     "id": "c-js",
-    "title": "Modern JavaScript",
-    "provider": "WebCraft",
+    "title": "The Modern JavaScript Tutorial",
+    "provider": "javascript.info",
     "type": "course",
     "level": 1,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 341000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -578,17 +548,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "The language, the DOM, and async patterns as used in real codebases."
+    "description": "The language, the DOM, and async patterns as used in real codebases.",
+    "url": "https://javascript.info/"
   },
   {
     "id": "c-ts",
-    "title": "TypeScript in Depth",
-    "provider": "WebCraft",
+    "title": "The TypeScript Handbook",
+    "provider": "Microsoft",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 112000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Web Development",
@@ -598,17 +567,16 @@
     "requires": [
       "javascript"
     ],
-    "description": "Types, generics, and architecture that scales past a few thousand lines."
+    "description": "Types, generics, and architecture that scales past a few thousand lines.",
+    "url": "https://www.typescriptlang.org/docs/handbook/intro.html"
   },
   {
     "id": "c-react",
-    "title": "React Fundamentals",
-    "provider": "WebCraft",
+    "title": "Learn React",
+    "provider": "React",
     "type": "course",
     "level": 2,
     "hours": 32,
-    "rating": 4.7,
-    "learners": 268000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -619,17 +587,16 @@
       "javascript",
       "html-css"
     ],
-    "description": "Components, hooks, and how React actually decides to re-render."
+    "description": "Components, hooks, and how React actually decides to re-render.",
+    "url": "https://react.dev/learn"
   },
   {
     "id": "c-react-alt",
-    "title": "React: Hooks & Composition Patterns",
-    "provider": "FrontierUI",
+    "title": "React Hooks Reference",
+    "provider": "React",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.6,
-    "learners": 73000,
     "format": "video",
     "cost": "paid",
     "domain": "Web Development",
@@ -640,17 +607,16 @@
       "javascript",
       "html-css"
     ],
-    "description": "A patterns-first take on React for developers who know the basics."
+    "description": "A patterns-first take on React for developers who know the basics.",
+    "url": "https://react.dev/reference/react/hooks"
   },
   {
     "id": "c-state",
-    "title": "Frontend State Management",
-    "provider": "FrontierUI",
+    "title": "Redux Essentials",
+    "provider": "Redux",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.4,
-    "learners": 44000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Web Development",
@@ -660,17 +626,16 @@
     "requires": [
       "react"
     ],
-    "description": "Server state, client state, caching, and invalidation without the mess."
+    "description": "Server state, client state, caching, and invalidation without the mess.",
+    "url": "https://redux.js.org/tutorials/essentials/part-1-overview-concepts"
   },
   {
     "id": "c-a11y",
-    "title": "Accessible & Responsive Interfaces",
-    "provider": "FrontierUI",
+    "title": "Learn Accessibility",
+    "provider": "web.dev",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 39000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -680,17 +645,16 @@
     "requires": [
       "html-css"
     ],
-    "description": "WCAG in practice: keyboard, screen readers, and responsive layout."
+    "description": "WCAG in practice: keyboard, screen readers, and responsive layout.",
+    "url": "https://web.dev/learn/accessibility"
   },
   {
     "id": "c-node",
-    "title": "Node.js & Express",
-    "provider": "WebCraft",
+    "title": "Introduction to Node.js",
+    "provider": "OpenJS Foundation",
     "type": "course",
     "level": 2,
     "hours": 26,
-    "rating": 4.5,
-    "learners": 157000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -700,17 +664,16 @@
     "requires": [
       "javascript"
     ],
-    "description": "Server-side JavaScript, middleware, and the request lifecycle."
+    "description": "Server-side JavaScript, middleware, and the request lifecycle.",
+    "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs"
   },
   {
     "id": "c-rest",
-    "title": "REST API Design & Documentation",
-    "provider": "DevPath",
+    "title": "OpenAPI Specification",
+    "provider": "Swagger / OpenAPI",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 81000,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -720,17 +683,16 @@
     "requires": [
       "nodejs"
     ],
-    "description": "Resources, versioning, pagination, and errors that clients can rely on."
+    "description": "Resources, versioning, pagination, and errors that clients can rely on.",
+    "url": "https://swagger.io/docs/specification/v3_0/about/"
   },
   {
     "id": "c-dbdesign",
-    "title": "Database Design & Data Modelling",
-    "provider": "DevPath",
+    "title": "Data Definition and Modelling",
+    "provider": "PostgreSQL Global Development Group",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.5,
-    "learners": 63000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Web Development",
@@ -740,17 +702,16 @@
     "requires": [
       "sql"
     ],
-    "description": "Normalisation, indexing, and migrations that survive production."
+    "description": "Normalisation, indexing, and migrations that survive production.",
+    "url": "https://www.postgresql.org/docs/current/ddl.html"
   },
   {
     "id": "c-authsec",
-    "title": "Web Authentication & Application Security",
-    "provider": "SecureStack",
+    "title": "OWASP Authentication Cheat Sheet",
+    "provider": "OWASP Foundation",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.7,
-    "learners": 58000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Web Development",
@@ -760,17 +721,16 @@
     "requires": [
       "rest-api"
     ],
-    "description": "Sessions, OAuth/OIDC, and the OWASP Top 10 with hands-on labs."
+    "description": "Sessions, OAuth/OIDC, and the OWASP Top 10 with hands-on labs.",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
   },
   {
     "id": "c-perf",
-    "title": "Web Performance Optimisation",
-    "provider": "FrontierUI",
+    "title": "Learn Performance",
+    "provider": "web.dev",
     "type": "course",
     "level": 3,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 31000,
     "format": "video",
     "cost": "paid",
     "domain": "Web Development",
@@ -780,17 +740,16 @@
     "requires": [
       "react"
     ],
-    "description": "Core Web Vitals, bundle budgets, and rendering strategy tradeoffs."
+    "description": "Core Web Vitals, bundle budgets, and rendering strategy tradeoffs.",
+    "url": "https://web.dev/learn/performance"
   },
   {
     "id": "c-next",
-    "title": "Full-Stack Apps with Next.js",
-    "provider": "WebCraft",
+    "title": "Learn Next.js",
+    "provider": "Vercel",
     "type": "course",
     "level": 3,
     "hours": 34,
-    "rating": 4.7,
-    "learners": 97000,
     "format": "project",
     "cost": "paid",
     "domain": "Web Development",
@@ -801,17 +760,16 @@
       "react",
       "rest-api"
     ],
-    "description": "Server components, data fetching, and deploying a real application."
+    "description": "Server components, data fetching, and deploying a real application.",
+    "url": "https://nextjs.org/learn"
   },
   {
     "id": "c-net",
-    "title": "Networking Fundamentals",
-    "provider": "CloudBridge",
+    "title": "Beej's Guide to Network Programming",
+    "provider": "Beej's Guide",
     "type": "course",
     "level": 1,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 88000,
     "format": "video",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -819,17 +777,16 @@
       "networking"
     ],
     "requires": [],
-    "description": "TCP/IP, DNS, HTTP, and TLS explained for engineers who deploy things."
+    "description": "TCP/IP, DNS, HTTP, and TLS explained for engineers who deploy things.",
+    "url": "https://beej.us/guide/bgnet/html/"
   },
   {
     "id": "c-linux",
-    "title": "Linux Administration Essentials",
-    "provider": "CloudBridge",
+    "title": "Linux Journey",
+    "provider": "Linux Journey",
     "type": "course",
     "level": 1,
     "hours": 28,
-    "rating": 4.6,
-    "learners": 142000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -839,17 +796,16 @@
     "requires": [
       "cli-git"
     ],
-    "description": "Processes, permissions, services, and shell scripting for real servers."
+    "description": "Processes, permissions, services, and shell scripting for real servers.",
+    "url": "https://linuxjourney.com/"
   },
   {
     "id": "c-docker",
-    "title": "Containers with Docker",
-    "provider": "CloudBridge",
+    "title": "Docker: Get Started",
+    "provider": "Docker",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.7,
-    "learners": 176000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -859,17 +815,16 @@
     "requires": [
       "linux"
     ],
-    "description": "Images, layers, networking, and multi-stage builds that stay small."
+    "description": "Images, layers, networking, and multi-stage builds that stay small.",
+    "url": "https://docs.docker.com/get-started/"
   },
   {
     "id": "c-cicd",
-    "title": "CI/CD Pipelines",
-    "provider": "DevPath",
+    "title": "Learn GitHub Actions",
+    "provider": "GitHub",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 69000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -880,17 +835,16 @@
       "cli-git",
       "testing"
     ],
-    "description": "Automate build, test, and release with safe deployment strategies."
+    "description": "Automate build, test, and release with safe deployment strategies.",
+    "url": "https://docs.github.com/en/actions/learn-github-actions"
   },
   {
     "id": "c-cloud",
-    "title": "Cloud Fundamentals on AWS",
-    "provider": "CloudBridge",
+    "title": "AWS Cloud Essentials",
+    "provider": "Amazon Web Services",
     "type": "course",
     "level": 2,
     "hours": 35,
-    "rating": 4.6,
-    "learners": 204000,
     "format": "video",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -901,17 +855,16 @@
       "linux",
       "networking"
     ],
-    "description": "Compute, storage, identity, and the cost model behind them."
+    "description": "Compute, storage, identity, and the cost model behind them.",
+    "url": "https://aws.amazon.com/getting-started/cloud-essentials/"
   },
   {
     "id": "c-k8s",
-    "title": "Kubernetes in Production",
-    "provider": "CloudBridge",
+    "title": "Kubernetes Basics",
+    "provider": "The Kubernetes Authors",
     "type": "course",
     "level": 3,
     "hours": 40,
-    "rating": 4.7,
-    "learners": 113000,
     "format": "project",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -922,17 +875,16 @@
       "docker",
       "networking"
     ],
-    "description": "Workloads, services, scheduling, and day-two cluster operations."
+    "description": "Workloads, services, scheduling, and day-two cluster operations.",
+    "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/"
   },
   {
     "id": "c-iac",
-    "title": "Infrastructure as Code with Terraform",
-    "provider": "CloudBridge",
+    "title": "Terraform Tutorials",
+    "provider": "HashiCorp",
     "type": "course",
     "level": 3,
     "hours": 26,
-    "rating": 4.6,
-    "learners": 78000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -942,17 +894,16 @@
     "requires": [
       "cloud-fundamentals"
     ],
-    "description": "Declarative provisioning, modules, and state you can reason about."
+    "description": "Declarative provisioning, modules, and state you can reason about.",
+    "url": "https://developer.hashicorp.com/terraform/tutorials"
   },
   {
     "id": "c-obs",
-    "title": "Observability & Monitoring",
-    "provider": "SignalOps",
+    "title": "What is OpenTelemetry?",
+    "provider": "OpenTelemetry",
     "type": "course",
     "level": 3,
     "hours": 22,
-    "rating": 4.5,
-    "learners": 42000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -962,17 +913,16 @@
     "requires": [
       "cloud-fundamentals"
     ],
-    "description": "Metrics, logs, traces, and alerts that page a human only when needed."
+    "description": "Metrics, logs, traces, and alerts that page a human only when needed.",
+    "url": "https://opentelemetry.io/docs/what-is-opentelemetry/"
   },
   {
     "id": "c-cloudsec",
-    "title": "Cloud Security Engineering",
-    "provider": "SecureStack",
+    "title": "OWASP Kubernetes Security Cheat Sheet",
+    "provider": "OWASP Foundation",
     "type": "course",
     "level": 3,
     "hours": 28,
-    "rating": 4.6,
-    "learners": 49000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -983,17 +933,16 @@
       "cloud-fundamentals",
       "auth-security"
     ],
-    "description": "Identity boundaries, network isolation, secrets, and compliance controls."
+    "description": "Identity boundaries, network isolation, secrets, and compliance controls.",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html"
   },
   {
     "id": "c-sre",
-    "title": "Site Reliability Engineering",
-    "provider": "SignalOps",
+    "title": "Site Reliability Engineering (the SRE Book)",
+    "provider": "Google",
     "type": "course",
     "level": 3,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 54000,
     "format": "reading",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -1004,17 +953,16 @@
       "observability",
       "kubernetes"
     ],
-    "description": "Error budgets, capacity planning, and incident response that scales."
+    "description": "Error budgets, capacity planning, and incident response that scales.",
+    "url": "https://sre.google/sre-book/table-of-contents/"
   },
   {
     "id": "c-sysdesign",
-    "title": "System Design for Engineers",
-    "provider": "DevPath",
+    "title": "The System Design Primer",
+    "provider": "Donne Martin",
     "type": "course",
     "level": 3,
     "hours": 30,
-    "rating": 4.8,
-    "learners": 167000,
     "format": "video",
     "cost": "paid",
     "domain": "Cloud & DevOps",
@@ -1026,17 +974,16 @@
       "data-modeling",
       "cloud-fundamentals"
     ],
-    "description": "Scaling, consistency tradeoffs, queues, caching, and failure modes."
+    "description": "Scaling, consistency tradeoffs, queues, caching, and failure modes.",
+    "url": "https://github.com/donnemartin/system-design-primer"
   },
   {
     "id": "pr-eda",
     "title": "Project: End-to-End Analysis of a Public Dataset",
-    "provider": "DataForge",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 12,
-    "rating": 4.6,
-    "learners": 34000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1050,12 +997,10 @@
   {
     "id": "pr-dashboard",
     "title": "Project: Business KPI Dashboard",
-    "provider": "MetricLab",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 14,
-    "rating": 4.4,
-    "learners": 18000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1069,12 +1014,10 @@
   {
     "id": "pr-ml-pipeline",
     "title": "Project: Predictive Model Pipeline",
-    "provider": "QuantAcademy",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 41000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1089,12 +1032,10 @@
   {
     "id": "pr-dl-classifier",
     "title": "Project: Image Classifier from Scratch",
-    "provider": "NeuralSchool",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 27000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1108,12 +1049,10 @@
   {
     "id": "pr-rag",
     "title": "Project: RAG Knowledge Assistant",
-    "provider": "MLWorks",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 24,
-    "rating": 4.8,
-    "learners": 36000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1127,12 +1066,10 @@
   {
     "id": "pr-mlops",
     "title": "Project: Deploy a Model to Production",
-    "provider": "MLWorks",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 22000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1146,12 +1083,10 @@
   {
     "id": "pr-portfolio",
     "title": "Project: Responsive Portfolio Site",
-    "provider": "WebCraft",
+    "provider": "Self-directed",
     "type": "project",
     "level": 1,
     "hours": 10,
-    "rating": 4.5,
-    "learners": 88000,
     "format": "project",
     "cost": "free",
     "domain": "Web Development",
@@ -1165,12 +1100,10 @@
   {
     "id": "pr-spa",
     "title": "Project: React Dashboard SPA",
-    "provider": "FrontierUI",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 52000,
     "format": "project",
     "cost": "free",
     "domain": "Web Development",
@@ -1184,12 +1117,10 @@
   {
     "id": "pr-api",
     "title": "Project: Secure REST API with Auth",
-    "provider": "DevPath",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 37000,
     "format": "project",
     "cost": "free",
     "domain": "Web Development",
@@ -1204,12 +1135,10 @@
   {
     "id": "pr-fullstack",
     "title": "Project: Full-Stack SaaS Starter",
-    "provider": "WebCraft",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 26,
-    "rating": 4.7,
-    "learners": 29000,
     "format": "project",
     "cost": "free",
     "domain": "Web Development",
@@ -1223,12 +1152,10 @@
   {
     "id": "pr-pipeline",
     "title": "Project: CI/CD Pipeline for a Web Service",
-    "provider": "DevPath",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 14,
-    "rating": 4.4,
-    "learners": 21000,
     "format": "project",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1242,12 +1169,10 @@
   {
     "id": "pr-k8s",
     "title": "Project: Microservice on Kubernetes",
-    "provider": "CloudBridge",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 24000,
     "format": "project",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1261,12 +1186,10 @@
   {
     "id": "pr-iac",
     "title": "Project: Provision Cloud Infrastructure as Code",
-    "provider": "CloudBridge",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 19000,
     "format": "project",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1279,13 +1202,11 @@
   },
   {
     "id": "a-python",
-    "title": "Assessment: Python Proficiency Check",
-    "provider": "OpenLearn",
+    "title": "LeetCode 75: Core Practice Set",
+    "provider": "LeetCode",
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "rating": 4.4,
-    "learners": 64000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -1293,17 +1214,16 @@
     "requires": [
       "python"
     ],
-    "description": "Timed exercises confirming you can write Python unaided."
+    "description": "Timed exercises confirming you can write Python unaided.",
+    "url": "https://leetcode.com/studyplan/leetcode-75/"
   },
   {
     "id": "a-sql",
-    "title": "Assessment: SQL Skills Check",
-    "provider": "OpenLearn",
+    "title": "SQL 50: Practice Set",
+    "provider": "LeetCode",
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "rating": 4.3,
-    "learners": 51000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -1311,17 +1231,16 @@
     "requires": [
       "sql"
     ],
-    "description": "Query-writing tasks against a realistic schema."
+    "description": "Query-writing tasks against a realistic schema.",
+    "url": "https://leetcode.com/studyplan/top-sql-50/"
   },
   {
     "id": "a-stats",
-    "title": "Assessment: Statistics Readiness",
-    "provider": "QuantAcademy",
+    "title": "AP Statistics",
+    "provider": "Khan Academy",
     "type": "assessment",
     "level": 2,
     "hours": 2,
-    "rating": 4.2,
-    "learners": 28000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -1329,17 +1248,16 @@
     "requires": [
       "math-stats"
     ],
-    "description": "Check your inference and probability grounding before modelling."
+    "description": "Check your inference and probability grounding before modelling.",
+    "url": "https://www.khanacademy.org/math/ap-statistics"
   },
   {
     "id": "a-ml",
     "title": "Assessment: ML Fundamentals Exam",
-    "provider": "QuantAcademy",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 2,
     "hours": 3,
-    "rating": 4.5,
-    "learners": 39000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -1352,13 +1270,11 @@
   },
   {
     "id": "a-dl",
-    "title": "Assessment: Deep Learning Concepts Exam",
-    "provider": "NeuralSchool",
+    "title": "Intro to Deep Learning",
+    "provider": "Kaggle Learn",
     "type": "assessment",
     "level": 3,
     "hours": 3,
-    "rating": 4.4,
-    "learners": 17000,
     "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
@@ -1366,17 +1282,16 @@
     "requires": [
       "deep-learning"
     ],
-    "description": "Architecture, optimisation, and debugging questions."
+    "description": "Architecture, optimisation, and debugging questions.",
+    "url": "https://www.kaggle.com/learn/intro-to-deep-learning"
   },
   {
     "id": "a-llm",
     "title": "Assessment: LLM Engineering Capstone Review",
-    "provider": "MLWorks",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 3,
     "hours": 3,
-    "rating": 4.6,
-    "learners": 12000,
     "format": "project",
     "cost": "free",
     "domain": "Data & AI",
@@ -1389,13 +1304,11 @@
   },
   {
     "id": "a-frontend",
-    "title": "Assessment: Frontend Engineering Exam",
-    "provider": "FrontierUI",
+    "title": "30 Days of JavaScript: Practice Set",
+    "provider": "LeetCode",
     "type": "assessment",
     "level": 2,
     "hours": 3,
-    "rating": 4.5,
-    "learners": 26000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -1404,17 +1317,16 @@
       "react",
       "typescript"
     ],
-    "description": "Component design, typing, and rendering-behaviour questions."
+    "description": "Component design, typing, and rendering-behaviour questions.",
+    "url": "https://leetcode.com/studyplan/30-days-of-javascript/"
   },
   {
     "id": "a-backend",
     "title": "Assessment: Backend & API Exam",
-    "provider": "DevPath",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 2,
     "hours": 3,
-    "rating": 4.4,
-    "learners": 23000,
     "format": "interactive",
     "cost": "free",
     "domain": "Web Development",
@@ -1428,13 +1340,11 @@
   },
   {
     "id": "a-cloud",
-    "title": "Assessment: Cloud Practitioner Mock Exam",
-    "provider": "CloudBridge",
+    "title": "AWS Certified Cloud Practitioner",
+    "provider": "Amazon Web Services",
     "type": "assessment",
     "level": 2,
     "hours": 3,
-    "rating": 4.6,
-    "learners": 61000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1442,17 +1352,16 @@
     "requires": [
       "cloud-fundamentals"
     ],
-    "description": "Full-length practice exam mirroring the certification blueprint."
+    "description": "Full-length practice exam mirroring the certification blueprint.",
+    "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/"
   },
   {
     "id": "a-k8s",
-    "title": "Assessment: Kubernetes Administrator Mock",
-    "provider": "CloudBridge",
+    "title": "Certified Kubernetes Administrator (CKA)",
+    "provider": "The Linux Foundation",
     "type": "assessment",
     "level": 3,
     "hours": 3,
-    "rating": 4.7,
-    "learners": 18000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1460,17 +1369,16 @@
     "requires": [
       "kubernetes"
     ],
-    "description": "Hands-on cluster tasks scored against the CKA objectives."
+    "description": "Hands-on cluster tasks scored against the CKA objectives.",
+    "url": "https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/"
   },
   {
     "id": "a-devops",
     "title": "Assessment: DevOps Pipeline Exam",
-    "provider": "DevPath",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 3,
     "hours": 3,
-    "rating": 4.4,
-    "learners": 14000,
     "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1488,8 +1396,6 @@
     "type": "resource",
     "level": 2,
     "hours": 4,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Foundations",
@@ -1507,8 +1413,6 @@
     "type": "resource",
     "level": 2,
     "hours": 6,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -1526,8 +1430,6 @@
     "type": "resource",
     "level": 2,
     "hours": 5,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -1545,8 +1447,6 @@
     "type": "resource",
     "level": 2,
     "hours": 4,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -1564,8 +1464,6 @@
     "type": "resource",
     "level": 2,
     "hours": 5,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1583,8 +1481,6 @@
     "type": "resource",
     "level": 2,
     "hours": 8,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1602,8 +1498,6 @@
     "type": "resource",
     "level": 2,
     "hours": 6,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1621,8 +1515,6 @@
     "type": "resource",
     "level": 2,
     "hours": 20,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1640,8 +1532,6 @@
     "type": "resource",
     "level": 2,
     "hours": 8,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Foundations",
@@ -1659,8 +1549,6 @@
     "type": "resource",
     "level": 2,
     "hours": 5,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1678,8 +1566,6 @@
     "type": "resource",
     "level": 2,
     "hours": 8,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Cloud & DevOps",
@@ -1697,8 +1583,6 @@
     "type": "resource",
     "level": 2,
     "hours": 4,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -1716,8 +1600,6 @@
     "type": "resource",
     "level": 2,
     "hours": 3,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Web Development",
@@ -1735,8 +1617,6 @@
     "type": "resource",
     "level": 2,
     "hours": 3,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1754,8 +1634,6 @@
     "type": "resource",
     "level": 2,
     "hours": 2,
-    "rating": 4.8,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
@@ -1768,13 +1646,11 @@
   },
   {
     "id": "c-communication",
-    "title": "Writing Clearly at Work",
-    "provider": "OpenLearn",
+    "title": "Federal Plain Language Guidelines",
+    "provider": "plainlanguage.gov",
     "type": "course",
     "level": 1,
     "hours": 14,
-    "rating": 4.6,
-    "learners": 96000,
     "format": "reading",
     "cost": "free",
     "domain": "Foundations",
@@ -1782,17 +1658,16 @@
       "communication"
     ],
     "requires": [],
-    "description": "Structure a document, cut half the words, and still say more."
+    "description": "Structure a document, cut half the words, and still say more.",
+    "url": "https://www.plainlanguage.gov/"
   },
   {
     "id": "c-spreadsheets",
-    "title": "Spreadsheets: From Formulas to Models",
-    "provider": "QuantAcademy",
+    "title": "Google Sheets Function List",
+    "provider": "Google",
     "type": "course",
     "level": 1,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 210000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -1800,17 +1675,16 @@
       "spreadsheets"
     ],
     "requires": [],
-    "description": "Formulas, lookups, pivots and workbook structure that survives review."
+    "description": "Formulas, lookups, pivots and workbook structure that survives review.",
+    "url": "https://support.google.com/docs/answer/46973"
   },
   {
     "id": "a-spreadsheets",
     "title": "Assessment: Spreadsheet Skills Check",
-    "provider": "QuantAcademy",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "rating": 4.4,
-    "learners": 41000,
     "format": "interactive",
     "cost": "free",
     "domain": "Foundations",
@@ -1822,13 +1696,11 @@
   },
   {
     "id": "c-business-101",
-    "title": "How Businesses Actually Work",
-    "provider": "Northgate Business School",
+    "title": "Introduction to Business",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 132000,
     "format": "video",
     "cost": "free",
     "domain": "Business & Product",
@@ -1836,17 +1708,16 @@
       "business-fundamentals"
     ],
     "requires": [],
-    "description": "Unit economics, margin and cash, explained without an MBA."
+    "description": "Unit economics, margin and cash, explained without an MBA.",
+    "url": "https://openstax.org/details/books/introduction-business"
   },
   {
     "id": "c-market-research",
-    "title": "Customer & Market Research",
-    "provider": "Northgate Business School",
+    "title": "Principles of Marketing: Research",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.5,
-    "learners": 74000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Business & Product",
@@ -1856,17 +1727,16 @@
     "requires": [
       "business-fundamentals"
     ],
-    "description": "Run interviews that are not leading and size a market you can defend."
+    "description": "Run interviews that are not leading and size a market you can defend.",
+    "url": "https://openstax.org/details/books/principles-marketing"
   },
   {
     "id": "c-product-discovery",
-    "title": "Product Discovery in Practice",
-    "provider": "ProductCraft",
+    "title": "Atlassian Agile Coach: Discovery",
+    "provider": "Atlassian",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.7,
-    "learners": 88000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Business & Product",
@@ -1876,17 +1746,16 @@
     "requires": [
       "market-research"
     ],
-    "description": "Find the problem worth solving before a team commits a quarter to it."
+    "description": "Find the problem worth solving before a team commits a quarter to it.",
+    "url": "https://www.atlassian.com/agile"
   },
   {
     "id": "c-roadmapping",
-    "title": "Prioritisation & Roadmapping",
-    "provider": "ProductCraft",
+    "title": "Atlassian Agile Coach",
+    "provider": "Atlassian",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 61000,
     "format": "video",
     "cost": "paid",
     "domain": "Business & Product",
@@ -1896,17 +1765,16 @@
     "requires": [
       "product-discovery"
     ],
-    "description": "Frameworks for saying no, and the roadmap that survives contact with sales."
+    "description": "Frameworks for saying no, and the roadmap that survives contact with sales.",
+    "url": "https://www.atlassian.com/agile"
   },
   {
     "id": "c-stakeholder",
-    "title": "Communicating with Stakeholders",
-    "provider": "ProductCraft",
+    "title": "Business Ethics: Communication",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 12,
-    "rating": 4.4,
-    "learners": 47000,
     "format": "video",
     "cost": "free",
     "domain": "Business & Product",
@@ -1916,17 +1784,16 @@
     "requires": [
       "communication"
     ],
-    "description": "Write the update, run the review, and keep everyone on one picture."
+    "description": "Write the update, run the review, and keep everyone on one picture.",
+    "url": "https://openstax.org/details/books/business-ethics"
   },
   {
     "id": "c-agile",
-    "title": "Agile Delivery for Product Teams",
-    "provider": "OpenLearn",
+    "title": "The Scrum Guide",
+    "provider": "Scrum.org",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.3,
-    "learners": 118000,
     "format": "interactive",
     "cost": "free",
     "domain": "Business & Product",
@@ -1936,17 +1803,16 @@
     "requires": [
       "business-fundamentals"
     ],
-    "description": "Backlogs, iterations and estimates that are honest about uncertainty."
+    "description": "Backlogs, iterations and estimates that are honest about uncertainty.",
+    "url": "https://scrumguides.org/scrum-guide.html"
   },
   {
     "id": "c-product-analytics",
-    "title": "Product Analytics",
-    "provider": "ProductCraft",
+    "title": "Introduction to Business: Analytics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 54000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Business & Product",
@@ -1956,17 +1822,16 @@
     "requires": [
       "spreadsheets"
     ],
-    "description": "Instrument a product, then read funnels, cohorts and retention properly."
+    "description": "Instrument a product, then read funnels, cohorts and retention properly.",
+    "url": "https://openstax.org/details/books/introduction-business"
   },
   {
     "id": "c-pricing",
-    "title": "Pricing & Monetisation",
-    "provider": "Northgate Business School",
+    "title": "Principles of Marketing: Pricing",
+    "provider": "OpenStax",
     "type": "course",
     "level": 3,
     "hours": 16,
-    "rating": 4.6,
-    "learners": 33000,
     "format": "video",
     "cost": "paid",
     "domain": "Business & Product",
@@ -1976,17 +1841,16 @@
     "requires": [
       "market-research"
     ],
-    "description": "Pick a model and a number, and understand what each does to demand."
+    "description": "Pick a model and a number, and understand what each does to demand.",
+    "url": "https://openstax.org/details/books/principles-marketing"
   },
   {
     "id": "pr-pm-launch",
     "title": "Project: Take a Feature from Problem to Launch Plan",
-    "provider": "ProductCraft",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 14,
-    "rating": 4.7,
-    "learners": 26000,
     "format": "project",
     "cost": "free",
     "domain": "Business & Product",
@@ -2000,12 +1864,10 @@
   {
     "id": "a-product",
     "title": "Assessment: Product Judgement",
-    "provider": "ProductCraft",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 2,
     "hours": 2,
-    "rating": 4.4,
-    "learners": 31000,
     "format": "interactive",
     "cost": "free",
     "domain": "Business & Product",
@@ -2017,13 +1879,11 @@
   },
   {
     "id": "c-marketing-101",
-    "title": "Marketing Fundamentals",
-    "provider": "Beacon Marketing Institute",
+    "title": "Principles of Marketing",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 164000,
     "format": "video",
     "cost": "free",
     "domain": "Marketing",
@@ -2031,17 +1891,16 @@
       "marketing-fundamentals"
     ],
     "requires": [],
-    "description": "Positioning, audience and message, before a single channel is chosen."
+    "description": "Positioning, audience and message, before a single channel is chosen.",
+    "url": "https://openstax.org/details/books/principles-marketing"
   },
   {
     "id": "c-seo",
-    "title": "SEO: Technical, Content and Intent",
-    "provider": "Beacon Marketing Institute",
+    "title": "SEO Starter Guide",
+    "provider": "Google",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 98000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Marketing",
@@ -2051,17 +1910,16 @@
     "requires": [
       "marketing-fundamentals"
     ],
-    "description": "Fix the crawl, target real intent, and write pages that hold a ranking."
+    "description": "Fix the crawl, target real intent, and write pages that hold a ranking.",
+    "url": "https://developers.google.com/search/docs/fundamentals/seo-starter-guide"
   },
   {
     "id": "c-content",
-    "title": "Content Marketing that Earns Attention",
-    "provider": "Beacon Marketing Institute",
+    "title": "HubSpot Academy: Content Marketing",
+    "provider": "HubSpot Academy",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.4,
-    "learners": 72000,
     "format": "reading",
     "cost": "free",
     "domain": "Marketing",
@@ -2071,17 +1929,16 @@
     "requires": [
       "communication"
     ],
-    "description": "Plan a calendar, write the piece, and measure whether it did anything."
+    "description": "Plan a calendar, write the piece, and measure whether it did anything.",
+    "url": "https://www.hubspot.com/resources/courses"
   },
   {
     "id": "c-paid",
-    "title": "Paid Acquisition without Burning Budget",
-    "provider": "Beacon Marketing Institute",
+    "title": "HubSpot Academy: Paid Acquisition",
+    "provider": "HubSpot Academy",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 66000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Marketing",
@@ -2091,17 +1948,16 @@
     "requires": [
       "marketing-fundamentals"
     ],
-    "description": "Targeting, creative testing and bidding, judged against CAC and payback."
+    "description": "Targeting, creative testing and bidding, judged against CAC and payback.",
+    "url": "https://www.hubspot.com/resources/courses"
   },
   {
     "id": "c-email",
-    "title": "Email & Lifecycle Marketing",
-    "provider": "Beacon Marketing Institute",
+    "title": "HubSpot Academy: Email Marketing",
+    "provider": "HubSpot Academy",
     "type": "course",
     "level": 2,
     "hours": 14,
-    "rating": 4.3,
-    "learners": 51000,
     "format": "interactive",
     "cost": "free",
     "domain": "Marketing",
@@ -2111,17 +1967,16 @@
     "requires": [
       "marketing-fundamentals"
     ],
-    "description": "Onboarding, retention and win-back flows people do not immediately mute."
+    "description": "Onboarding, retention and win-back flows people do not immediately mute.",
+    "url": "https://www.hubspot.com/resources/courses"
   },
   {
     "id": "c-marketing-analytics",
-    "title": "Marketing Analytics & Attribution",
-    "provider": "Beacon Marketing Institute",
+    "title": "Google Analytics Academy",
+    "provider": "Google",
     "type": "course",
     "level": 3,
     "hours": 24,
-    "rating": 4.6,
-    "learners": 38000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Marketing",
@@ -2131,17 +1986,16 @@
     "requires": [
       "spreadsheets"
     ],
-    "description": "Cohorts, attribution models, and proving a channel actually contributed."
+    "description": "Cohorts, attribution models, and proving a channel actually contributed.",
+    "url": "https://analytics.google.com/analytics/academy/"
   },
   {
     "id": "c-brand",
-    "title": "Brand Strategy",
-    "provider": "Beacon Marketing Institute",
+    "title": "Principles of Marketing: Branding",
+    "provider": "OpenStax",
     "type": "course",
     "level": 3,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 29000,
     "format": "video",
     "cost": "paid",
     "domain": "Marketing",
@@ -2151,17 +2005,16 @@
     "requires": [
       "marketing-fundamentals"
     ],
-    "description": "Decide what you stand for, then hold it still long enough to compound."
+    "description": "Decide what you stand for, then hold it still long enough to compound.",
+    "url": "https://openstax.org/details/books/principles-marketing"
   },
   {
     "id": "pr-campaign",
     "title": "Project: Plan and Measure a Full Campaign",
-    "provider": "Beacon Marketing Institute",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 12,
-    "rating": 4.5,
-    "learners": 22000,
     "format": "project",
     "cost": "free",
     "domain": "Marketing",
@@ -2175,12 +2028,10 @@
   {
     "id": "a-marketing",
     "title": "Assessment: Marketing Fundamentals Check",
-    "provider": "Beacon Marketing Institute",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "rating": 4.2,
-    "learners": 44000,
     "format": "interactive",
     "cost": "free",
     "domain": "Marketing",
@@ -2192,13 +2043,11 @@
   },
   {
     "id": "c-design-101",
-    "title": "Design Principles",
-    "provider": "Studio Method",
+    "title": "10 Usability Heuristics for User Interface Design",
+    "provider": "Nielsen Norman Group",
     "type": "course",
     "level": 1,
     "hours": 16,
-    "rating": 4.7,
-    "learners": 142000,
     "format": "video",
     "cost": "free",
     "domain": "Design",
@@ -2206,17 +2055,16 @@
       "design-principles"
     ],
     "requires": [],
-    "description": "Hierarchy, contrast, spacing and alignment, drilled on real layouts."
+    "description": "Hierarchy, contrast, spacing and alignment, drilled on real layouts.",
+    "url": "https://www.nngroup.com/articles/ten-usability-heuristics/"
   },
   {
     "id": "c-ux-research",
-    "title": "UX Research Methods",
-    "provider": "Studio Method",
+    "title": "Which UX Research Methods to Use",
+    "provider": "Nielsen Norman Group",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 79000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Design",
@@ -2226,17 +2074,16 @@
     "requires": [
       "design-principles"
     ],
-    "description": "Interviews, diary studies and surveys that avoid leading the witness."
+    "description": "Interviews, diary studies and surveys that avoid leading the witness.",
+    "url": "https://www.nngroup.com/articles/which-ux-research-methods/"
   },
   {
     "id": "c-interaction",
     "title": "Interaction Design",
-    "provider": "Studio Method",
+    "provider": "Interaction Design Foundation",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 68000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Design",
@@ -2246,17 +2093,16 @@
     "requires": [
       "design-principles"
     ],
-    "description": "Flows, states, empty screens and errors — the parts demos skip."
+    "description": "Flows, states, empty screens and errors — the parts demos skip.",
+    "url": "https://www.interaction-design.org/literature/topics/interaction-design"
   },
   {
     "id": "c-visual",
-    "title": "Visual Design for Interfaces",
-    "provider": "Studio Method",
+    "title": "Material Design 3: Styles",
+    "provider": "Google",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 84000,
     "format": "video",
     "cost": "paid",
     "domain": "Design",
@@ -2266,17 +2112,16 @@
     "requires": [
       "design-principles"
     ],
-    "description": "Type scales, colour systems and grids applied to a working product."
+    "description": "Type scales, colour systems and grids applied to a working product.",
+    "url": "https://m3.material.io/styles"
   },
   {
     "id": "c-prototyping",
-    "title": "Prototyping and Testing Ideas Early",
-    "provider": "Studio Method",
+    "title": "Prototyping: Low vs High Fidelity",
+    "provider": "Nielsen Norman Group",
     "type": "course",
     "level": 2,
     "hours": 14,
-    "rating": 4.5,
-    "learners": 57000,
     "format": "interactive",
     "cost": "free",
     "domain": "Design",
@@ -2286,17 +2131,16 @@
     "requires": [
       "interaction-design"
     ],
-    "description": "Get something clickable in front of people while being wrong is cheap."
+    "description": "Get something clickable in front of people while being wrong is cheap.",
+    "url": "https://www.nngroup.com/articles/ux-prototype-hi-lo-fidelity/"
   },
   {
     "id": "c-usability",
-    "title": "Usability Testing",
-    "provider": "Studio Method",
+    "title": "Usability Testing 101",
+    "provider": "Nielsen Norman Group",
     "type": "course",
     "level": 2,
     "hours": 12,
-    "rating": 4.6,
-    "learners": 46000,
     "format": "interactive",
     "cost": "free",
     "domain": "Design",
@@ -2306,17 +2150,16 @@
     "requires": [
       "ux-research"
     ],
-    "description": "Recruit five people, run the session, and separate signal from politeness."
+    "description": "Recruit five people, run the session, and separate signal from politeness.",
+    "url": "https://www.nngroup.com/articles/usability-testing-101/"
   },
   {
     "id": "c-design-systems",
-    "title": "Design Systems",
-    "provider": "Studio Method",
+    "title": "Material Design 3: Foundations",
+    "provider": "Google",
     "type": "course",
     "level": 3,
     "hours": 24,
-    "rating": 4.7,
-    "learners": 35000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Design",
@@ -2326,17 +2169,16 @@
     "requires": [
       "visual-design"
     ],
-    "description": "Tokens, components and the governance that stops a system rotting."
+    "description": "Tokens, components and the governance that stops a system rotting.",
+    "url": "https://m3.material.io/foundations"
   },
   {
     "id": "pr-ux-portfolio",
     "title": "Project: A Redesign, Researched and Tested",
-    "provider": "Studio Method",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 18,
-    "rating": 4.7,
-    "learners": 31000,
     "format": "project",
     "cost": "free",
     "domain": "Design",
@@ -2350,12 +2192,10 @@
   {
     "id": "a-ux",
     "title": "Assessment: Research Method Selection",
-    "provider": "Studio Method",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 2,
     "hours": 2,
-    "rating": 4.3,
-    "learners": 24000,
     "format": "interactive",
     "cost": "free",
     "domain": "Design",
@@ -2372,8 +2212,6 @@
     "type": "resource",
     "level": 2,
     "hours": 3,
-    "rating": 4.9,
-    "learners": 0,
     "format": "reading",
     "cost": "free",
     "domain": "Design",
@@ -2386,13 +2224,11 @@
   },
   {
     "id": "c-accounting-101",
-    "title": "Accounting Basics",
-    "provider": "Ledger Institute",
+    "title": "Principles of Financial Accounting",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 121000,
     "format": "video",
     "cost": "free",
     "domain": "Finance & Accounting",
@@ -2400,17 +2236,16 @@
       "accounting-basics"
     ],
     "requires": [],
-    "description": "Debits, credits and accruals, until the books stop being a mystery."
+    "description": "Debits, credits and accruals, until the books stop being a mystery.",
+    "url": "https://openstax.org/details/books/principles-financial-accounting"
   },
   {
     "id": "c-financial-statements",
     "title": "Reading Financial Statements",
-    "provider": "Ledger Institute",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.7,
-    "learners": 87000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Finance & Accounting",
@@ -2420,17 +2255,16 @@
     "requires": [
       "accounting-basics"
     ],
-    "description": "Read all three statements together and notice where they disagree."
+    "description": "Read all three statements together and notice where they disagree.",
+    "url": "https://openstax.org/details/books/principles-financial-accounting"
   },
   {
     "id": "c-fin-modelling",
-    "title": "Three-Statement Financial Modelling",
-    "provider": "Ledger Institute",
+    "title": "Damodaran Online: Valuation Tools",
+    "provider": "Aswath Damodaran (NYU Stern)",
     "type": "course",
     "level": 2,
     "hours": 30,
-    "rating": 4.8,
-    "learners": 64000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Finance & Accounting",
@@ -2441,17 +2275,16 @@
       "financial-statements",
       "spreadsheets"
     ],
-    "description": "Build a driver-based model that does not break when an input moves."
+    "description": "Build a driver-based model that does not break when an input moves.",
+    "url": "https://pages.stern.nyu.edu/~adamodar/"
   },
   {
     "id": "c-corp-finance",
-    "title": "Corporate Finance",
-    "provider": "Ledger Institute",
+    "title": "Core Finance",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.5,
-    "learners": 52000,
     "format": "video",
     "cost": "paid",
     "domain": "Finance & Accounting",
@@ -2461,17 +2294,16 @@
     "requires": [
       "financial-statements"
     ],
-    "description": "Cost of capital, structure, and choosing between projects competing for cash."
+    "description": "Cost of capital, structure, and choosing between projects competing for cash.",
+    "url": "https://www.khanacademy.org/economics-finance-domain/core-finance"
   },
   {
     "id": "c-budgeting",
-    "title": "Budgeting & Forecasting",
-    "provider": "Ledger Institute",
+    "title": "Principles of Managerial Accounting",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.4,
-    "learners": 43000,
     "format": "interactive",
     "cost": "free",
     "domain": "Finance & Accounting",
@@ -2481,17 +2313,16 @@
     "requires": [
       "financial-statements"
     ],
-    "description": "Plan a year, track variance honestly, and re-forecast without theatre."
+    "description": "Plan a year, track variance honestly, and re-forecast without theatre.",
+    "url": "https://openstax.org/details/books/principles-managerial-accounting"
   },
   {
     "id": "c-valuation",
-    "title": "Valuation: DCF and Comparables",
-    "provider": "Ledger Institute",
+    "title": "Damodaran Online: Valuation",
+    "provider": "Aswath Damodaran (NYU Stern)",
     "type": "course",
     "level": 3,
     "hours": 26,
-    "rating": 4.7,
-    "learners": 41000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Finance & Accounting",
@@ -2501,17 +2332,16 @@
     "requires": [
       "financial-modelling"
     ],
-    "description": "Three methods, and the judgement each of them quietly depends on."
+    "description": "Three methods, and the judgement each of them quietly depends on.",
+    "url": "https://pages.stern.nyu.edu/~adamodar/"
   },
   {
     "id": "pr-valuation",
     "title": "Project: Value a Listed Company End to End",
-    "provider": "Ledger Institute",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 16,
-    "rating": 4.6,
-    "learners": 18000,
     "format": "project",
     "cost": "free",
     "domain": "Finance & Accounting",
@@ -2524,12 +2354,10 @@
   {
     "id": "a-finance",
     "title": "Assessment: Statement Analysis",
-    "provider": "Ledger Institute",
+    "provider": "Self-assessment",
     "type": "assessment",
     "level": 2,
     "hours": 2,
-    "rating": 4.4,
-    "learners": 28000,
     "format": "interactive",
     "cost": "free",
     "domain": "Finance & Accounting",
@@ -2541,13 +2369,11 @@
   },
   {
     "id": "c-algebra",
-    "title": "Algebra & Functions",
-    "provider": "Lyceum Open Courseware",
+    "title": "Algebra I",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 1,
     "hours": 26,
-    "rating": 4.7,
-    "learners": 198000,
     "format": "video",
     "cost": "free",
     "domain": "Mathematics",
@@ -2555,17 +2381,16 @@
       "algebra"
     ],
     "requires": [],
-    "description": "Expressions, equations and functions, with enough practice to stick."
+    "description": "Expressions, equations and functions, with enough practice to stick.",
+    "url": "https://www.khanacademy.org/math/algebra"
   },
   {
     "id": "c-calculus",
-    "title": "Calculus I & II",
-    "provider": "Lyceum Open Courseware",
+    "title": "18.01SC Single Variable Calculus",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 40,
-    "rating": 4.8,
-    "learners": 156000,
     "format": "video",
     "cost": "free",
     "domain": "Mathematics",
@@ -2575,17 +2400,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Limits, derivatives and integrals, taught through problems rather than rules."
+    "description": "Limits, derivatives and integrals, taught through problems rather than rules.",
+    "url": "https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/"
   },
   {
     "id": "c-linear-algebra",
-    "title": "Linear Algebra",
-    "provider": "Lyceum Open Courseware",
+    "title": "18.06 Linear Algebra",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 34,
-    "rating": 4.9,
-    "learners": 143000,
     "format": "video",
     "cost": "free",
     "domain": "Mathematics",
@@ -2595,17 +2419,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Vectors, matrices and transformations, with the geometry kept in view."
+    "description": "Vectors, matrices and transformations, with the geometry kept in view.",
+    "url": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/"
   },
   {
     "id": "c-probability",
-    "title": "Probability & Statistics",
-    "provider": "Lyceum Open Courseware",
+    "title": "6.041SC Probabilistic Systems Analysis",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 32,
-    "rating": 4.7,
-    "learners": 128000,
     "format": "interactive",
     "cost": "free",
     "domain": "Mathematics",
@@ -2615,17 +2438,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Distributions, expectation and inference, applied to real questions."
+    "description": "Distributions, expectation and inference, applied to real questions.",
+    "url": "https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/"
   },
   {
     "id": "c-discrete",
-    "title": "Discrete Mathematics",
-    "provider": "Lyceum Open Courseware",
+    "title": "6.042J Mathematics for Computer Science",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 30,
-    "rating": 4.6,
-    "learners": 74000,
     "format": "reading",
     "cost": "free",
     "domain": "Mathematics",
@@ -2635,17 +2457,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Logic, sets, counting and graphs, with proof introduced gently."
+    "description": "Logic, sets, counting and graphs, with proof introduced gently.",
+    "url": "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-fall-2010/"
   },
   {
     "id": "c-analysis",
-    "title": "Introduction to Real Analysis",
-    "provider": "Lyceum Open Courseware",
+    "title": "18.100A Real Analysis",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 3,
     "hours": 36,
-    "rating": 4.6,
-    "learners": 39000,
     "format": "reading",
     "cost": "paid",
     "domain": "Mathematics",
@@ -2655,17 +2476,16 @@
     "requires": [
       "calculus"
     ],
-    "description": "Make calculus rigorous, and learn to write a proof that holds."
+    "description": "Make calculus rigorous, and learn to write a proof that holds.",
+    "url": "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/"
   },
   {
     "id": "a-algebra",
-    "title": "Assessment: Algebra Readiness",
-    "provider": "Lyceum Open Courseware",
+    "title": "Foundations for Algebra",
+    "provider": "Khan Academy",
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "rating": 4.5,
-    "learners": 88000,
     "format": "interactive",
     "cost": "free",
     "domain": "Mathematics",
@@ -2673,17 +2493,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Find the gaps before they bite you halfway through calculus."
+    "description": "Find the gaps before they bite you halfway through calculus.",
+    "url": "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:foundation-algebra"
   },
   {
     "id": "pr-math-modelling",
     "title": "Project: Model a Real-World System",
-    "provider": "Lyceum Open Courseware",
+    "provider": "Self-directed",
     "type": "project",
     "level": 2,
     "hours": 14,
-    "rating": 4.5,
-    "learners": 21000,
     "format": "project",
     "cost": "free",
     "domain": "Mathematics",
@@ -2696,13 +2515,11 @@
   },
   {
     "id": "c-design-a11y",
-    "title": "Accessible Design",
-    "provider": "Studio Method",
+    "title": "Introduction to Web Accessibility",
+    "provider": "WebAIM",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.8,
-    "learners": 39000,
     "format": "interactive",
     "cost": "free",
     "domain": "Design",
@@ -2712,17 +2529,16 @@
     "requires": [
       "design-principles"
     ],
-    "description": "Contrast, focus order, semantics and motion, tested with a screen reader."
+    "description": "Contrast, focus order, semantics and motion, tested with a screen reader.",
+    "url": "https://webaim.org/intro/"
   },
   {
     "id": "c-algorithms",
-    "title": "Algorithms & Complexity",
-    "provider": "Lyceum Open Courseware",
+    "title": "6.006 Introduction to Algorithms",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 40,
-    "rating": 4.8,
-    "learners": 172000,
     "format": "video",
     "cost": "free",
     "domain": "Computer Science",
@@ -2732,17 +2548,16 @@
     "requires": [
       "data-structures"
     ],
-    "description": "Design techniques and the analysis that tells you which one to use."
+    "description": "Design techniques and the analysis that tells you which one to use.",
+    "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"
   },
   {
     "id": "c-os",
-    "title": "Operating Systems",
-    "provider": "Lyceum Open Courseware",
+    "title": "Operating Systems: Three Easy Pieces",
+    "provider": "Remzi & Andrea Arpaci-Dusseau",
     "type": "course",
     "level": 2,
     "hours": 34,
-    "rating": 4.7,
-    "learners": 121000,
     "format": "video",
     "cost": "free",
     "domain": "Computer Science",
@@ -2752,17 +2567,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "Processes, scheduling, memory and file systems, built up from scratch."
+    "description": "Processes, scheduling, memory and file systems, built up from scratch.",
+    "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/"
   },
   {
     "id": "c-dbms",
-    "title": "Database Systems Internals",
-    "provider": "Lyceum Open Courseware",
+    "title": "15-445 Database Systems",
+    "provider": "Carnegie Mellon University",
     "type": "course",
     "level": 2,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 98000,
     "format": "interactive",
     "cost": "free",
     "domain": "Computer Science",
@@ -2772,17 +2586,16 @@
     "requires": [
       "sql"
     ],
-    "description": "Normalisation, indexing, transactions and concurrency control."
+    "description": "Normalisation, indexing, transactions and concurrency control.",
+    "url": "https://15445.courses.cs.cmu.edu/"
   },
   {
     "id": "c-networks",
-    "title": "Computer Networking",
-    "provider": "Lyceum Open Courseware",
+    "title": "Computer Networks: A Systems Approach",
+    "provider": "Peterson & Davie",
     "type": "course",
     "level": 2,
     "hours": 32,
-    "rating": 4.8,
-    "learners": 134000,
     "format": "video",
     "cost": "free",
     "domain": "Computer Science",
@@ -2792,17 +2605,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "Top-down from the application layer to the wire."
+    "description": "Top-down from the application layer to the wire.",
+    "url": "https://book.systemsapproach.org/"
   },
   {
     "id": "c-arch",
-    "title": "Computer Organisation & Architecture",
-    "provider": "Lyceum Open Courseware",
+    "title": "6.004 Computation Structures",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 28,
-    "rating": 4.6,
-    "learners": 76000,
     "format": "video",
     "cost": "free",
     "domain": "Computer Science",
@@ -2812,17 +2624,16 @@
     "requires": [
       "prog-fundamentals"
     ],
-    "description": "Instruction sets, pipelining, cache and the memory hierarchy."
+    "description": "Instruction sets, pipelining, cache and the memory hierarchy.",
+    "url": "https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/"
   },
   {
     "id": "c-toc",
-    "title": "Theory of Computation",
-    "provider": "Lyceum Open Courseware",
+    "title": "18.404J Theory of Computation",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 3,
     "hours": 30,
-    "rating": 4.6,
-    "learners": 54000,
     "format": "reading",
     "cost": "free",
     "domain": "Computer Science",
@@ -2832,17 +2643,16 @@
     "requires": [
       "discrete-math"
     ],
-    "description": "Automata, formal languages and decidability."
+    "description": "Automata, formal languages and decidability.",
+    "url": "https://ocw.mit.edu/courses/18-404j-theory-of-computation-fall-2020/"
   },
   {
     "id": "a-gate-cs",
-    "title": "GATE CS Full-Length Mock Series",
-    "provider": "Prep Forge",
+    "title": "Top Interview 150: Practice Set",
+    "provider": "LeetCode",
     "type": "assessment",
     "level": 3,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 44000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Computer Science",
@@ -2851,17 +2661,16 @@
       "algorithms",
       "operating-systems"
     ],
-    "description": "Timed full papers under real conditions, with solutions analysed."
+    "description": "Timed full papers under real conditions, with solutions analysed.",
+    "url": "https://leetcode.com/studyplan/top-interview-150/"
   },
   {
     "id": "c-mechanics",
-    "title": "Mechanics",
-    "provider": "Lyceum Open Courseware",
+    "title": "University Physics I: Mechanics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 34,
-    "rating": 4.7,
-    "learners": 188000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -2869,17 +2678,16 @@
       "physics-mechanics"
     ],
     "requires": [],
-    "description": "Kinematics through rotation, taught by working problems."
+    "description": "Kinematics through rotation, taught by working problems.",
+    "url": "https://openstax.org/details/books/university-physics-volume-1"
   },
   {
     "id": "c-em-waves",
-    "title": "Electromagnetism & Waves",
-    "provider": "Lyceum Open Courseware",
+    "title": "University Physics II: Electromagnetism",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 36,
-    "rating": 4.7,
-    "learners": 142000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -2889,17 +2697,16 @@
     "requires": [
       "physics-mechanics"
     ],
-    "description": "Fields, circuits, induction, and oscillations through to optics."
+    "description": "Fields, circuits, induction, and oscillations through to optics.",
+    "url": "https://openstax.org/details/books/university-physics-volume-2"
   },
   {
     "id": "c-modern-physics",
-    "title": "Modern Physics",
-    "provider": "Lyceum Open Courseware",
+    "title": "University Physics III: Modern Physics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 3,
     "hours": 24,
-    "rating": 4.6,
-    "learners": 89000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -2909,17 +2716,16 @@
     "requires": [
       "physics-em"
     ],
-    "description": "Quanta, atomic structure, nuclei and semiconductors."
+    "description": "Quanta, atomic structure, nuclei and semiconductors.",
+    "url": "https://openstax.org/details/books/university-physics-volume-3"
   },
   {
     "id": "c-phys-chem",
-    "title": "Physical Chemistry",
-    "provider": "Lyceum Open Courseware",
+    "title": "Chemistry",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 30,
-    "rating": 4.6,
-    "learners": 131000,
     "format": "interactive",
     "cost": "free",
     "domain": "Sciences",
@@ -2927,17 +2733,16 @@
       "chemistry-physical"
     ],
     "requires": [],
-    "description": "Mole concept, thermodynamics, equilibrium and electrochemistry."
+    "description": "Mole concept, thermodynamics, equilibrium and electrochemistry.",
+    "url": "https://openstax.org/details/books/chemistry-2e"
   },
   {
     "id": "c-org-chem",
     "title": "Organic Chemistry",
-    "provider": "Lyceum Open Courseware",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 34,
-    "rating": 4.7,
-    "learners": 126000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -2947,17 +2752,16 @@
     "requires": [
       "chemistry-physical"
     ],
-    "description": "Mechanisms first, so the reactions stop needing memorising."
+    "description": "Mechanisms first, so the reactions stop needing memorising.",
+    "url": "https://openstax.org/details/books/organic-chemistry"
   },
   {
     "id": "c-inorg-chem",
-    "title": "Inorganic Chemistry",
-    "provider": "Lyceum Open Courseware",
+    "title": "Chemistry: Inorganic Topics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 26,
-    "rating": 4.4,
-    "learners": 84000,
     "format": "reading",
     "cost": "free",
     "domain": "Sciences",
@@ -2967,17 +2771,16 @@
     "requires": [
       "chemistry-physical"
     ],
-    "description": "Periodicity, bonding and coordination chemistry."
+    "description": "Periodicity, bonding and coordination chemistry.",
+    "url": "https://openstax.org/details/books/chemistry-2e"
   },
   {
     "id": "c-botany",
-    "title": "Botany",
-    "provider": "Lyceum Open Courseware",
+    "title": "Biology: Plant Structure and Function",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 30,
-    "rating": 4.5,
-    "learners": 92000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -2985,17 +2788,16 @@
       "biology-botany"
     ],
     "requires": [],
-    "description": "Plant physiology, morphology, reproduction and ecology."
+    "description": "Plant physiology, morphology, reproduction and ecology.",
+    "url": "https://openstax.org/details/books/biology-2e"
   },
   {
     "id": "c-zoology",
-    "title": "Zoology & Human Physiology",
-    "provider": "Lyceum Open Courseware",
+    "title": "Anatomy and Physiology",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 32,
-    "rating": 4.6,
-    "learners": 104000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -3003,17 +2805,16 @@
       "biology-zoology"
     ],
     "requires": [],
-    "description": "Human systems in depth, plus animal diversity and evolution."
+    "description": "Human systems in depth, plus animal diversity and evolution.",
+    "url": "https://openstax.org/details/books/anatomy-and-physiology-2e"
   },
   {
     "id": "c-molbio",
-    "title": "Genetics & Molecular Biology",
-    "provider": "Lyceum Open Courseware",
+    "title": "Biology: Genetics and Molecular Biology",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 26,
-    "rating": 4.7,
-    "learners": 71000,
     "format": "interactive",
     "cost": "free",
     "domain": "Sciences",
@@ -3023,17 +2824,16 @@
     "requires": [
       "biology-botany"
     ],
-    "description": "Inheritance through to gene expression and biotechnology."
+    "description": "Inheritance through to gene expression and biotechnology.",
+    "url": "https://openstax.org/details/books/biology-2e"
   },
   {
     "id": "c-eng-maths",
-    "title": "Engineering Mathematics",
-    "provider": "Lyceum Open Courseware",
+    "title": "18.03SC Differential Equations",
+    "provider": "MIT OpenCourseWare",
     "type": "course",
     "level": 2,
     "hours": 36,
-    "rating": 4.6,
-    "learners": 98000,
     "format": "video",
     "cost": "free",
     "domain": "Sciences",
@@ -3043,17 +2843,16 @@
     "requires": [
       "calculus"
     ],
-    "description": "Differential equations, transforms, complex analysis and numerical methods."
+    "description": "Differential equations, transforms, complex analysis and numerical methods.",
+    "url": "https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/"
   },
   {
     "id": "a-jee-mock",
-    "title": "JEE Main & Advanced Mock Series",
-    "provider": "Prep Forge",
+    "title": "JEE Main: Official Information and Papers",
+    "provider": "National Testing Agency",
     "type": "assessment",
     "level": 3,
     "hours": 40,
-    "rating": 4.8,
-    "learners": 210000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Sciences",
@@ -3062,17 +2861,16 @@
       "physics-em",
       "chemistry-organic"
     ],
-    "description": "Full papers to the real pattern, with per-topic accuracy analysis."
+    "description": "Full papers to the real pattern, with per-topic accuracy analysis.",
+    "url": "https://jeemain.nta.nic.in/"
   },
   {
     "id": "a-neet-mock",
-    "title": "NEET Mock Test Series",
-    "provider": "Prep Forge",
+    "title": "NEET: Official Information and Papers",
+    "provider": "National Testing Agency",
     "type": "assessment",
     "level": 3,
     "hours": 36,
-    "rating": 4.7,
-    "learners": 186000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Sciences",
@@ -3081,17 +2879,16 @@
       "biology-molecular",
       "chemistry-organic"
     ],
-    "description": "180-question papers under the clock, marked with negative marking."
+    "description": "180-question papers under the clock, marked with negative marking.",
+    "url": "https://neet.nta.nic.in/"
   },
   {
     "id": "c-polity",
-    "title": "Indian Polity & Governance",
-    "provider": "Civic Institute",
+    "title": "Introduction to Political Science",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 32,
-    "rating": 4.8,
-    "learners": 156000,
     "format": "reading",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3099,17 +2896,16 @@
       "indian-polity"
     ],
     "requires": [],
-    "description": "The constitution and the machinery of government, article by article."
+    "description": "The constitution and the machinery of government, article by article.",
+    "url": "https://openstax.org/details/books/introduction-political-science"
   },
   {
     "id": "c-history",
-    "title": "History for Competitive Exams",
-    "provider": "Civic Institute",
+    "title": "World History",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 34,
-    "rating": 4.6,
-    "learners": 128000,
     "format": "video",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3117,17 +2913,16 @@
       "indian-history"
     ],
     "requires": [],
-    "description": "Ancient to modern, with the freedom struggle covered properly."
+    "description": "Ancient to modern, with the freedom struggle covered properly.",
+    "url": "https://openstax.org/details/books/world-history-volume-1"
   },
   {
     "id": "c-geography",
-    "title": "Geography",
-    "provider": "Civic Institute",
+    "title": "World History and Geography",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 1,
     "hours": 28,
-    "rating": 4.5,
-    "learners": 112000,
     "format": "video",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3135,17 +2930,16 @@
       "geography-core"
     ],
     "requires": [],
-    "description": "Physical, human and economic geography, map work included."
+    "description": "Physical, human and economic geography, map work included.",
+    "url": "https://www.khanacademy.org/humanities/world-history"
   },
   {
     "id": "c-econ-basics",
-    "title": "Economics Fundamentals",
-    "provider": "Northgate Business School",
+    "title": "Economics and Finance",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 1,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 143000,
     "format": "video",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3153,17 +2947,16 @@
       "economics-basics"
     ],
     "requires": [],
-    "description": "The vocabulary and the indicators, before any of the theory."
+    "description": "The vocabulary and the indicators, before any of the theory.",
+    "url": "https://www.khanacademy.org/economics-finance-domain/core-finance"
   },
   {
     "id": "c-micro",
-    "title": "Microeconomics",
-    "provider": "Northgate Business School",
+    "title": "Principles of Microeconomics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 87000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Humanities & Social Science",
@@ -3173,17 +2966,16 @@
     "requires": [
       "economics-basics"
     ],
-    "description": "Consumer and producer theory through market structures and welfare."
+    "description": "Consumer and producer theory through market structures and welfare.",
+    "url": "https://openstax.org/details/books/principles-microeconomics-3e"
   },
   {
     "id": "c-macro",
-    "title": "Macroeconomics",
-    "provider": "Northgate Business School",
+    "title": "Principles of Macroeconomics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 28,
-    "rating": 4.6,
-    "learners": 81000,
     "format": "video",
     "cost": "paid",
     "domain": "Humanities & Social Science",
@@ -3193,17 +2985,16 @@
     "requires": [
       "economics-basics"
     ],
-    "description": "National income, money, inflation, growth and policy."
+    "description": "National income, money, inflation, growth and policy.",
+    "url": "https://openstax.org/details/books/principles-macroeconomics-3e"
   },
   {
     "id": "c-current-affairs",
-    "title": "Current Affairs & Environment",
-    "provider": "Civic Institute",
+    "title": "Press Information Bureau",
+    "provider": "Press Information Bureau, Government of India",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.5,
-    "learners": 96000,
     "format": "reading",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3213,17 +3004,16 @@
     "requires": [
       "indian-polity"
     ],
-    "description": "A method for reading the news as syllabus, not as noise."
+    "description": "A method for reading the news as syllabus, not as noise.",
+    "url": "https://www.pib.gov.in/"
   },
   {
     "id": "c-ethics-essay",
-    "title": "Ethics, Integrity & Essay",
-    "provider": "Civic Institute",
+    "title": "Business Ethics",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 68000,
     "format": "reading",
     "cost": "paid",
     "domain": "Humanities & Social Science",
@@ -3233,17 +3023,16 @@
     "requires": [
       "communication"
     ],
-    "description": "Case studies, applied ethics, and essays that hold together."
+    "description": "Case studies, applied ethics, and essays that hold together.",
+    "url": "https://openstax.org/details/books/business-ethics"
   },
   {
     "id": "c-psych-intro",
-    "title": "Introduction to Psychology",
-    "provider": "Lyceum Open Courseware",
+    "title": "Psychology",
+    "provider": "OpenStax",
     "type": "course",
     "level": 1,
     "hours": 26,
-    "rating": 4.8,
-    "learners": 164000,
     "format": "video",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3251,17 +3040,16 @@
       "psychology-intro"
     ],
     "requires": [],
-    "description": "The major schools, and the experiments that made them."
+    "description": "The major schools, and the experiments that made them.",
+    "url": "https://openstax.org/details/books/psychology-2e"
   },
   {
     "id": "c-research-methods",
-    "title": "Research Methods & Statistics",
-    "provider": "Lyceum Open Courseware",
+    "title": "Introduction to Sociology: Research Methods",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 24,
-    "rating": 4.6,
-    "learners": 72000,
     "format": "interactive",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3271,17 +3059,16 @@
     "requires": [
       "probability"
     ],
-    "description": "Design, sampling and inference, with the common fallacies named."
+    "description": "Design, sampling and inference, with the common fallacies named.",
+    "url": "https://openstax.org/details/books/introduction-sociology-3e"
   },
   {
     "id": "pr-upsc-answers",
     "title": "Project: A Month of Answer Writing",
-    "provider": "Civic Institute",
+    "provider": "Self-directed",
     "type": "project",
     "level": 3,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 34000,
     "format": "project",
     "cost": "free",
     "domain": "Humanities & Social Science",
@@ -3294,13 +3081,11 @@
   },
   {
     "id": "c-grammar",
-    "title": "English Grammar & Usage",
-    "provider": "Beacon Language Lab",
+    "title": "Purdue OWL: Grammar",
+    "provider": "Purdue OWL",
     "type": "course",
     "level": 1,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 198000,
     "format": "interactive",
     "cost": "free",
     "domain": "Language",
@@ -3308,17 +3093,16 @@
       "english-grammar"
     ],
     "requires": [],
-    "description": "The rules tests actually examine, drilled rather than described."
+    "description": "The rules tests actually examine, drilled rather than described.",
+    "url": "https://owl.purdue.edu/owl/general_writing/grammar/index.html"
   },
   {
     "id": "c-vocab",
-    "title": "Academic Vocabulary",
-    "provider": "Beacon Language Lab",
+    "title": "Purdue OWL: Academic Writing",
+    "provider": "Purdue OWL",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.5,
-    "learners": 121000,
     "format": "interactive",
     "cost": "free",
     "domain": "Language",
@@ -3328,17 +3112,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "The academic word list, with roots so new words decode themselves."
+    "description": "The academic word list, with roots so new words decode themselves.",
+    "url": "https://owl.purdue.edu/owl/general_writing/academic_writing/index.html"
   },
   {
     "id": "c-reading",
-    "title": "Reading Comprehension",
-    "provider": "Beacon Language Lab",
+    "title": "Reading and Language Arts",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.6,
-    "learners": 134000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Language",
@@ -3348,17 +3131,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "Long passages under time, read for argument rather than detail."
+    "description": "Long passages under time, read for argument rather than detail.",
+    "url": "https://www.khanacademy.org/ela"
   },
   {
     "id": "c-writing",
-    "title": "Academic & Task Writing",
-    "provider": "Beacon Language Lab",
+    "title": "Writing Guide with Handbook",
+    "provider": "OpenStax",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.7,
-    "learners": 118000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Language",
@@ -3368,17 +3150,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "Task response and coherence, written to a rubric and a clock."
+    "description": "Task response and coherence, written to a rubric and a clock.",
+    "url": "https://openstax.org/details/books/writing-guide"
   },
   {
     "id": "c-listening",
-    "title": "Listening & Note-Taking",
-    "provider": "Beacon Language Lab",
+    "title": "BBC Learning English",
+    "provider": "BBC Learning English",
     "type": "course",
     "level": 2,
     "hours": 16,
-    "rating": 4.5,
-    "learners": 94000,
     "format": "video",
     "cost": "free",
     "domain": "Language",
@@ -3388,17 +3169,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "Lectures and conversations across a range of accents."
+    "description": "Lectures and conversations across a range of accents.",
+    "url": "https://www.bbc.co.uk/learningenglish/"
   },
   {
     "id": "c-speaking",
-    "title": "Speaking & Fluency",
-    "provider": "Beacon Language Lab",
+    "title": "Cambridge Learning English",
+    "provider": "Cambridge English",
     "type": "course",
     "level": 2,
     "hours": 18,
-    "rating": 4.6,
-    "learners": 88000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Language",
@@ -3408,17 +3188,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "Fluency and pronunciation, rehearsed against the assessment criteria."
+    "description": "Fluency and pronunciation, rehearsed against the assessment criteria.",
+    "url": "https://www.cambridgeenglish.org/learning-english/"
   },
   {
     "id": "a-ielts-mock",
-    "title": "IELTS Full Mock Tests",
-    "provider": "Beacon Language Lab",
+    "title": "IELTS Sample Test Questions",
+    "provider": "IELTS",
     "type": "assessment",
     "level": 2,
     "hours": 20,
-    "rating": 4.7,
-    "learners": 152000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Language",
@@ -3427,17 +3206,16 @@
       "english-writing",
       "english-listening"
     ],
-    "description": "All four papers under exam timing, band-scored."
+    "description": "All four papers under exam timing, band-scored.",
+    "url": "https://www.ielts.org/for-test-takers/sample-test-questions"
   },
   {
     "id": "c-quant",
-    "title": "Quantitative Aptitude",
-    "provider": "Prep Forge",
+    "title": "Foundations for Algebra",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 1,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 176000,
     "format": "interactive",
     "cost": "free",
     "domain": "Aptitude & Reasoning",
@@ -3447,17 +3225,16 @@
     "requires": [
       "algebra"
     ],
-    "description": "Arithmetic and algebra drilled for accuracy at speed."
+    "description": "Arithmetic and algebra drilled for accuracy at speed.",
+    "url": "https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:foundation-algebra"
   },
   {
     "id": "c-logical",
-    "title": "Logical Reasoning",
-    "provider": "Prep Forge",
+    "title": "SAT Reasoning Practice",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 1,
     "hours": 24,
-    "rating": 4.6,
-    "learners": 148000,
     "format": "interactive",
     "cost": "free",
     "domain": "Aptitude & Reasoning",
@@ -3465,17 +3242,16 @@
       "logical-reasoning"
     ],
     "requires": [],
-    "description": "Arrangements, puzzles and syllogisms, by pattern rather than by luck."
+    "description": "Arrangements, puzzles and syllogisms, by pattern rather than by luck.",
+    "url": "https://www.khanacademy.org/test-prep/sat/x0a8c2e5f:untitled-652"
   },
   {
     "id": "c-di",
-    "title": "Data Interpretation",
-    "provider": "Prep Forge",
+    "title": "Analyzing Categorical Data",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 2,
     "hours": 22,
-    "rating": 4.6,
-    "learners": 102000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Aptitude & Reasoning",
@@ -3485,17 +3261,16 @@
     "requires": [
       "quantitative-aptitude"
     ],
-    "description": "Tables, graphs and caselets, with approximation techniques."
+    "description": "Tables, graphs and caselets, with approximation techniques.",
+    "url": "https://www.khanacademy.org/math/statistics-probability/analyzing-categorical-data"
   },
   {
     "id": "c-verbal",
-    "title": "Verbal Ability",
-    "provider": "Prep Forge",
+    "title": "Reading and Language Arts",
+    "provider": "Khan Academy",
     "type": "course",
     "level": 2,
     "hours": 20,
-    "rating": 4.5,
-    "learners": 97000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Aptitude & Reasoning",
@@ -3505,17 +3280,16 @@
     "requires": [
       "english-grammar"
     ],
-    "description": "Para-jumbles, critical reasoning, summary and correction."
+    "description": "Para-jumbles, critical reasoning, summary and correction.",
+    "url": "https://www.khanacademy.org/ela"
   },
   {
     "id": "c-exam-strategy",
-    "title": "Exam Strategy & Revision Planning",
-    "provider": "Prep Forge",
+    "title": "The Learning Scientists: Evidence-Based Study Strategies",
+    "provider": "The Learning Scientists",
     "type": "course",
     "level": 2,
     "hours": 10,
-    "rating": 4.8,
-    "learners": 64000,
     "format": "video",
     "cost": "free",
     "domain": "Aptitude & Reasoning",
@@ -3523,17 +3297,16 @@
       "exam-strategy"
     ],
     "requires": [],
-    "description": "Attempt order, sectional timing, negative-marking maths, and a revision schedule that survives contact with a syllabus."
+    "description": "Attempt order, sectional timing, negative-marking maths, and a revision schedule that survives contact with a syllabus.",
+    "url": "https://www.learningscientists.org/"
   },
   {
     "id": "a-cat-mock",
-    "title": "CAT Mock Series",
-    "provider": "Prep Forge",
+    "title": "CAT: Official Information and Mocks",
+    "provider": "Indian Institutes of Management",
     "type": "assessment",
     "level": 3,
     "hours": 30,
-    "rating": 4.7,
-    "learners": 88000,
     "format": "interactive",
     "cost": "paid",
     "domain": "Aptitude & Reasoning",
@@ -3542,6 +3315,7 @@
       "data-interpretation",
       "verbal-ability"
     ],
-    "description": "Sectional and full mocks with percentile estimation."
+    "description": "Sectional and full mocks with percentile estimation.",
+    "url": "https://iimcat.ac.in/"
   }
 ]

@@ -111,7 +111,7 @@ def test_recommendations_are_sorted_and_limited(catalog):
     ctx = _ctx(catalog)
     recs = recommender.recommend(ctx, limit=5)
     assert len(recs) == 5
-    assert recs == sorted(recs, key=lambda r: (-r.score, -r.rating, r.item_id))
+    assert recs == sorted(recs, key=lambda r: (-r.score, r.hours, r.item_id))
 
 
 def test_every_recommendation_has_reasons(catalog):
@@ -284,7 +284,9 @@ def test_liked_builds_provider_and_format_affinity(catalog):
     profile = LearnerProfile(learner_id="a")
     entry = FeedbackEntry(item_id="c-react", signal="liked")
     profile, _ = apply_feedback(catalog, profile, entry)
-    assert profile.provider_affinity.get("WebCraft") == 1
+    # Whatever the catalogue says this item's provider is — not a name
+    # pinned here, which broke the moment the real one replaced the invented one.
+    assert profile.provider_affinity.get(catalog.items["c-react"].provider) == 1
     assert profile.format_affinity.get("interactive") == 1
 
 

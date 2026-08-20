@@ -514,7 +514,6 @@ def list_items(
             "type": i.type,
             "level": i.level,
             "hours": i.hours,
-            "rating": i.rating,
             "format": i.format,
             "cost": i.cost,
             "domain": i.domain,

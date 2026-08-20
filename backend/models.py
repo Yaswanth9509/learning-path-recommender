@@ -110,7 +110,6 @@ class ScoreBreakdown(BaseModel):
     level_fit: float
     interest_match: float
     format_fit: float
-    quality: float
 
 
 class Recommendation(BaseModel):
@@ -120,7 +119,6 @@ class Recommendation(BaseModel):
     type: str
     level: int
     hours: int
-    rating: float
     format: str
     cost: str
     domain: str
@@ -148,7 +146,6 @@ class PathItem(BaseModel):
     type: str
     level: int
     hours: int
-    rating: float
     format: str
     cost: str
     description: str

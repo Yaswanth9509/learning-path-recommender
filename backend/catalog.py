@@ -58,8 +58,6 @@ class LearningItem:
     type: str
     level: int
     hours: int
-    rating: float
-    learners: int
     format: str
     cost: str
     domain: str
@@ -240,8 +238,6 @@ def load_catalog() -> Catalog:
             type=row["type"],
             level=int(row["level"]),
             hours=int(row["hours"]),
-            rating=float(row["rating"]),
-            learners=int(row["learners"]),
             format=row["format"],
             cost=row["cost"],
             domain=row["domain"],
@@ -325,8 +321,6 @@ def validate(catalog: Catalog) -> None:
             raise CatalogError(f"item '{item.id}' has invalid level {item.level}")
         if item.hours <= 0:
             raise CatalogError(f"item '{item.id}' must have positive hours")
-        if not 0 <= item.rating <= 5:
-            raise CatalogError(f"item '{item.id}' has out-of-range rating {item.rating}")
         for sid in (*item.teaches, *item.requires):
             if sid not in skill_ids:
                 raise CatalogError(f"item '{item.id}' references unknown skill '{sid}'")

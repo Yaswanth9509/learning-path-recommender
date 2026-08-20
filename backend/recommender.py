@@ -16,13 +16,17 @@ from .profiling import DerivedProfile
 
 # Weights sum to 1.0. Goal relevance dominates because a learning path that is
 # pleasant but off-target is worse than useless.
+# There was a sixth component, `quality`, worth 0.05 and computed from a
+# rating and a learner count that were both invented. Once every provider
+# became a real one those numbers stopped being harmless flavour and started
+# lending false precision to MIT and OpenStax, so they are gone and the
+# remaining five carry their share.
 WEIGHTS: dict[str, float] = {
-    "goal_relevance": 0.35,
-    "skill_readiness": 0.20,
-    "level_fit": 0.15,
-    "interest_match": 0.15,
+    "goal_relevance": 0.37,
+    "skill_readiness": 0.21,
+    "level_fit": 0.16,
+    "interest_match": 0.16,
     "format_fit": 0.10,
-    "quality": 0.05,
 }
 
 assert abs(sum(WEIGHTS.values()) - 1.0) < 1e-9, "recommendation weights must sum to 1"
@@ -116,11 +120,6 @@ def _format_fit(ctx: ScoringContext, item: LearningItem) -> float:
     return score
 
 
-def _quality(ctx: ScoringContext, item: LearningItem) -> float:
-    rating = item.rating / 5.0
-    # Popularity as a weak tiebreaker, saturating at 200k learners.
-    popularity = min(1.0, item.learners / 200_000)
-    return 0.8 * rating + 0.2 * popularity
 
 
 _COMPONENTS = {
@@ -129,7 +128,6 @@ _COMPONENTS = {
     "level_fit": _level_fit,
     "interest_match": _interest_match,
     "format_fit": _format_fit,
-    "quality": _quality,
 }
 
 
@@ -195,10 +193,7 @@ def build_reasons(
     if profile.provider_affinity.get(item.provider):
         reasons.append(f"From {item.provider}, a provider you rated highly before.")
 
-    reasons.append(
-        f"Rated {item.rating}/5 by {item.learners:,} learners; about "
-        f"{item.hours} hours of work."
-    )
+    reasons.append(f"About {item.hours} hours of work, from {item.provider}.")
     return reasons
 
 
@@ -215,7 +210,6 @@ def to_recommendation(
         type=item.type,
         level=item.level,
         hours=item.hours,
-        rating=item.rating,
         format=item.format,
         cost=item.cost,
         domain=item.domain,
@@ -262,9 +256,9 @@ def recommend(
             continue
         results.append(rec)
 
-    # Deterministic ordering: score, then rating, then id — so equal-scoring
+    # Deterministic ordering: score, then shorter work, then id — so equal-scoring
     # items never shuffle between requests.
-    results.sort(key=lambda r: (-r.score, -r.rating, r.item_id))
+    results.sort(key=lambda r: (-r.score, r.hours, r.item_id))
     return results[:limit]
 
 
@@ -291,7 +285,7 @@ def best_course_for_skill(
     def rank(item: LearningItem) -> tuple:
         extra_coverage = len(set(item.teaches) & ctx.gap_skills)
         score, _ = score_item(ctx, item)
-        return (-extra_coverage, -score, -item.rating, item.id)
+        return (-extra_coverage, -score, item.hours, item.id)
 
     candidates.sort(key=rank)
     return candidates[0]

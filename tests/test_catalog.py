@@ -10,6 +10,7 @@ from backend.catalog import (
     Goal,
     LearningItem,
     Skill,
+    get_catalog,
     validate,
 )
 
@@ -86,7 +87,7 @@ def _skill(sid, prereqs=()):
 def _course(cid, teaches=(), requires=()):
     return LearningItem(
         id=cid, title=cid, provider="p", type="course", level=1, hours=1,
-        rating=4.0, learners=10, format="video", cost="free", domain="D",
+        format="video", cost="free", domain="D",
         teaches=tuple(teaches), requires=tuple(requires), description="d",
     )
 
@@ -298,3 +299,56 @@ def test_exams_and_degrees_are_reachable_from_plain_language(phrase, expected, c
     from backend import assistant
 
     assert assistant._interpret_with_rules(catalog, phrase).goal_id == expected
+
+
+def test_every_course_links_somewhere_real():
+    """125 of 125 courses once had no URL at all.
+
+    A course the learner cannot open is a label on an empty bottle. Projects
+    and self-assessments are exempt: those are work the learner does, not a
+    page somebody else hosts.
+    """
+    catalog = get_catalog()
+    linkless = [
+        item.id for item in catalog.items.values()
+        if item.type not in ("project", "assessment") and not item.url
+    ]
+    assert not linkless, f"courses with no url: {linkless}"
+
+
+def test_no_item_claims_an_invented_provider():
+    """The catalogue used to credit 22 providers that do not exist.
+
+    Once the links became real the names had to as well, or the page would
+    cite "Lyceum Open Courseware" while pointing at MIT.
+    """
+    invented = {
+        "Lyceum Open Courseware", "DevPath", "QuantAcademy", "CloudBridge",
+        "Studio Method", "MLWorks", "Beacon Marketing Institute", "Prep Forge",
+        "WebCraft", "Ledger Institute", "DataForge", "Beacon Language Lab",
+        "OpenLearn", "FrontierUI", "Northgate Business School", "ProductCraft",
+        "Civic Institute", "NeuralSchool", "CampusX", "MetricLab",
+        "SecureStack", "SignalOps",
+    }
+    offenders = [
+        f"{item.id} -> {item.provider}"
+        for item in get_catalog().items.values() if item.provider in invented
+    ]
+    assert not offenders, f"items crediting a provider that does not exist: {offenders}"
+
+
+def test_the_catalogue_carries_no_invented_ratings():
+    """Every item shipped a rating between 4.2 and 4.9 and a learner count.
+
+    Both were made up. Harmless as flavour on a fictional provider; not
+    harmless once the provider became MIT OpenCourseWare, where a fabricated
+    4.7 borrows real authority.
+    """
+    import json
+    from pathlib import Path
+    raw = json.loads(
+        (Path(__file__).resolve().parent.parent / "backend" / "data" / "courses.json")
+        .read_text(encoding="utf-8")
+    )
+    carrying = [i["id"] for i in raw if "rating" in i or "learners" in i]
+    assert not carrying, f"items still carrying invented numbers: {carrying}"

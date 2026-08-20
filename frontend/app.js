@@ -1132,7 +1132,6 @@ function renderPathItem(item) {
   chip(item.provider);
   chip(`level ${item.level}`);
   if (item.format) chip(item.format);
-  if (item.rating) chip(`★ ${item.rating}`);
   body.appendChild(meta);
 
   if (item.teaches_names.length) {
@@ -1253,7 +1252,7 @@ async function explainItem(itemId) {
 
   body.appendChild(el("div", {}, [itemLink(rec)]));
   body.appendChild(el("div", { class: "item-sub", text:
-    `${rec.provider} · ${rec.type} · ${rec.hours}h · level ${rec.level} · ${rec.format} · ${rec.cost} · rated ${rec.rating}/5` }));
+    `${rec.provider} · ${rec.type} · ${rec.hours}h · level ${rec.level} · ${rec.format} · ${rec.cost}` }));
   body.appendChild(el("div", { class: "explain-score" }, [
     el("span", { class: "explain-score-value", text: rec.score.toFixed(3) }),
     el("span", { class: "hint", text: "weighted match score, 0–1" }),
@@ -2101,7 +2100,7 @@ function renderRecommendation(r, index = 0) {
   head.appendChild(el("div", {}, [
     el("div", { class: "item-title" }, [r.title, itemLink(r), videoLink(r)]),
     el("div", { class: "item-sub", text:
-      `${r.provider} · ${r.type} · ${r.hours}h · level ${r.level} · ${r.format} · ${r.cost} · ${r.rating}/5` }),
+      `${r.provider} · ${r.type} · ${r.hours}h · level ${r.level} · ${r.format} · ${r.cost} · ${r.provider}` }),
   ]));
   head.appendChild(el("div", { class: "rec-score", text: r.score.toFixed(3), attrs: { title: "Weighted match score" } }));
   card.appendChild(head);

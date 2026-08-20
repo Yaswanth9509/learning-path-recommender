@@ -162,7 +162,7 @@ def test_recommendations_are_explained(client):
         assert 0 <= rec["score"] <= 1
         assert set(rec["breakdown"]) == {
             "goal_relevance", "skill_readiness", "level_fit",
-            "interest_match", "format_fit", "quality",
+            "interest_match", "format_fit",
         }
     scores = [r["score"] for r in recs]
     assert scores == sorted(scores, reverse=True)

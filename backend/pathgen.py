@@ -204,7 +204,6 @@ def _to_path_item(
         type=item.type,
         level=item.level,
         hours=item.hours,
-        rating=item.rating,
         format=item.format,
         cost=item.cost,
         description=item.description,
