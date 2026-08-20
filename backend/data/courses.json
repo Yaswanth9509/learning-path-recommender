@@ -43,7 +43,7 @@
     "type": "course",
     "level": 1,
     "hours": 12,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Foundations",
     "teaches": [
@@ -78,7 +78,7 @@
     "level": 2,
     "hours": 18,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Foundations",
     "teaches": [
       "sql"
@@ -95,7 +95,7 @@
     "level": 2,
     "hours": 35,
     "format": "video",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Foundations",
     "teaches": [
       "math-stats"
@@ -111,8 +111,8 @@
     "type": "course",
     "level": 2,
     "hours": 45,
-    "format": "video",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Foundations",
     "teaches": [
       "data-structures"
@@ -149,7 +149,7 @@
     "type": "course",
     "level": 2,
     "hours": 25,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
     "teaches": [
@@ -168,8 +168,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "video",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "data-viz"
@@ -187,8 +187,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "project",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "eda"
@@ -207,8 +207,8 @@
     "type": "course",
     "level": 2,
     "hours": 24,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "bi-dashboards"
@@ -227,7 +227,7 @@
     "type": "course",
     "level": 2,
     "hours": 40,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
     "teaches": [
@@ -247,8 +247,8 @@
     "type": "course",
     "level": 2,
     "hours": 35,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "supervised-ml"
@@ -266,8 +266,8 @@
     "type": "course",
     "level": 2,
     "hours": 45,
-    "format": "project",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "ml-foundations",
@@ -287,8 +287,8 @@
     "type": "course",
     "level": 2,
     "hours": 25,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "unsupervised-ml"
@@ -307,7 +307,7 @@
     "level": 2,
     "hours": 20,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "feature-engineering"
@@ -326,7 +326,7 @@
     "type": "course",
     "level": 2,
     "hours": 18,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
     "teaches": [
@@ -345,7 +345,7 @@
     "type": "course",
     "level": 2,
     "hours": 14,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Data & AI",
     "teaches": [
@@ -384,8 +384,8 @@
     "type": "course",
     "level": 3,
     "hours": 60,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "deep-learning"
@@ -405,7 +405,7 @@
     "level": 3,
     "hours": 45,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "nlp"
@@ -423,8 +423,8 @@
     "type": "course",
     "level": 3,
     "hours": 45,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "computer-vision"
@@ -461,8 +461,8 @@
     "type": "course",
     "level": 3,
     "hours": 30,
-    "format": "project",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "llm-engineering"
@@ -481,8 +481,8 @@
     "type": "course",
     "level": 3,
     "hours": 26,
-    "format": "project",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "rag-systems"
@@ -501,8 +501,8 @@
     "type": "course",
     "level": 3,
     "hours": 40,
-    "format": "project",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Data & AI",
     "teaches": [
       "mlops"
@@ -522,7 +522,7 @@
     "type": "course",
     "level": 1,
     "hours": 22,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Web Development",
     "teaches": [
@@ -558,8 +558,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "typescript"
@@ -577,7 +577,7 @@
     "type": "course",
     "level": 2,
     "hours": 32,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Web Development",
     "teaches": [
@@ -597,8 +597,8 @@
     "type": "course",
     "level": 2,
     "hours": 24,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "react"
@@ -617,8 +617,8 @@
     "type": "course",
     "level": 2,
     "hours": 16,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "state-management"
@@ -693,8 +693,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "data-modeling"
@@ -712,8 +712,8 @@
     "type": "course",
     "level": 2,
     "hours": 24,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "auth-security"
@@ -731,8 +731,8 @@
     "type": "course",
     "level": 3,
     "hours": 16,
-    "format": "video",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "web-performance"
@@ -750,8 +750,8 @@
     "type": "course",
     "level": 3,
     "hours": 34,
-    "format": "project",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Web Development",
     "teaches": [
       "nextjs"
@@ -770,7 +770,7 @@
     "type": "course",
     "level": 1,
     "hours": 20,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
@@ -806,7 +806,7 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
@@ -846,7 +846,7 @@
     "level": 2,
     "hours": 35,
     "format": "video",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "cloud-fundamentals"
@@ -865,8 +865,8 @@
     "type": "course",
     "level": 3,
     "hours": 40,
-    "format": "project",
-    "cost": "paid",
+    "format": "interactive",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "kubernetes"
@@ -886,7 +886,7 @@
     "level": 3,
     "hours": 26,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "iac"
@@ -904,8 +904,8 @@
     "type": "course",
     "level": 3,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "observability"
@@ -923,8 +923,8 @@
     "type": "course",
     "level": 3,
     "hours": 28,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "cloud-security"
@@ -944,7 +944,7 @@
     "level": 3,
     "hours": 30,
     "format": "reading",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "sre"
@@ -963,8 +963,8 @@
     "type": "course",
     "level": 3,
     "hours": 30,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
       "system-design"
@@ -1258,7 +1258,7 @@
     "type": "assessment",
     "level": 2,
     "hours": 2,
-    "format": "interactive",
+    "format": "video",
     "cost": "free",
     "domain": "Foundations",
     "teaches": [],
@@ -1309,7 +1309,7 @@
     "type": "assessment",
     "level": 3,
     "hours": 3,
-    "format": "project",
+    "format": "interactive",
     "cost": "free",
     "domain": "Data & AI",
     "teaches": [],
@@ -1363,7 +1363,7 @@
     "level": 2,
     "hours": 3,
     "format": "interactive",
-    "cost": "free",
+    "cost": "paid",
     "domain": "Cloud & DevOps",
     "teaches": [],
     "requires": [
@@ -1380,7 +1380,7 @@
     "level": 3,
     "hours": 3,
     "format": "interactive",
-    "cost": "free",
+    "cost": "paid",
     "domain": "Cloud & DevOps",
     "teaches": [],
     "requires": [
@@ -1583,7 +1583,7 @@
     "type": "resource",
     "level": 2,
     "hours": 8,
-    "format": "reading",
+    "format": "interactive",
     "cost": "free",
     "domain": "Cloud & DevOps",
     "teaches": [
@@ -1685,7 +1685,7 @@
     "type": "course",
     "level": 1,
     "hours": 20,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Foundations",
     "teaches": [
@@ -1718,7 +1718,7 @@
     "type": "course",
     "level": 1,
     "hours": 18,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Business & Product",
     "teaches": [
@@ -1735,8 +1735,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Business & Product",
     "teaches": [
       "market-research"
@@ -1754,8 +1754,8 @@
     "type": "course",
     "level": 2,
     "hours": 24,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Business & Product",
     "teaches": [
       "product-discovery"
@@ -1773,8 +1773,8 @@
     "type": "course",
     "level": 2,
     "hours": 16,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Business & Product",
     "teaches": [
       "roadmapping"
@@ -1792,7 +1792,7 @@
     "type": "course",
     "level": 2,
     "hours": 12,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Business & Product",
     "teaches": [
@@ -1811,7 +1811,7 @@
     "type": "course",
     "level": 2,
     "hours": 18,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Business & Product",
     "teaches": [
@@ -1830,8 +1830,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Business & Product",
     "teaches": [
       "product-analytics"
@@ -1849,8 +1849,8 @@
     "type": "course",
     "level": 3,
     "hours": 16,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Business & Product",
     "teaches": [
       "pricing-strategy"
@@ -1901,7 +1901,7 @@
     "type": "course",
     "level": 1,
     "hours": 16,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Marketing",
     "teaches": [
@@ -1918,8 +1918,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Marketing",
     "teaches": [
       "seo"
@@ -1957,7 +1957,7 @@
     "level": 2,
     "hours": 20,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Marketing",
     "teaches": [
       "paid-acquisition"
@@ -1994,8 +1994,8 @@
     "type": "course",
     "level": 3,
     "hours": 24,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Marketing",
     "teaches": [
       "marketing-analytics"
@@ -2013,8 +2013,8 @@
     "type": "course",
     "level": 3,
     "hours": 16,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Marketing",
     "teaches": [
       "brand-strategy"
@@ -2065,7 +2065,7 @@
     "type": "course",
     "level": 1,
     "hours": 16,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Design",
     "teaches": [
@@ -2082,8 +2082,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Design",
     "teaches": [
       "ux-research"
@@ -2120,8 +2120,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Design",
     "teaches": [
       "visual-design"
@@ -2139,7 +2139,7 @@
     "type": "course",
     "level": 2,
     "hours": 14,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Design",
     "teaches": [
@@ -2158,7 +2158,7 @@
     "type": "course",
     "level": 2,
     "hours": 12,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Design",
     "teaches": [
@@ -2177,8 +2177,8 @@
     "type": "course",
     "level": 3,
     "hours": 24,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Design",
     "teaches": [
       "design-systems"
@@ -2246,7 +2246,7 @@
     "type": "course",
     "level": 1,
     "hours": 20,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
@@ -2263,8 +2263,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
       "financial-statements"
@@ -2282,8 +2282,8 @@
     "type": "course",
     "level": 2,
     "hours": 30,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
       "financial-modelling"
@@ -2303,7 +2303,7 @@
     "level": 2,
     "hours": 24,
     "format": "video",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
       "corporate-finance"
@@ -2321,7 +2321,7 @@
     "type": "course",
     "level": 2,
     "hours": 16,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
@@ -2340,8 +2340,8 @@
     "type": "course",
     "level": 3,
     "hours": 26,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Finance & Accounting",
     "teaches": [
       "valuation"
@@ -2446,7 +2446,7 @@
     "type": "course",
     "level": 2,
     "hours": 32,
-    "format": "interactive",
+    "format": "video",
     "cost": "free",
     "domain": "Mathematics",
     "teaches": [
@@ -2465,7 +2465,7 @@
     "type": "course",
     "level": 2,
     "hours": 30,
-    "format": "reading",
+    "format": "video",
     "cost": "free",
     "domain": "Mathematics",
     "teaches": [
@@ -2484,8 +2484,8 @@
     "type": "course",
     "level": 3,
     "hours": 36,
-    "format": "reading",
-    "cost": "paid",
+    "format": "video",
+    "cost": "free",
     "domain": "Mathematics",
     "teaches": [
       "real-analysis"
@@ -2503,7 +2503,7 @@
     "type": "assessment",
     "level": 1,
     "hours": 2,
-    "format": "interactive",
+    "format": "video",
     "cost": "free",
     "domain": "Mathematics",
     "teaches": [],
@@ -2651,7 +2651,7 @@
     "type": "course",
     "level": 3,
     "hours": 30,
-    "format": "reading",
+    "format": "video",
     "cost": "free",
     "domain": "Computer Science",
     "teaches": [
@@ -2671,7 +2671,7 @@
     "level": 3,
     "hours": 30,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Computer Science",
     "teaches": [],
     "requires": [
@@ -2688,7 +2688,7 @@
     "type": "course",
     "level": 1,
     "hours": 34,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2705,7 +2705,7 @@
     "type": "course",
     "level": 2,
     "hours": 36,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2724,7 +2724,7 @@
     "type": "course",
     "level": 3,
     "hours": 24,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2743,7 +2743,7 @@
     "type": "course",
     "level": 1,
     "hours": 30,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2760,7 +2760,7 @@
     "type": "course",
     "level": 2,
     "hours": 34,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2798,7 +2798,7 @@
     "type": "course",
     "level": 1,
     "hours": 30,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2815,7 +2815,7 @@
     "type": "course",
     "level": 1,
     "hours": 32,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2832,7 +2832,7 @@
     "type": "course",
     "level": 2,
     "hours": 26,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Sciences",
     "teaches": [
@@ -2871,7 +2871,7 @@
     "level": 3,
     "hours": 40,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Sciences",
     "teaches": [],
     "requires": [
@@ -2889,7 +2889,7 @@
     "level": 3,
     "hours": 36,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Sciences",
     "teaches": [],
     "requires": [
@@ -2923,7 +2923,7 @@
     "type": "course",
     "level": 1,
     "hours": 34,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
@@ -2974,8 +2974,8 @@
     "type": "course",
     "level": 2,
     "hours": 30,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
       "microeconomics"
@@ -2993,8 +2993,8 @@
     "type": "course",
     "level": 2,
     "hours": 28,
-    "format": "video",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
       "macroeconomics"
@@ -3032,7 +3032,7 @@
     "level": 2,
     "hours": 22,
     "format": "reading",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
       "ethics-essay"
@@ -3050,7 +3050,7 @@
     "type": "course",
     "level": 1,
     "hours": 26,
-    "format": "video",
+    "format": "reading",
     "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
@@ -3067,7 +3067,7 @@
     "type": "course",
     "level": 2,
     "hours": 24,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Humanities & Social Science",
     "teaches": [
@@ -3103,7 +3103,7 @@
     "type": "course",
     "level": 1,
     "hours": 22,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Language",
     "teaches": [
@@ -3120,7 +3120,7 @@
     "type": "course",
     "level": 2,
     "hours": 18,
-    "format": "interactive",
+    "format": "reading",
     "cost": "free",
     "domain": "Language",
     "teaches": [
@@ -3139,8 +3139,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "video",
+    "cost": "free",
     "domain": "Language",
     "teaches": [
       "english-reading"
@@ -3158,8 +3158,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "reading",
+    "cost": "free",
     "domain": "Language",
     "teaches": [
       "english-writing"
@@ -3197,7 +3197,7 @@
     "level": 2,
     "hours": 18,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Language",
     "teaches": [
       "english-speaking"
@@ -3216,7 +3216,7 @@
     "level": 2,
     "hours": 20,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Language",
     "teaches": [],
     "requires": [
@@ -3233,7 +3233,7 @@
     "type": "course",
     "level": 1,
     "hours": 30,
-    "format": "interactive",
+    "format": "video",
     "cost": "free",
     "domain": "Aptitude & Reasoning",
     "teaches": [
@@ -3252,7 +3252,7 @@
     "type": "course",
     "level": 1,
     "hours": 24,
-    "format": "interactive",
+    "format": "video",
     "cost": "free",
     "domain": "Aptitude & Reasoning",
     "teaches": [
@@ -3269,8 +3269,8 @@
     "type": "course",
     "level": 2,
     "hours": 22,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "video",
+    "cost": "free",
     "domain": "Aptitude & Reasoning",
     "teaches": [
       "data-interpretation"
@@ -3288,8 +3288,8 @@
     "type": "course",
     "level": 2,
     "hours": 20,
-    "format": "interactive",
-    "cost": "paid",
+    "format": "video",
+    "cost": "free",
     "domain": "Aptitude & Reasoning",
     "teaches": [
       "verbal-ability"
@@ -3325,7 +3325,7 @@
     "level": 3,
     "hours": 30,
     "format": "interactive",
-    "cost": "paid",
+    "cost": "free",
     "domain": "Aptitude & Reasoning",
     "teaches": [],
     "requires": [

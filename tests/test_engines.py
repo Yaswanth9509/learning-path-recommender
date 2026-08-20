@@ -287,7 +287,7 @@ def test_liked_builds_provider_and_format_affinity(catalog):
     # Whatever the catalogue says this item's provider is — not a name
     # pinned here, which broke the moment the real one replaced the invented one.
     assert profile.provider_affinity.get(catalog.items["c-react"].provider) == 1
-    assert profile.format_affinity.get("interactive") == 1
+    assert profile.format_affinity.get(catalog.items["c-react"].format) == 1
 
 
 def test_difficulty_offset_is_clamped(catalog):
