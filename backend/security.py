@@ -48,7 +48,9 @@ CHAT_PATH = "/api/chat"
 #: Account recovery. Rare for a real user, constant for anyone guessing
 #: at a security answer, so it gets its own tight budget.
 RECOVERY_PATHS = frozenset({
-    "/api/auth/recovery-question", "/api/auth/reset-password",
+    # Mailing a link is cheap for us and cheaper still for someone using it to
+    # pepper an address with mail, so recovery keeps its own tight budget.
+    "/api/auth/forgot", "/api/auth/reset",
 })
 
 DEFAULT_PER_MINUTE = 240

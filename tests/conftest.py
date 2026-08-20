@@ -59,6 +59,22 @@ def db(tmp_path) -> Database:
     database.close()
 
 
+@pytest.fixture(autouse=True)
+def mailer():
+    """A recording transport, so the reset flow never opens a socket.
+
+    Marked configured, because the endpoints refuse to pretend they sent
+    anything on an instance with no key — the tests need the working path.
+    """
+    from backend import main as main_mod
+    from backend.mailer import NullMailer
+
+    stub = NullMailer(configured=True)
+    main_mod.set_mailer(stub)
+    yield stub
+    main_mod.set_mailer(None)
+
+
 @pytest.fixture()
 def client(db):
     from fastapi.testclient import TestClient

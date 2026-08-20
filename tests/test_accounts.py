@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from backend import accounts
@@ -9,8 +11,6 @@ from backend import accounts
 GOOD = {
     "email": "ana@example.com",
     "password": "correct horse battery",
-    "recovery_question": "What did I call my first bike?",
-    "recovery_answer": "Rusty Rocket",
 }
 
 
@@ -350,99 +350,233 @@ def test_upgrading_to_a_taken_email_is_refused(client):
     assert "already exists" in response.json()["detail"]
 
 
-# ------------------------------------------------------- account recovery
-def test_an_account_cannot_be_created_without_a_way_back_in(client):
-    """The question is the only recovery route, so it is not optional."""
-    refused = client.post("/api/auth/register", json={
-        "email": "noq@example.com", "password": "correct horse battery",
-    })
-    assert refused.status_code == 400
-    assert "recovery" in refused.json()["detail"].lower()
+# ------------------------------------------------------- reset by email link
+def _link_token(mailer, email: str) -> str:
+    """The token out of the mail we just recorded."""
+    message = mailer.last_to(email)
+    assert message is not None, f"nothing was mailed to {email}"
+    match = re.search(r"#reset/(\S+)", message.text)
+    assert match, f"no reset link in the mail body:\n{message.text}"
+    return match.group(1)
 
 
-def test_the_answer_is_never_stored_in_the_clear(db):
-    """It unlocks the account, so it is a secret and hashed like one."""
-    db.accounts.create_user(
-        "hash@example.com", "correct horse battery",
-        recovery_question="street I grew up on", recovery_answer="Mill Lane",
-    )
-    rows = db._conn.execute(
-        "SELECT recovery_answer FROM users WHERE email = ?", ("hash@example.com",)
-    ).fetchall()
-    stored = rows[0]["recovery_answer"]
-    assert "mill lane" not in stored.lower()
-    assert stored.startswith("pbkdf2$")
-
-
-def test_recall_is_not_failed_by_capitals_or_spacing(client):
-    """Nobody remembers how they capitalised their own answer."""
+def test_a_reset_link_sets_a_new_password_and_signs_you_in(client, mailer):
     _register(client)
     client.post("/api/auth/logout")
-    assert client.post("/api/auth/reset-password", json={
-        "email": GOOD["email"], "answer": "  rUsTy   ROCKET ",
-        "password": "a brand new password",
-    }).status_code == 200
+
+    asked = client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    assert asked.status_code == 202
+    token = _link_token(mailer, "ana@example.com")
+
+    done = client.post("/api/auth/reset",
+                       json={"token": token, "password": "a whole new password"})
+    assert done.status_code == 200
+    assert done.json()["email"] == "ana@example.com"
+    # Signed in on the spot, rather than bounced back to a login form.
+    assert client.get("/api/auth/me").json()["signed_in"] is True
+
+    client.post("/api/auth/logout")
     assert client.post("/api/auth/login", json={
-        "email": GOOD["email"], "password": "a brand new password",
+        "email": "ana@example.com", "password": "a whole new password",
     }).status_code == 200
 
 
-def test_a_wrong_answer_does_not_change_the_password(client):
+def test_asking_to_reset_never_says_whether_the_account_exists(client, mailer):
     _register(client)
     client.post("/api/auth/logout")
-    assert client.post("/api/auth/reset-password", json={
-        "email": GOOD["email"], "answer": "not it",
-        "password": "attacker chosen password",
-    }).status_code == 400
-    # The original still works, and the attacker's does not.
-    assert client.post("/api/auth/login", json={
-        "email": GOOD["email"], "password": "attacker chosen password",
-    }).status_code == 401
-    assert client.post("/api/auth/login", json={
-        "email": GOOD["email"], "password": GOOD["password"],
-    }).status_code == 200
+
+    known = client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    unknown = client.post("/api/auth/forgot", json={"email": "nobody@example.com"})
+    assert known.status_code == unknown.status_code == 202
+    assert known.json() == unknown.json()
+    # ...and only one of them actually produced mail.
+    assert mailer.last_to("ana@example.com") is not None
+    assert mailer.last_to("nobody@example.com") is None
 
 
-def test_the_question_endpoint_cannot_be_used_to_find_registered_emails(client):
-    """Answering "no such account" would make this an enumeration oracle."""
-    _register(client)
-    known = client.post("/api/auth/recovery-question",
-                        json={"email": GOOD["email"]}).json()
-    unknown = client.post("/api/auth/recovery-question",
-                          json={"email": "stranger@example.com"}).json()
-    assert known["question"] and unknown["question"]
-    assert unknown["question"], "an unknown address must still get a question"
-
-
-def test_a_guest_has_no_recovery_to_attack(client):
+def test_a_guest_address_gets_no_reset_link(client, mailer):
     guest = client.post("/api/auth/guest").json()
-    asked = client.post("/api/auth/recovery-question",
-                        json={"email": guest["email"]}).json()
-    assert asked["known"] is False
+    assert client.post("/api/auth/forgot",
+                       json={"email": guest["email"]}).status_code == 202
+    assert mailer.last_to(guest["email"]) is None
 
 
-def test_recovery_can_be_set_on_an_account_that_has_none(db):
-    """Accounts made before this existed are not stranded."""
-    user = db.accounts.create_user(
-        "later@example.com", "correct horse battery",
-        recovery_question="q", recovery_answer="first answer",
+def test_a_reset_link_works_only_once(client, mailer):
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    token = _link_token(mailer, "ana@example.com")
+
+    assert client.post("/api/auth/reset",
+                       json={"token": token, "password": "first replacement"}
+                       ).status_code == 200
+    again = client.post("/api/auth/reset",
+                        json={"token": token, "password": "second replacement"})
+    assert again.status_code == 400
+    assert "no longer valid" in again.json()["detail"]
+
+
+def test_asking_again_retires_the_previous_link(client, mailer):
+    """Two live links means an old mail can still be replayed later."""
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    first = _link_token(mailer, "ana@example.com")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    second = _link_token(mailer, "ana@example.com")
+    assert first != second
+
+    stale = client.post("/api/auth/reset",
+                        json={"token": first, "password": "using the old link"})
+    assert stale.status_code == 400
+    assert client.post("/api/auth/reset",
+                       json={"token": second, "password": "using the new link"}
+                       ).status_code == 200
+
+
+def test_an_expired_link_is_refused(client, mailer, db):
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    token = _link_token(mailer, "ana@example.com")
+
+    db._conn.execute(
+        "UPDATE password_resets SET expires_at = ?",
+        ("2020-01-01T00:00:00+00:00",),
     )
-    db.accounts.set_recovery(user.id, "a better question", "second answer")
-    assert db.accounts.recovery_question_for("later@example.com") == "a better question"
-    assert db.accounts.reset_password(
-        "later@example.com", "second answer", "a replacement password"
-    ).id == user.id
+    db._conn.commit()
+    refused = client.post("/api/auth/reset",
+                          json={"token": token, "password": "too late for this"})
+    assert refused.status_code == 400
+    assert "expired" in refused.json()["detail"]
 
 
-def test_a_reset_keeps_everything_the_account_owned(client):
+def test_a_forged_token_is_refused(client):
+    _register(client)
+    assert client.post("/api/auth/reset", json={
+        "token": "not-a-real-token", "password": "a whole new password",
+    }).status_code == 400
+
+
+def test_the_raw_token_is_never_stored(client, mailer, db):
+    """A leaked database must not hand over a working reset link."""
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    token = _link_token(mailer, "ana@example.com")
+
+    stored = [r["token_hash"] for r in
+              db._conn.execute("SELECT token_hash FROM password_resets").fetchall()]
+    assert stored, "no reset row was written"
+    assert token not in stored
+    assert accounts.hash_token(token) in stored
+
+
+def test_a_reset_ends_every_existing_session(client, mailer):
+    """Whoever reset it has lost the password or lost the account."""
+    _register(client)
+    stolen = client.cookies.get(accounts.SESSION_COOKIE)
+    assert stolen
+
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    token = _link_token(mailer, "ana@example.com")
+    client.post("/api/auth/reset",
+                json={"token": token, "password": "a whole new password"})
+
+    client.cookies.clear()
+    client.cookies.set(accounts.SESSION_COOKIE, stolen)
+    assert client.get("/api/auth/me").json()["signed_in"] is False
+
+
+def test_a_weak_replacement_is_refused(client, mailer):
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    token = _link_token(mailer, "ana@example.com")
+    refused = client.post("/api/auth/reset", json={"token": token, "password": "short"})
+    assert refused.status_code == 400
+    assert "8 characters" in refused.json()["detail"]
+
+
+def test_the_mail_carries_a_usable_link_and_the_expiry(client, mailer):
+    _register(client)
+    client.post("/api/auth/logout")
+    client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    message = mailer.last_to("ana@example.com")
+    assert "reset" in message.subject.lower()
+    assert f"{accounts.RESET_TTL_MINUTES} minutes" in message.text
+    assert message.text.count("#reset/") == 1, "more than one link in one mail"
+
+
+def test_reset_is_refused_when_no_mailer_is_configured(client):
+    """Better an honest 503 than a link that will never arrive."""
+    from backend import main as main_mod
+    from backend.mailer import NullMailer
+
+    main_mod.set_mailer(NullMailer(configured=False))
+    refused = client.post("/api/auth/forgot", json={"email": "ana@example.com"})
+    assert refused.status_code == 503
+    assert "not configured" in refused.json()["detail"]
+
+
+def test_a_reset_keeps_everything_the_account_owned(client, mailer):
+    """Resetting a password must not read as starting over."""
     _register(client)
     learner = client.post("/api/learners", json={"name": "Kept"}).json()["learner_id"]
     client.post("/api/auth/logout")
-    client.post("/api/auth/reset-password", json={
-        "email": GOOD["email"], "answer": GOOD["recovery_answer"],
-        "password": "a brand new password",
-    })
-    client.post("/api/auth/login", json={
-        "email": GOOD["email"], "password": "a brand new password",
-    })
+
+    client.post("/api/auth/forgot", json={"email": GOOD["email"]})
+    token = _link_token(mailer, GOOD["email"])
+    client.post("/api/auth/reset",
+                json={"token": token, "password": "a brand new password"})
+
     assert learner in [p["learner_id"] for p in client.get("/api/learners").json()]
+
+
+def test_registering_no_longer_asks_for_a_recovery_question(client):
+    """The question is gone; sending one must not resurrect it or 400."""
+    created = client.post("/api/auth/register", json={
+        "email": "plain@example.com", "password": "correct horse battery",
+    })
+    assert created.status_code == 201
+    assert "has_recovery" not in created.json()
+
+    ignored = client.post("/api/auth/register", json={
+        "email": "extra@example.com", "password": "correct horse battery",
+        "recovery_question": "ignored", "recovery_answer": "ignored",
+    })
+    assert ignored.status_code == 201
+
+
+@pytest.mark.parametrize("method,path", [
+    ("post", "/api/auth/recovery-question"),
+    ("post", "/api/auth/reset-password"),
+    ("put", "/api/auth/recovery"),
+])
+def test_the_recovery_question_endpoints_are_gone(client, method, path):
+    """Removed outright, not merely unlinked from the UI."""
+    call = getattr(client, method)
+    assert call(path, json={"email": "ana@example.com"}).status_code == 404
+
+
+def test_expired_sessions_and_reset_links_are_swept(db):
+    """`purge_expired` shipped uncalled, so both tables only ever grew."""
+    from backend.main import _sweep_expired
+
+    user = db.accounts.create_user("sweep@example.com", "correct horse battery")
+    live, _ = db.accounts.start_session(user.id)
+    dead, _ = db.accounts.start_session(user.id)
+    db.accounts.begin_password_reset("sweep@example.com")
+
+    db._conn.execute("UPDATE sessions SET expires_at = ? WHERE token = ?",
+                     ("2020-01-01T00:00:00+00:00", dead))
+    db._conn.execute("UPDATE password_resets SET expires_at = ?",
+                     ("2020-01-01T00:00:00+00:00",))
+    db._conn.commit()
+
+    assert db.accounts.purge_expired() == 1
+    assert db.accounts.purge_expired_resets() == 1
+    # The live session survives.
+    assert db.accounts.user_for_session(live) is not None
+    # And the sweep itself is safe to run against a clean table.
+    _sweep_expired()

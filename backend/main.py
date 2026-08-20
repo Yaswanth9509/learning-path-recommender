@@ -20,6 +20,7 @@ from . import (
     dashboard as dashboard_engine,
     insights,
     llm,
+    mailer as mailer_mod,
     profiling,
     recommender,
     security,
@@ -111,6 +112,23 @@ def require_user(user=Depends(current_user)):
     return user
 
 
+#: Built once from the environment. `set_mailer` swaps it, which is how the
+#: tests keep this whole feature off the network.
+_mailer = None
+
+
+def get_mailer():
+    global _mailer
+    if _mailer is None:
+        _mailer = mailer_mod.build_mailer()
+    return _mailer
+
+
+def set_mailer(replacement) -> None:
+    global _mailer
+    _mailer = replacement
+
+
 def _set_session(response: Response, db: Database, user) -> None:
     token, expires = db.accounts.start_session(user.id)
     response.set_cookie(
@@ -138,9 +156,6 @@ def _user_view(user, db: Database) -> dict:
         "learners": db.count_learners(user.id),
         "max_learners": accounts.MAX_LEARNERS_PER_USER,
         "max_paths_per_learner": MAX_ACTIVE_PATHS,
-        # So the Profile tab can offer to set one on an account that predates
-        # recovery questions, without ever sending the question itself.
-        "has_recovery": bool(db.accounts.recovery_question_for(user.email)),
     }
 
 
@@ -151,8 +166,6 @@ def register(response: Response, payload: dict = Body(...), db: Database = Depen
             str(payload.get("email", "")),
             str(payload.get("password", "")),
             str(payload.get("display_name", "")),
-            recovery_question=str(payload.get("recovery_question", "")),
-            recovery_answer=str(payload.get("recovery_answer", "")),
         )
     except accounts.AuthError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -237,63 +250,73 @@ def update_account(
     return _user_view(updated, db)
 
 
-@app.post("/api/auth/recovery-question")
-def recovery_question(payload: dict = Body(...), db: Database = Depends(db_dep)) -> dict:
-    """The question set on an account, so it can be put back to the asker.
+@app.post("/api/auth/forgot", status_code=202)
+def forgot_password(payload: dict = Body(...), db: Database = Depends(db_dep)) -> dict:
+    """Mail a single-use reset link, if there is an account to mail it to.
 
-    Always answers 200 with a question, inventing a plausible one when the
-    address is unknown. Saying "no such account" here would turn this into a
-    way to test which email addresses are registered.
-    """
-    email = str(payload.get("email", "")).strip()
-    question = db.accounts.recovery_question_for(email)
-    return {"question": question or DECOY_QUESTION, "known": bool(question)}
-
-
-#: Shown when an address has no account, or predates recovery questions. The
-#: answer will simply never match, which is the same outcome as a wrong guess.
-DECOY_QUESTION = "What is the name of the place you grew up in?"
-
-
-@app.post("/api/auth/reset-password")
-def reset_password(payload: dict = Body(...), db: Database = Depends(db_dep)) -> dict:
-    """Set a new password, gated on the account's recovery answer.
-
-    A speed bump rather than authentication — see `Accounts.reset_password`.
-    Rate limited hard, because guessing an answer is cheap otherwise.
+    Always the same 202 and the same body. Whether the address is registered,
+    belongs to a guest, or has never been seen, the caller learns nothing — the
+    property the recovery question could only approximate with a decoy.
     """
     if not _env_flag("ALLOW_PASSWORD_RESET", True):
         raise HTTPException(
             status_code=403, detail="password reset is disabled on this instance"
         )
+    email = str(payload.get("email", "")).strip()
+    mailer = get_mailer()
+    if not mailer.configured:
+        # No key on this instance. Say so plainly rather than pretending to
+        # have sent something that will never arrive.
+        raise HTTPException(
+            status_code=503,
+            detail="email is not configured on this instance — "
+                   "use your recovery question instead",
+        )
+
+    issued = None
     try:
-        user = db.accounts.reset_password(
-            str(payload.get("email", "")),
-            str(payload.get("answer", "")),
+        issued = db.accounts.begin_password_reset(email)
+    except accounts.AuthError:
+        issued = None
+
+    if issued is not None:
+        user, token = issued
+        link = f"{mailer_mod.public_base_url()}/#reset/{token}"
+        try:
+            mailer.send(mailer_mod.reset_message(
+                user.email, link, accounts.RESET_TTL_MINUTES))
+            log.info("reset link mailed to %s", user.email)
+        except mailer_mod.MailError as exc:
+            # Do not surface this: the reply must not vary with whether an
+            # address exists, and that includes varying by failure.
+            log.error("could not mail a reset link to %s: %s", user.email, exc)
+
+    return {"sent": True, "expires_in_minutes": accounts.RESET_TTL_MINUTES}
+
+
+@app.post("/api/auth/reset")
+def reset_with_token(
+    payload: dict = Body(...),
+    response: Response = None,  # noqa: RUF013 - FastAPI fills this in
+    db: Database = Depends(db_dep),
+) -> dict:
+    """Spend a reset link and sign the account back in.
+
+    Signing in here is deliberate: the person just proved control of the
+    mailbox and chose a new password, and bouncing them to a login form to
+    retype it immediately is friction with no security to show for it.
+    """
+    try:
+        user = db.accounts.complete_password_reset(
+            str(payload.get("token", "")),
             str(payload.get("password", "")),
         )
     except accounts.AuthError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    log.warning("password reset via recovery question for %s", user.email)
-    return {"email": user.email, "reset": True}
 
-
-@app.put("/api/auth/recovery")
-def set_recovery(
-    payload: dict = Body(...),
-    user=Depends(require_user),
-    db: Database = Depends(db_dep),
-) -> dict:
-    """Set or change your own recovery question."""
-    try:
-        db.accounts.set_recovery(
-            user.id,
-            str(payload.get("question", "")),
-            str(payload.get("answer", "")),
-        )
-    except accounts.AuthError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return {"question": str(payload.get("question", "")).strip(), "set": True}
+    log.warning("password reset by email link for %s", user.email)
+    _set_session(response, db, user)
+    return _user_view(user, db)
 
 
 @app.patch("/api/auth/password", status_code=204)
@@ -1440,6 +1463,26 @@ if FRONTEND_DIR.exists():
         return FileResponse(str(FRONTEND_DIR / "index.html"))
 
 
+def _sweep_expired() -> None:
+    """Drop dead sessions and spent reset links.
+
+    Both tables only ever grew: `purge_expired` existed from the beginning and
+    nothing ever called it. On a free instance that sleeps and wakes this runs
+    on every wake, which is often enough for a table that gains a handful of
+    rows a day and costs nothing when there is nothing to remove.
+    """
+    try:
+        database = get_db()
+        sessions = database.accounts.purge_expired()
+        resets = database.accounts.purge_expired_resets()
+    except Exception:  # pragma: no cover - never block startup on housekeeping
+        log.exception("could not sweep expired sessions and reset links")
+        return
+    if sessions or resets:
+        log.info("swept %d expired session(s) and %d expired reset link(s)",
+                 sessions, resets)
+
+
 @asynccontextmanager
 async def _lifespan(_: FastAPI):
     catalog = get_catalog()  # validates; raises loudly if the data is broken
@@ -1464,6 +1507,7 @@ async def _lifespan(_: FastAPI):
         gate.general.limit,
         gate.chat.limit,
     )
+    _sweep_expired()
     yield
 
 

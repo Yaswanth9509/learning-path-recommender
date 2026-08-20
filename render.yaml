@@ -35,6 +35,19 @@ services:
       # Prompted for at deploy time and never stored in the repository.
       - key: GEMINI_API_KEY
         sync: false
+      # Password reset mail. Brevo's HTTP API, not SMTP: Render's free tier
+      # blocks outbound traffic to ports 25, 465 and 587, so an SMTP transport
+      # would work locally and time out here. Leave unset to disable reset.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Learning Path Recommender
+      # Used to build the link inside the mail, so it must be this service's
+      # public URL. Set it once the Render hostname is known.
+      - key: PUBLIC_BASE_URL
+        sync: false
       # Lock this to your own origin once the URL is known.
       - key: ALLOWED_ORIGINS
         value: "*"

@@ -6,12 +6,11 @@ locally, Postgres once deployed. Nothing here needs an external service, a key,
 or a network call beyond the database itself, so the app still runs offline and
 deploys as one container.
 
-Recovery works without a mail service: each account carries a question the
-holder wrote themselves and an answer hashed like a password. It is a speed
-bump rather than authentication — an answer has less entropy than a password —
-but it raises the cost from knowing an email address to knowing an email
-address and one fact about that person, and unlike a recovery code it is
-something people actually remember. There is still no email verification.
+Recovery is by emailed link. An account that has lost its password proves
+control of its mailbox instead of answering a question about itself, which is
+both stronger and the only mechanism that works for someone who never set a
+question up. See `mailer.py` for the transport and `begin_password_reset`
+below for the token.
 """
 
 from __future__ import annotations
@@ -32,6 +31,10 @@ TOKEN_BYTES = 32
 
 SESSION_COOKIE = "lpr_session"
 SESSION_DAYS = 30
+
+#: Long enough to walk to a phone and find the mail, short enough that a link
+#: sitting in an inbox months later is worthless.
+RESET_TTL_MINUTES = 30
 
 #: A learner is a persona ("me", "my sister"), not an account. Five is plenty
 #: for one person and keeps a shared demo instance from being filled by one user.
@@ -94,31 +97,15 @@ def verify_password(password: str, stored: str) -> bool:
     return hmac.compare_digest(digest.hex(), expected)
 
 
-def normalise_answer(answer: str) -> str:
-    """Fold the differences that should never fail a recall.
+def hash_token(token: str) -> str:
+    """A plain SHA-256, deliberately, where passwords get PBKDF2.
 
-    Case, surrounding space and repeated inner spaces are not part of what
-    somebody remembers about their own life, so they are not part of the
-    secret either.
+    Key stretching defends a secret that a human chose and an attacker can
+    guess. A reset token is 32 random bytes from `secrets`, so there is nothing
+    to guess and stretching would only buy latency. It also has to be looked up
+    by value, which a per-row salt makes impossible.
     """
-    return " ".join((answer or "").strip().lower().split())
-
-
-MIN_ANSWER_CHARS = 2
-MAX_QUESTION_CHARS = 160
-
-
-def check_recovery(question: str, answer: str) -> tuple[str, str]:
-    """Validate a question and answer, returning them cleaned."""
-    text = (question or "").strip()
-    if not text:
-        raise AuthError("choose a recovery question")
-    if len(text) > MAX_QUESTION_CHARS:
-        raise AuthError("that question is too long")
-    folded = normalise_answer(answer)
-    if len(folded) < MIN_ANSWER_CHARS:
-        raise AuthError("your answer is too short to be useful")
-    return text, folded
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def _now() -> datetime:
@@ -135,12 +122,7 @@ class Accounts:
         password_hash TEXT NOT NULL,
         display_name  TEXT NOT NULL DEFAULT '',
         is_guest      INTEGER NOT NULL DEFAULT 0,
-        created_at    TEXT NOT NULL,
-        -- Account recovery. The question is shown back to whoever is asking,
-        -- so it is only ever the account holder's own words; the answer is
-        -- hashed exactly like a password, because that is what it is.
-        recovery_question TEXT NOT NULL DEFAULT '',
-        recovery_answer   TEXT NOT NULL DEFAULT ''
+        created_at    TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS sessions (
         token      TEXT PRIMARY KEY,
@@ -149,6 +131,18 @@ class Accounts:
         expires_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+    -- Password reset links. Only the hash of the token is kept, for the same
+    -- reason passwords are: anyone who reads this table must not be able to
+    -- take over an account with what they find. `used_at` makes a link
+    -- single-use without deleting the evidence that it was spent.
+    CREATE TABLE IF NOT EXISTS password_resets (
+        token_hash TEXT PRIMARY KEY,
+        user_id    TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        used_at    TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_resets_user ON password_resets(user_id);
     """
 
     def __init__(self, connection, lock) -> None:
@@ -157,41 +151,14 @@ class Accounts:
         with self._lock:
             self._conn.executescript(self.SCHEMA)
             self._conn.commit()
-            self._add_recovery_columns()
-
-    def _add_recovery_columns(self) -> None:
-        """`CREATE TABLE IF NOT EXISTS` does not add columns to an existing one."""
-        existing = self._user_columns()
-        for column in ("recovery_question", "recovery_answer"):
-            if column in existing:
-                continue
-            self._conn.execute(
-                f"ALTER TABLE users ADD COLUMN {column} TEXT NOT NULL DEFAULT ''"
-            )
-            self._conn.commit()
-
-    def _user_columns(self) -> set:
-        if getattr(self._conn, "is_postgres", False):
-            rows = self._conn.execute(
-                "SELECT column_name AS name FROM information_schema.columns "
-                "WHERE table_name = 'users'"
-            ).fetchall()
-        else:
-            rows = self._conn.execute("PRAGMA table_info(users)").fetchall()
-        return {row["name"] for row in rows}
 
     # ----------------------------------------------------------------- users
     def create_user(
         self, email: str, password: str, display_name: str = "",
-        is_guest: bool = False, recovery_question: str = "",
-        recovery_answer: str = "",
+        is_guest: bool = False,
     ) -> User:
         address = normalise_email(email)
         check_password_strength(password)
-        # A guest has no password worth resetting and nothing to recover.
-        question, folded = "", ""
-        if not is_guest:
-            question, folded = check_recovery(recovery_question, recovery_answer)
         user = User(
             id=secrets.token_hex(8),
             email=address,
@@ -203,11 +170,9 @@ class Accounts:
             try:
                 self._conn.execute(
                     "INSERT INTO users (id, email, password_hash, display_name, "
-                    "is_guest, created_at, recovery_question, recovery_answer) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "is_guest, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                     (user.id, user.email, hash_password(password), user.display_name,
-                     int(is_guest), user.created_at, question,
-                     hash_password(folded) if folded else ""),
+                     int(is_guest), user.created_at),
                 )
                 self._conn.commit()
             except self._conn.integrity_error as exc:
@@ -290,63 +255,94 @@ class Accounts:
             )
             self._conn.commit()
 
-    def recovery_question_for(self, email: str) -> str:
-        """The question to put back to whoever is asking, or "" if there is none."""
-        address = (email or "").strip().lower()
-        with self._lock:
-            rows = self._conn.execute(
-                "SELECT recovery_question, is_guest FROM users WHERE email = ?",
-                (address,),
-            ).fetchall()
-        if not rows or rows[0]["is_guest"]:
-            return ""
-        return rows[0]["recovery_question"] or ""
+    # -------------------------------------------------------- reset by email
+    def begin_password_reset(self, email: str) -> Optional[tuple[User, str]]:
+        """Issue a reset token, or None when there is nothing to reset.
 
-    def reset_password(self, email: str, answer: str, replacement: str) -> User:
-        """Set a new password, gated on the account's recovery answer.
-
-        This is not authentication. An answer carries far less entropy than a
-        password and somebody who knows the person could guess it. What it does
-        is raise the cost from "know an email address" to "know an email
-        address and one fact about them", which is proportionate to what this
-        application holds. The caller rate limits it — see `RECOVERY_PATHS` in
-        security.py.
+        Returns the raw token, which is the only moment it exists in readable
+        form — the caller mails it and forgets it. None covers an unknown
+        address and a guest alike; the endpoint answers identically either way,
+        so the distinction never leaves this method.
         """
         address = normalise_email(email)
-        check_password_strength(replacement)
         with self._lock:
             rows = self._conn.execute(
-                "SELECT id, is_guest, recovery_answer FROM users WHERE email = ?",
-                (address,),
+                "SELECT * FROM users WHERE email = ?", (address,)
             ).fetchall()
+        if not rows or rows[0]["is_guest"]:
+            return None
+        user = self._row_to_user(rows[0])
 
-        # Hash either way, so a missing account and a wrong answer take the
-        # same time and cannot be told apart by timing.
-        stored = rows[0]["recovery_answer"] if rows else hash_password("no-such-user")
-        correct = verify_password(normalise_answer(answer), stored) if stored else False
-        if not rows or rows[0]["is_guest"] or not stored or not correct:
-            raise AuthError("that answer does not match our records")
+        token = secrets.token_urlsafe(TOKEN_BYTES)
+        now = _now()
+        with self._lock:
+            # One live link per account: asking again silently retires the
+            # previous mail, so an older message cannot be replayed later.
+            self._conn.execute(
+                "DELETE FROM password_resets WHERE user_id = ? AND used_at = ''",
+                (user.id,),
+            )
+            self._conn.execute(
+                "INSERT INTO password_resets "
+                "(token_hash, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                (hash_token(token), user.id,
+                 now.isoformat(timespec="seconds"),
+                 (now + timedelta(minutes=RESET_TTL_MINUTES))
+                 .isoformat(timespec="seconds")),
+            )
+            self._conn.commit()
+        return user, token
 
+    def complete_password_reset(self, token: str, replacement: str) -> User:
+        """Spend a reset token and set the new password.
+
+        Every existing session ends with it. Somebody resetting a password has
+        either lost control of the account or lost the password; in both cases
+        the sessions already out there are the thing you want gone.
+        """
+        check_password_strength(replacement)
+        digest = hash_token((token or "").strip())
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT user_id, expires_at, used_at FROM password_resets "
+                "WHERE token_hash = ?", (digest,)
+            ).fetchall()
+        if not rows or rows[0]["used_at"]:
+            raise AuthError("that reset link is no longer valid")
+        try:
+            expires = datetime.fromisoformat(rows[0]["expires_at"])
+        except ValueError as exc:
+            raise AuthError("that reset link is no longer valid") from exc
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if expires <= _now():
+            raise AuthError("that reset link has expired — ask for a new one")
+
+        user_id = rows[0]["user_id"]
         with self._lock:
             self._conn.execute(
                 "UPDATE users SET password_hash = ? WHERE id = ?",
-                (hash_password(replacement), rows[0]["id"]),
+                (hash_password(replacement), user_id),
             )
+            self._conn.execute(
+                "UPDATE password_resets SET used_at = ? WHERE token_hash = ?",
+                (_now().isoformat(timespec="seconds"), digest),
+            )
+            self._conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
             self._conn.commit()
-        user = self.get_user(rows[0]["id"])
-        assert user is not None
+        user = self.get_user(user_id)
+        if user is None:
+            raise AuthError("that reset link is no longer valid")
         return user
 
-    def set_recovery(self, user_id: str, question: str, answer: str) -> None:
-        """Add or change the recovery question on an existing account."""
-        text, folded = check_recovery(question, answer)
+    def purge_expired_resets(self) -> int:
         with self._lock:
-            self._conn.execute(
-                "UPDATE users SET recovery_question = ?, recovery_answer = ? "
-                "WHERE id = ?",
-                (text, hash_password(folded), user_id),
+            cursor = self._conn.execute(
+                "DELETE FROM password_resets WHERE expires_at <= ?",
+                (_now().isoformat(timespec="seconds"),),
             )
             self._conn.commit()
+        return cursor.rowcount or 0
 
     def change_password(self, user_id: str, current: str, replacement: str) -> None:
         with self._lock:
