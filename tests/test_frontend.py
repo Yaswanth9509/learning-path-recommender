@@ -149,6 +149,12 @@ def test_every_button_in_the_page_is_wired_to_something():
     for selector in re.findall(r"""closest\??\.?\(\s*["']([^"']+)["']""", JS):
         delegated.update(re.findall(r"\.([A-Za-z0-9_-]+)", selector))
 
+    # ...and tokens bound by class across the whole set, e.g. `$$(".tab")`,
+    # which wires every tab at once. Those buttons carry an id only so the
+    # panels can point at them with `aria-labelledby`, never to be looked up.
+    for selector in re.findall(r"""\$\$?\(\s*["'](\.[^"']+)["']\s*\)""", JS):
+        delegated.update(re.findall(r"\.([A-Za-z0-9_-]+)", selector))
+
     # A `type="submit"` button is wired by its form, and every form in this
     # page has a submit handler — asserted just below, so this cannot rot into
     # a loophole.
@@ -252,3 +258,92 @@ def test_the_worked_example_does_not_rebuild_silently():
     block = re.search(r"async function startExamplePath.*?\n\}", JS, re.DOTALL)
     assert block, "startExamplePath is gone"
     assert "toast(" in block.group(0), "the example switches goals without saying so"
+
+
+def test_the_client_never_asks_through_a_browser_dialog():
+    """`window.prompt` is a control the browser is allowed to switch off.
+
+    Chrome returns null from it — silently, and for the rest of the page's
+    life — once the user ticks "prevent this page from creating additional
+    dialogs" on any earlier one. Rename, Change name and the recovery question
+    were all built on it, so all three read as dead buttons with no error and
+    nothing in the console. Asking happens in the page now.
+    """
+    called = re.findall(r"\bwindow\.(prompt|confirm|alert)\s*\(", JS)
+    assert not called, f"the client still asks through a browser dialog: {called}"
+    assert "function askModal(" in JS, "the in-page replacement for prompt() is gone"
+
+
+def test_asking_in_the_page_always_settles():
+    """A promise that never resolves leaves the caller waiting forever.
+
+    Dismissing the dialog by ✕, backdrop or Escape has to resolve it too, not
+    just submitting — otherwise cancelling a rename hangs the handler.
+    """
+    assert "modalOnClose" in JS, "closing the modal no longer notifies its caller"
+    block = re.search(r"function closeModal\(\).*?\n\}", JS, re.DOTALL)
+    assert block and "onClose" in block.group(0), (
+        "closeModal does not run the dismissal callback, so cancel never resolves"
+    )
+
+
+@pytest.mark.parametrize("input_id", ["authPassword", "resetPassword"])
+def test_every_password_input_has_a_reveal_control(input_id):
+    """Typing a password blind makes a failed sign-in the only feedback on a typo."""
+    toggle = f"{input_id}Toggle"
+    assert re.search(rf"""id=["']{toggle}["']""", HTML), (
+        f"#{input_id} has no reveal button beside it"
+    )
+    assert re.search(rf"""["']#{toggle}["']""", JS), (
+        f"#{toggle} is in the markup but nothing wires it up"
+    )
+    assert "function setPasswordShown(" in JS, "the reveal helper is gone"
+
+
+def test_the_reset_panel_is_bounded():
+    """Switching to reset hides the tab pill, which was the only thing giving
+    that column an edge. Without one the form floated loose in the panel."""
+    block = re.search(r"\.auth-recover\s*\{[^}]*\}", CSS)
+    assert block, ".auth-recover no longer carries its own rules"
+    for prop in ("border:", "border-radius:", "padding:"):
+        assert prop in block.group(0), f".auth-recover sets no {prop.rstrip(':')}"
+
+
+def test_the_tab_strip_keeps_its_aria_state():
+    """`role="tablist"` was declared and never honoured.
+
+    Every tab carried the role while nothing set `aria-selected`, so a screen
+    reader announced a tab list with no selection in it, and the panels were
+    not associated with the tabs that label them.
+    """
+    tabs = re.findall(r"<button[^>]*\bclass=[\"']tab[^\"']*[\"'][^>]*>", HTML, re.DOTALL)
+    assert len(tabs) == 7, f"expected 7 tabs, found {len(tabs)}"
+    for tag in tabs:
+        assert "aria-selected=" in tag, f"tab without aria-selected: {tag[:70]}"
+        assert "aria-controls=" in tag, f"tab without aria-controls: {tag[:70]}"
+        assert "tabindex=" in tag, f"tab without a roving tabindex: {tag[:70]}"
+
+    panels = re.findall(r"<section[^>]*\bclass=[\"']panel[^\"']*[\"'][^>]*>", HTML)
+    assert len(panels) == 7
+    for tag in panels:
+        assert "aria-labelledby=" in tag, f"panel not labelled by its tab: {tag[:70]}"
+
+    # And the state has to be maintained, not just declared once in the markup.
+    assert 'setAttribute("aria-selected"' in JS, "aria-selected is never updated"
+
+
+def test_the_backdrop_does_not_imitate_the_skill_graph():
+    """The lattice was a node-and-edge motif behind a node-and-edge diagram.
+
+    Decoration that mimics the one visual carrying meaning competes with it.
+    """
+    assert "@keyframes lattice" not in CSS, "the drifting lattice is back"
+    assert "circle cx=" not in CSS, "the backdrop draws graph nodes again"
+
+
+def test_the_rationale_is_collapsed_by_default():
+    """Twelve open rationales stacked is a wall nobody reads."""
+    assert 'el("details", { class: "item-why" })' in JS, (
+        "the per-item rationale is no longer a disclosure"
+    )
+    assert ".item-why summary" in CSS

@@ -41,23 +41,14 @@
                  placeholder="you@example.com" />
         </label>
         <label>Password
-          <input type="password" id="authPassword" autocomplete="current-password"
-                 required minlength="8" placeholder="At least 8 characters" />
+          <span class="pw-wrap">
+            <input type="password" id="authPassword" autocomplete="current-password"
+                   required minlength="8" placeholder="At least 8 characters" />
+            <button id="authPasswordToggle" class="pw-toggle" type="button"
+                    aria-controls="authPassword" aria-pressed="false"
+                    aria-label="Show password">Show</button>
+          </span>
         </label>
-        <div id="authRecoveryRow" hidden>
-          <label>A question only you can answer
-            <input type="text" id="authQuestion" maxlength="160"
-                   placeholder="e.g. What did I call my first bike?" />
-          </label>
-          <label>Your answer
-            <input type="text" id="authAnswer" autocomplete="off" maxlength="120"
-                   placeholder="Something you will not forget" />
-          </label>
-          <p class="hint auth-recovery-note">
-            This is how you get back in if you forget your password. Capitals
-            and spacing do not matter. Pick something nobody could look up.
-          </p>
-        </div>
         <p id="authError" class="auth-error" role="alert" hidden></p>
         <button id="authSubmit" class="btn btn-primary btn-block" type="submit">Sign in</button>
       </form>
@@ -70,34 +61,48 @@
           <strong>Reset your password</strong>
           <button id="recoverCancel" class="btn btn-ghost btn-mini" type="button">Back</button>
         </div>
+        <p class="hint auth-recover-lede">
+          Enter the address on your account and we will email you a link. It
+          works once and expires in 30 minutes.
+        </p>
         <label>Email
           <input type="email" id="recoverEmail" autocomplete="email" required
                  placeholder="you@example.com" />
         </label>
-        <button id="recoverLookup" class="btn btn-block" type="button">Continue</button>
-
-        <div id="recoverStep2" hidden>
-          <p id="recoverQuestion" class="auth-recover-q"></p>
-          <label>Your answer
-            <input type="text" id="recoverAnswer" autocomplete="off" maxlength="120" />
-          </label>
-          <label>New password
-            <input type="password" id="recoverPassword" autocomplete="new-password"
-                   minlength="8" placeholder="At least 8 characters" />
-          </label>
-          <button id="recoverSubmit" class="btn btn-primary btn-block" type="submit">
-            Set new password
-          </button>
-        </div>
+        <button id="recoverSubmit" class="btn btn-primary btn-block" type="submit">
+          Email me a link
+        </button>
+        <p id="recoverSent" class="auth-sent" role="status" hidden></p>
         <p id="recoverError" class="auth-error" role="alert" hidden></p>
+      </form>
+
+      <!-- Reached from the emailed link, /#reset/<token>. -->
+      <form id="resetForm" class="auth-form auth-recover" hidden>
+        <div class="auth-recover-head">
+          <strong>Choose a new password</strong>
+          <button id="resetCancel" class="btn btn-ghost btn-mini" type="button">Back</button>
+        </div>
+        <label>New password
+          <span class="pw-wrap">
+            <input type="password" id="resetPassword" autocomplete="new-password"
+                   minlength="8" placeholder="At least 8 characters" />
+            <button id="resetPasswordToggle" class="pw-toggle" type="button"
+                    aria-controls="resetPassword" aria-pressed="false"
+                    aria-label="Show password">Show</button>
+          </span>
+        </label>
+        <button id="resetSubmit" class="btn btn-primary btn-block" type="submit">
+          Set password and sign in
+        </button>
+        <p id="resetError" class="auth-error" role="alert" hidden></p>
       </form>
 
       <div class="auth-or"><span>or</span></div>
       <button id="guestBtn" class="btn btn-block" type="button">Try it as a guest</button>
       <p class="hint auth-note">
         A guest account works fully and needs no email. Passwords are hashed and
-        stored only on this server. If you forget your password, your recovery
-        question is the only way back in — there is no email to reset through.
+        stored only on this server. Forget yours and we will email you a
+        single-use link to set a new one.
       </p>
     </div>
   </div>
@@ -129,19 +134,33 @@
 </header>
 
 <nav class="tabs" role="tablist">
-  <button class="tab is-active" role="tab" data-tab="chat">Chat</button>
-  <button class="tab" role="tab" data-tab="path">Path</button>
-  <button class="tab" role="tab" data-tab="graph">Skill graph</button>
-  <button class="tab" role="tab" data-tab="plan">Weekly plan</button>
-  <button class="tab" role="tab" data-tab="dashboard">Dashboard</button>
-  <button class="tab" role="tab" data-tab="explore">Recommendations</button>
-  <button class="tab" role="tab" data-tab="profile">Profile</button>
+  <button class="tab is-active" role="tab" id="tab-chat" data-tab="chat"
+          aria-controls="panel-chat" aria-selected="true"
+          tabindex="0">Chat</button>
+  <button class="tab" role="tab" id="tab-path" data-tab="path"
+          aria-controls="panel-path" aria-selected="false"
+          tabindex="-1">Path</button>
+  <button class="tab" role="tab" id="tab-graph" data-tab="graph"
+          aria-controls="panel-graph" aria-selected="false"
+          tabindex="-1">Skill graph</button>
+  <button class="tab" role="tab" id="tab-plan" data-tab="plan"
+          aria-controls="panel-plan" aria-selected="false"
+          tabindex="-1">Weekly plan</button>
+  <button class="tab" role="tab" id="tab-dashboard" data-tab="dashboard"
+          aria-controls="panel-dashboard" aria-selected="false"
+          tabindex="-1">Dashboard</button>
+  <button class="tab" role="tab" id="tab-explore" data-tab="explore"
+          aria-controls="panel-explore" aria-selected="false"
+          tabindex="-1">Recommendations</button>
+  <button class="tab" role="tab" id="tab-profile" data-tab="profile"
+          aria-controls="panel-profile" aria-selected="false"
+          tabindex="-1">Profile</button>
 </nav>
 </div>
 
 <main>
   <!-- ------------------------------------------------------------ CHAT -->
-  <section id="panel-chat" class="panel is-active" role="tabpanel">
+  <section id="panel-chat" class="panel is-active" role="tabpanel" aria-labelledby="tab-chat" tabindex="0">
     <div class="chat-wrap">
       <div id="chatLog" class="chat-log" aria-live="polite"></div>
       <div id="suggestions" class="suggestions"></div>
@@ -177,7 +196,7 @@
   </section>
 
   <!-- ------------------------------------------------------------ PATH -->
-  <section id="panel-path" class="panel" role="tabpanel">
+  <section id="panel-path" class="panel" role="tabpanel" aria-labelledby="tab-path" tabindex="0">
     <div class="panel-head">
       <h2>Your path</h2>
       <p>Every step in prerequisite order, with the reason it earned its place.</p>
@@ -189,7 +208,7 @@
   </section>
 
   <!-- ----------------------------------------------------- SKILL GRAPH -->
-  <section id="panel-graph" class="panel" role="tabpanel">
+  <section id="panel-graph" class="panel" role="tabpanel" aria-labelledby="tab-graph" tabindex="0">
     <div class="panel-head">
       <h2>Skill graph</h2>
       <p>What depends on what, and how far through the chain you are.</p>
@@ -210,7 +229,7 @@
   </section>
 
   <!-- ----------------------------------------------------- WEEKLY PLAN -->
-  <section id="panel-plan" class="panel" role="tabpanel">
+  <section id="panel-plan" class="panel" role="tabpanel" aria-labelledby="tab-plan" tabindex="0">
     <div class="panel-head">
       <h2>Weekly plan</h2>
       <p>Your roadmap divided into the hours you actually said you have.</p>
@@ -220,7 +239,7 @@
   </section>
 
   <!-- ------------------------------------------------------- DASHBOARD -->
-  <section id="panel-dashboard" class="panel" role="tabpanel">
+  <section id="panel-dashboard" class="panel" role="tabpanel" aria-labelledby="tab-dashboard" tabindex="0">
     <div class="panel-head">
       <h2>Dashboard</h2>
       <p>Progress, pace and what to do next, measured against the plan.</p>
@@ -255,7 +274,7 @@
   </section>
 
   <!-- --------------------------------------------------------- EXPLORE -->
-  <section id="panel-explore" class="panel" role="tabpanel">
+  <section id="panel-explore" class="panel" role="tabpanel" aria-labelledby="tab-explore" tabindex="0">
     <div class="panel-head">
       <h2>Recommendations</h2>
       <p>Ranked against your goal and your gaps, with the score broken down.</p>
@@ -279,7 +298,7 @@
   </section>
 
   <!-- --------------------------------------------------------- PROFILE -->
-  <section id="panel-profile" class="panel" role="tabpanel">
+  <section id="panel-profile" class="panel" role="tabpanel" aria-labelledby="tab-profile" tabindex="0">
     <div class="panel-head">
       <h2>Profile</h2>
       <p>Your account, and the learner whose plan you are looking at.</p>

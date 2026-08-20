@@ -131,20 +131,20 @@ body {
 }
 
 /* ------------------------------------------------------------- background
-   The subject is a prerequisite graph, so the backdrop is one: nodes joined
-   by edges, drifting slowly. Drawn as an inline SVG data URI rather than a
-   fetched image, because the page is not allowed to load from another host —
-   and generated rather than hand-placed, so it tiles at any size.
+   A backdrop, not a picture. This used to be a drifting lattice of nodes and
+   edges — the same motif as the Skill graph, which is the one screen where
+   nodes and edges carry meaning. Decoration that imitates your signal dilutes
+   it: the real graph had to compete with wallpaper that looked just like it.
 
-   Three layers, back to front: two colour fields for depth, the graph lattice,
-   then a fine grid to give the whole thing structure. */
+   What is left is depth only. Two off-centre colour fields so the page has a
+   horizon and a corner rather than one flat wash, and a grid faint enough to
+   register as texture rather than content. */
 body::before,
 body::after {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
 }
 
-/* Colour fields. Two off-centre pools so the page has a horizon and a corner,
-   rather than one flat wash. */
+/* Colour fields. Two off-centre pools so the page has a horizon and a corner. */
 body::before {
   background:
     radial-gradient(58rem 34rem at 12% -8%,
@@ -155,26 +155,16 @@ body::before {
       color-mix(in srgb, var(--brand) 10%, transparent), transparent 66%);
 }
 
-/* The lattice: a node-and-edge motif over a fine grid. `background-size`
-   differs per layer so the two never line up into an obvious repeat. */
+/* A plain grid. No motif, no motion: nothing here should read as a diagram. */
 body::after {
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='none' stroke='%23808cff' stroke-width='1'%3E%3Cpath d='M40 60 L150 30 M150 30 L260 75 M40 60 L95 165 M150 30 L165 150 M260 75 L245 190 M95 165 L165 150 M165 150 L245 190 M95 165 L70 265 M165 150 L180 270 M245 190 L275 265 M70 265 L180 270 M180 270 L275 265'/%3E%3C/g%3E%3Cg fill='%23808cff'%3E%3Ccircle cx='40' cy='60' r='3.5'/%3E%3Ccircle cx='150' cy='30' r='4.5'/%3E%3Ccircle cx='260' cy='75' r='3'/%3E%3Ccircle cx='95' cy='165' r='4'/%3E%3Ccircle cx='165' cy='150' r='5'/%3E%3Ccircle cx='245' cy='190' r='3.5'/%3E%3Ccircle cx='70' cy='265' r='3'/%3E%3Ccircle cx='180' cy='270' r='4'/%3E%3Ccircle cx='275' cy='265' r='3'/%3E%3C/g%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M0 .5H64M.5 0V64' fill='none' stroke='%23808cff' stroke-width='.5'/%3E%3C/svg%3E");
-  background-size: 620px 620px, 64px 64px;
-  background-position: 0 0, 0 0;
-  opacity: .1;
-  /* Very slow drift, so the page feels alive without anything to watch. */
-  animation: lattice 240s linear infinite;
+  background-size: 64px 64px;
+  opacity: .05;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body::after { opacity: .16; }
-}
-
-@keyframes lattice {
-  from { background-position: 0 0, 0 0; }
-  to   { background-position: 620px 1240px, 64px 128px; }
+  :root:not([data-theme="light"]) body::after { opacity: .07; }
 }
 
 h1, h2, h3 {
@@ -511,8 +501,41 @@ input::placeholder { color: var(--text-dim); opacity: .8; }
 .role-assessment { background: var(--good-soft); color: var(--good); }
 .item-title { font-weight: 620; font-size: var(--t-base); letter-spacing: -.01em; }
 .item-sub { color: var(--text-dim); font-size: var(--t-xs); }
-.item-why { font-size: var(--t-sm); margin-top: .4rem; color: var(--text-soft); }
-.item-why strong { color: var(--text); font-weight: 620; }
+
+/* Read-only facts about an item, one per chip so any single one can be found
+   without reading the rest. Distinct from `.chip`, which is interactive. */
+.item-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin: .35rem 0 .1rem; }
+.meta-chip {
+  display: inline-flex; align-items: center; font-size: var(--t-xs);
+  padding: .12rem .5rem; border-radius: var(--radius-pill);
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-dim); white-space: nowrap;
+}
+.meta-chip.is-strong {
+  color: var(--text); font-weight: 640;
+  background: var(--brand-soft); border-color: var(--brand-line);
+}
+.meta-chip.is-good {
+  color: var(--good); background: var(--good-soft); border-color: var(--good-line);
+}
+
+/* Collapsed by default. Twelve open rationales is a wall; one is an answer. */
+.item-why { margin-top: .5rem; font-size: var(--t-sm); }
+.item-why summary {
+  cursor: pointer; color: var(--text-dim); font-weight: 580; font-size: var(--t-xs);
+  list-style: none; display: inline-flex; align-items: center; gap: .3rem;
+  padding: .15rem 0; transition: color var(--fast) var(--ease);
+}
+.item-why summary::-webkit-details-marker { display: none; }
+.item-why summary::before {
+  content: "▸"; font-size: .8em; transition: transform var(--fast) var(--ease);
+}
+.item-why[open] summary::before { transform: rotate(90deg); }
+.item-why summary:hover { color: var(--text); }
+.item-why-body {
+  margin-top: .35rem; padding-left: .85rem; color: var(--text-soft);
+  border-left: 2px solid var(--border);
+}
 .item-link { font-size: var(--t-xs); font-weight: 560; margin-left: .4rem;
   border-bottom: 1px dotted currentColor; text-decoration: none; }
 .item-link:hover { border-bottom-style: solid; }
@@ -949,19 +972,50 @@ body.is-gated .app-header, body.is-gated main { display: none; }
 .auth-or { display: flex; align-items: center; gap: .8rem; margin: 1.1rem 0; color: var(--text-dim); font-size: var(--t-xs); }
 .auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .auth-note { font-size: var(--t-xs); color: var(--text-dim); margin-top: 1.1rem; line-height: 1.6; }
-#authRecoveryRow { display: flex; flex-direction: column; gap: .8rem; }
-.auth-recovery-note { margin: 0; }
-.auth-recover { margin-top: .2rem; }
+/* Reset is a different task from signing in, and losing the tab pill left it
+   floating in the column with nothing to sit inside. Give it its own edge. */
+.auth-recover {
+  margin-top: .2rem; padding: 1.15rem 1.2rem;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
 .auth-recover-head {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 1rem; margin-bottom: .3rem;
+  gap: 1rem; margin-bottom: .9rem; padding-bottom: .75rem;
+  border-bottom: 1px solid var(--border);
 }
 .auth-recover-q {
   margin: .2rem 0 .4rem; padding: .7rem .85rem; font-size: var(--t-sm);
   background: var(--brand-soft); border: 1px solid var(--brand-line);
   border-radius: var(--radius-sm); color: var(--text);
 }
-#recoverStep2 { display: flex; flex-direction: column; gap: .8rem; }
+.auth-recover-lede { margin: 0 0 .2rem; }
+.auth-sent {
+  background: var(--good-soft); border: 1px solid var(--good-line);
+  color: var(--text); font-size: var(--t-sm);
+  padding: .65rem .8rem; border-radius: var(--radius-sm); margin: 0;
+}
+
+/* ------------------------------------------------- password reveal + asking */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-right: 4.2rem; }
+.pw-toggle {
+  position: absolute; right: .35rem; top: 50%; transform: translateY(-50%);
+  border: 0; background: transparent; cursor: pointer; padding: .35rem .55rem;
+  font: inherit; font-size: var(--t-xs); font-weight: 640; color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.pw-toggle:hover { color: var(--text); background: var(--surface); }
+.pw-toggle:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+.ask-form { display: flex; flex-direction: column; gap: .8rem; }
+.ask-label {
+  display: flex; flex-direction: column; gap: .3rem;
+  font-size: var(--t-sm); color: var(--text-dim); font-weight: 520;
+}
+.ask-form input { width: 100%; padding: .6rem .75rem; font-size: var(--t-base); }
+.ask-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: .2rem; }
 
 /* ------------------------------------------------------------------ motion */
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
@@ -1009,13 +1063,7 @@ body.is-gated .app-header, body.is-gated main { display: none; }
   .topbar { padding: .65rem 1rem; }
   .tabs { padding: 0 1rem; }
   #panel-chat.is-active { grid-template-columns: 1fr; }
-  /* The engine choice lives with the chat it governs, not in the global header. */
-.engine-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .6rem; }
-.engine-after { margin-top: 1.3rem; padding-top: .9rem; border-top: 1px solid var(--border); }
-.auth-forgot { align-self: flex-start; margin-top: .5rem; padding-left: 0; }
-.account-row .btn { margin-left: .6rem; }
-
-.chat-side { order: -1; }
+  .chat-side { order: -1; }
   .item { grid-template-columns: auto minmax(0, 1fr); }
   .item-actions { grid-column: 1 / -1; flex-direction: row; align-items: center; flex-wrap: wrap; }
   .domain-row { grid-template-columns: 110px minmax(0, 1fr) auto; }

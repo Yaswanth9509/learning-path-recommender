@@ -78,17 +78,26 @@ function setMessageText(node, text) {
 }
 
 /* ------------------------------------------------------------------ modal */
+//: Called once when the modal closes by any route — ✕, backdrop, or Escape.
+let modalOnClose = null;
+
 function openModal(title) {
   const modal = $("#modal");
   $("#modalTitle").textContent = title;
   const body = $("#modalBody");
   body.innerHTML = "";
+  modalOnClose = null;
   modal.hidden = false;
   $("#modalClose").focus();
   return body;
 }
 
-function closeModal() { $("#modal").hidden = true; }
+function closeModal() {
+  $("#modal").hidden = true;
+  const onClose = modalOnClose;
+  modalOnClose = null;
+  if (onClose) onClose();
+}
 
 $("#modalClose").addEventListener("click", closeModal);
 $("#modal").addEventListener("click", (event) => {
@@ -97,6 +106,112 @@ $("#modal").addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !$("#modal").hidden) closeModal();
 });
+
+/* ------------------------------------------------------- password + asking */
+function setPasswordShown(input, toggle, shown) {
+  input.type = shown ? "text" : "password";
+  toggle.textContent = shown ? "Hide" : "Show";
+  toggle.setAttribute("aria-pressed", shown ? "true" : "false");
+  toggle.setAttribute("aria-label", shown ? "Hide password" : "Show password");
+}
+
+function wirePasswordToggle(input, toggle) {
+  toggle.addEventListener("click", () =>
+    setPasswordShown(input, toggle, input.type === "password"));
+}
+
+/* The two password inputs that ship in the markup. Typing a password blind is
+   the only place in the app where the sole feedback on a typo is a failure. */
+wirePasswordToggle($("#authPassword"), $("#authPasswordToggle"));
+wirePasswordToggle($("#resetPassword"), $("#resetPasswordToggle"));
+
+/* A prompt() the browser cannot switch off.
+   Chrome returns null from `window.prompt` — silently, forever — once the user
+   ticks "prevent this page from creating additional dialogs" on any earlier
+   one. Every control built on it then reads as a dead button, which is exactly
+   how Rename, Change name and the recovery question were failing. Asking in
+   the page also lets one dialog collect two fields, so cancelling the second
+   half no longer throws away the first.
+   Resolves to an object of trimmed values, or null if dismissed. */
+function askModal({ title, intro = "", fields, submitLabel = "Save" }) {
+  return new Promise((resolve) => {
+    const body = openModal(title);
+    let settled = false;
+    const settle = (value) => { if (!settled) { settled = true; resolve(value); } };
+
+    if (intro) body.appendChild(el("p", { class: "hint", text: intro }));
+
+    const form = el("form", { class: "ask-form" });
+    const inputs = new Map();
+    for (const field of fields) {
+      const input = el("input", { attrs: {
+        type: field.type || "text",
+        maxlength: String(field.maxlength || 160),
+        placeholder: field.placeholder || "",
+        autocomplete: field.autocomplete || "off",
+      } });
+      input.value = field.value || "";
+      inputs.set(field.name, input);
+
+      const label = el("label", { class: "ask-label", text: field.label });
+      if (field.type === "password") {
+        const wrap = el("span", { class: "pw-wrap" });
+        const toggle = el("button", {
+          class: "pw-toggle", text: "Show",
+          attrs: { type: "button", "aria-pressed": "false",
+                   "aria-label": "Show password" },
+        });
+        wirePasswordToggle(input, toggle);
+        wrap.appendChild(input);
+        wrap.appendChild(toggle);
+        label.appendChild(wrap);
+      } else {
+        label.appendChild(input);
+      }
+      form.appendChild(label);
+    }
+
+    const error = el("p", { class: "auth-error" });
+    error.hidden = true;
+    form.appendChild(error);
+    const fail = (message, input) => {
+      error.textContent = message;
+      error.hidden = false;
+      input.focus();
+    };
+
+    form.appendChild(el("div", { class: "ask-actions" }, [
+      el("button", {
+        class: "btn", text: "Cancel", attrs: { type: "button" },
+        on: { click: closeModal },
+      }),
+      el("button", {
+        class: "btn btn-primary", text: submitLabel, attrs: { type: "submit" },
+      }),
+    ]));
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const answers = {};
+      for (const field of fields) {
+        const input = inputs.get(field.name);
+        const value = input.value.trim();
+        if (!value) return fail(`${field.label} cannot be empty.`, input);
+        if (field.type === "password" && value.length < 8) {
+          return fail("Use a password of at least 8 characters.", input);
+        }
+        answers[field.name] = value;
+      }
+      settle(answers);
+      closeModal();
+    });
+
+    body.appendChild(form);
+    modalOnClose = () => settle(null);
+    const first = inputs.values().next().value;
+    if (first) first.focus();
+  });
+}
 
 /* ------------------------------------------------------------------- tabs
    Each tab is addressable as #chat, #path, #graph, … so a view can be linked,
@@ -111,7 +226,16 @@ function showTab(name, { updateHash = true } = {}) {
   // two graphs appended to a host that had only been cleared once.
   const already = $(`#panel-${name}`)?.classList.contains("is-active");
 
-  $$(".tab").forEach((t) => t.classList.toggle("is-active", t.dataset.tab === name));
+  $$(".tab").forEach((t) => {
+    const selected = t.dataset.tab === name;
+    t.classList.toggle("is-active", selected);
+    // The markup declares role="tablist" but nothing kept the state in step,
+    // so a screen reader announced a tab list with nothing selected in it.
+    // Roving tabindex too: only the selected tab is in the tab order, and the
+    // arrow keys move between them — the pattern the role promises.
+    t.setAttribute("aria-selected", selected ? "true" : "false");
+    t.tabIndex = selected ? 0 : -1;
+  });
   $$(".panel").forEach((p) => p.classList.toggle("is-active", p.id === `panel-${name}`));
   if (updateHash && window.location.hash.slice(1) !== name) {
     window.location.hash = name;
@@ -131,9 +255,43 @@ $$(".tab").forEach((tab) => {
   tab.addEventListener("click", () => showTab(tab.dataset.tab));
 });
 
+/* Arrow keys move along the tab strip, Home and End jump to its ends. */
+$$(".tab").forEach((tab) => {
+  tab.addEventListener("keydown", (event) => {
+    const steps = { ArrowRight: 1, ArrowLeft: -1, Home: "first", End: "last" };
+    const step = steps[event.key];
+    if (step === undefined) return;
+    event.preventDefault();
+    const tabs = $$(".tab");
+    const here = tabs.indexOf(tab);
+    const next = step === "first" ? 0
+      : step === "last" ? tabs.length - 1
+        : (here + step + tabs.length) % tabs.length;
+    showTab(tabs[next].dataset.tab);
+    tabs[next].focus();
+  });
+});
+
 /* `#explain/<item-id>` opens one item's full justification, so a learner can
    send someone the exact reason a course is on their path. */
+//: `#reset/<token>`, as it arrives from the emailed link.
+function resetTokenFromHash() {
+  const link = window.location.hash.match(/^#reset\/(.+)$/);
+  return link ? decodeURIComponent(link[1]) : "";
+}
+
 function routeHash() {
+  // A reset link often arrives while the app is already open in a tab. Only
+  // the hash changes then, so the page never reloads and `boot` never runs
+  // again — without this the link would quietly do nothing at all.
+  const token = resetTokenFromHash();
+  if (token) {
+    resetToken = token;
+    showAuthGate(true);
+    showReset(true);
+    $("#resetPassword").focus();
+    return;
+  }
   const hash = window.location.hash.slice(1);
   if (hash.startsWith("explain/")) {
     showTab("path", { updateHash: false });
@@ -164,7 +322,6 @@ $$(".auth-tab").forEach((tab) => {
     authMode = tab.dataset.auth;
     $$(".auth-tab").forEach((t) => t.classList.toggle("is-active", t === tab));
     $("#authNameRow").hidden = authMode !== "register";
-    $("#authRecoveryRow").hidden = authMode !== "register";
     $("#authSubmit").textContent = authMode === "register" ? "Create account" : "Sign in";
     $("#authPassword").autocomplete =
       authMode === "register" ? "new-password" : "current-password";
@@ -179,8 +336,6 @@ $("#authForm").addEventListener("submit", async (event) => {
     email: $("#authEmail").value.trim(),
     password: $("#authPassword").value,
     display_name: $("#authName").value.trim(),
-    recovery_question: $("#authQuestion").value.trim(),
-    recovery_answer: $("#authAnswer").value,
   };
   const submit = $("#authSubmit");
   submit.disabled = true;
@@ -195,18 +350,35 @@ $("#authForm").addEventListener("submit", async (event) => {
   }
 });
 
-/* Recovery without a mail service: the account carries a question its holder
-   wrote, and an answer hashed like a password. Two steps, because the question
-   has to be fetched before it can be asked. */
+/* Recovery by email: the server mails a single-use link, and the link carries
+   a token that is the whole proof. Nothing here reveals whether an address is
+   registered — the reply is identical either way, which is the property the
+   old decoy question could only approximate. */
 function showRecover(show) {
   $("#recoverForm").hidden = !show;
   $("#authForm").hidden = show;
   $("#forgotBtn").hidden = show;
   $$(".auth-tabs")[0].hidden = show;
   if (!show) {
-    $("#recoverStep2").hidden = true;
     $("#recoverError").hidden = true;
+    $("#recoverSent").hidden = true;
     $("#recoverForm").reset();
+  }
+}
+
+/* The screen the emailed link lands on. The token never reaches our server in
+   a URL — it sits in the hash, so it stays out of access logs until this posts
+   it deliberately. */
+function showReset(show) {
+  $("#resetForm").hidden = !show;
+  $("#authForm").hidden = show;
+  $("#forgotBtn").hidden = show;
+  $("#recoverForm").hidden = show || $("#recoverForm").hidden;
+  $$(".auth-tabs")[0].hidden = show;
+  if (!show) {
+    $("#resetError").hidden = true;
+    $("#resetForm").reset();
+    setPasswordShown($("#resetPassword"), $("#resetPasswordToggle"), false);
   }
 }
 
@@ -222,43 +394,61 @@ $("#forgotBtn").addEventListener("click", () => {
   $("#recoverEmail").focus();
 });
 $("#recoverCancel").addEventListener("click", () => showRecover(false));
-
-$("#recoverLookup").addEventListener("click", async () => {
-  recoverError("");
-  const email = $("#recoverEmail").value.trim();
-  if (!email) { recoverError("Enter the email address on the account."); return; }
-  try {
-    const found = await api("/api/auth/recovery-question", {
-      method: "POST", body: JSON.stringify({ email }),
-    });
-    // The server answers with a question either way, so this never reveals
-    // whether an address is registered.
-    $("#recoverQuestion").textContent = found.question;
-    $("#recoverStep2").hidden = false;
-    $("#recoverAnswer").focus();
-  } catch (err) { recoverError(err.message); }
+$("#resetCancel").addEventListener("click", () => {
+  resetToken = "";
+  if (window.location.hash.startsWith("#reset/")) window.location.hash = "";
+  showReset(false);
 });
 
 $("#recoverForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   recoverError("");
-  const body = {
-    email: $("#recoverEmail").value.trim(),
-    answer: $("#recoverAnswer").value,
-    password: $("#recoverPassword").value,
-  };
-  if (!body.answer || !body.password) {
-    recoverError("Answer the question and choose a new password."); return;
-  }
+  $("#recoverSent").hidden = true;
+  const email = $("#recoverEmail").value.trim();
+  if (!email) { recoverError("Enter the email address on the account."); return; }
+  const submit = $("#recoverSubmit");
+  submit.disabled = true;
   try {
-    await api("/api/auth/reset-password", { method: "POST", body: JSON.stringify(body) });
-    showRecover(false);
-    authMode = "login";
-    $("#authEmail").value = body.email;
-    $("#authPassword").value = "";
-    $("#authPassword").focus();
-    toast("Password changed. Sign in with the new one.", 5000);
-  } catch (err) { recoverError(err.message); }
+    const out = await api("/api/auth/forgot", {
+      method: "POST", body: JSON.stringify({ email }),
+    });
+    // Deliberately worded for the case where there is no such account, because
+    // this reply is the same either way.
+    const sent = $("#recoverSent");
+    sent.textContent = `If ${email} has an account, a reset link is on its way. `
+      + `It works once and expires in ${out.expires_in_minutes} minutes.`;
+    sent.hidden = false;
+  } catch (err) { recoverError(err.message); } finally { submit.disabled = false; }
+});
+
+//: Held from the link's hash until the new password is submitted with it.
+let resetToken = "";
+
+$("#resetForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const box = $("#resetError");
+  box.hidden = true;
+  const password = $("#resetPassword").value;
+  if (!password || password.length < 8) {
+    box.textContent = "Use a password of at least 8 characters.";
+    box.hidden = false;
+    return;
+  }
+  const submit = $("#resetSubmit");
+  submit.disabled = true;
+  try {
+    state.user = await api("/api/auth/reset", {
+      method: "POST", body: JSON.stringify({ token: resetToken, password }),
+    });
+    resetToken = "";
+    window.location.hash = "";
+    showReset(false);
+    await enterApp();
+    toast("Password changed. You are signed in.", 5000);
+  } catch (err) {
+    box.textContent = err.message;
+    box.hidden = false;
+  } finally { submit.disabled = false; }
 });
 
 $("#guestBtn").addEventListener("click", async () => {
@@ -276,16 +466,26 @@ $("#signOutBtn").addEventListener("click", async () => {
 });
 
 async function upgradeGuest() {
-  const email = (window.prompt("Email for your new account") || "").trim();
-  if (!email) return;
-  const password = (window.prompt("Choose a password (at least 8 characters)") || "").trim();
-  if (!password) return;
+  const answers = await askModal({
+    title: "Create an account",
+    intro: "Everything you have done as a guest moves across to it.",
+    fields: [
+      { name: "email", label: "Email", type: "email", autocomplete: "email",
+        placeholder: "you@example.com" },
+      { name: "password", label: "Password", type: "password",
+        autocomplete: "new-password", placeholder: "At least 8 characters" },
+    ],
+    submitLabel: "Create account",
+  });
+  if (!answers) return;
   try {
     state.user = await api("/api/auth/upgrade", {
-      method: "POST", body: JSON.stringify({ email, password }),
+      method: "POST", body: JSON.stringify(answers),
     });
     renderUserChip();
-    toast("Account created. Everything you have done so far is saved to it.", 5000);
+    renderAccount();
+    toast("Account created. Everything you have done so far is saved to it, "
+          + "and you can reset the password by email if you lose it.", 6000);
   } catch (err) { toast(err.message, 5000); }
 }
 
@@ -308,6 +508,10 @@ function renderUserChip() {
 
 /* --------------------------------------------------------------- bootstrap */
 async function boot() {
+  // A reset link outranks whatever session this browser already has: the
+  // person following it is proving they own the mailbox, and they may well be
+  // on a machine still signed in as somebody else.
+  if (resetTokenFromHash()) { routeHash(); return; }
   try {
     const me = await api("/api/auth/me");
     if (!me.signed_in) { showAuthGate(true); return; }
@@ -350,6 +554,7 @@ async function enterApp() {
   if (window.location.hash.slice(1)) routeHash();
 }
 
+
 async function refreshUser() {
   try { state.user = await api("/api/auth/me"); renderUserChip(); } catch (_) {}
 }
@@ -371,8 +576,15 @@ $("#learnerSelect").addEventListener("change", (e) => selectLearner(e.target.val
 $("#renameLearnerBtn").addEventListener("click", async () => {
   if (!state.learnerId) return;
   const current = state.profile?.name || "";
-  const name = (window.prompt("Name for this learner", current) || "").trim();
-  if (!name || name === current) return;
+  const answers = await askModal({
+    title: "Rename this learner",
+    fields: [{ name: "name", label: "Name", value: current, maxlength: 80,
+               placeholder: "Who is this plan for?" }],
+    submitLabel: "Rename",
+  });
+  if (!answers) return;
+  const name = answers.name;
+  if (name === current) return;
   try {
     state.profile = await api(
       `/api/learners/${state.learnerId}/profile?regenerate=false`,
@@ -384,8 +596,15 @@ $("#renameLearnerBtn").addEventListener("click", async () => {
 });
 
 $("#newLearnerBtn").addEventListener("click", async () => {
-  const name = (window.prompt("Name for the new learner") || "").trim();
-  if (!name) return;
+  const answers = await askModal({
+    title: "Add a learner",
+    intro: "A learner is one person's plan. Progress is tracked separately for each.",
+    fields: [{ name: "name", label: "Name", maxlength: 80,
+               placeholder: "Who is this plan for?" }],
+    submitLabel: "Add learner",
+  });
+  if (!answers) return;
+  const name = answers.name;
   try {
     const profile = await api("/api/learners", {
       method: "POST", body: JSON.stringify({ name }),
@@ -898,14 +1117,36 @@ function renderPathItem(item) {
   body.appendChild(el("div", { class: "item-title" }, [
     item.title, itemLink(item), videoLink(item),
   ]));
-  body.appendChild(el("div", { class: "item-sub", text:
-    `${item.provider} · ${item.hours}h · level ${item.level} · ${item.format} · ${item.cost} · rated ${item.rating}/5` }));
+
+  /* Metadata as discrete chips rather than one dim run-on line. The old
+     `Provider · 30h · level 1 · interactive · free · rated 4.7/5` was a single
+     grey string, so nothing in it could be found without reading all of it.
+     Hours and cost lead, because those are what people actually compare. */
+  const meta = el("div", { class: "item-meta" });
+  // Not `.chip`: that one is an interactive checkbox chip in the Profile tab,
+  // and these are read-only facts.
+  const chip = (text, kind) =>
+    meta.appendChild(el("span", { class: `meta-chip${kind ? " is-" + kind : ""}`, text }));
+  chip(`${item.hours}h`, "strong");
+  if (item.cost) chip(item.cost, item.cost === "free" ? "good" : null);
+  chip(item.provider);
+  chip(`level ${item.level}`);
+  if (item.format) chip(item.format);
+  if (item.rating) chip(`★ ${item.rating}`);
+  body.appendChild(meta);
+
   if (item.teaches_names.length) {
-    body.appendChild(el("div", { class: "item-sub", text: "Teaches: " + item.teaches_names.join(", ") }));
+    body.appendChild(el("div", { class: "item-sub", text:
+      "Teaches: " + item.teaches_names.join(", ") }));
   }
-  body.appendChild(el("div", { class: "item-why" }, [
-    el("strong", { text: "Why this, here: " }), item.rationale,
-  ]));
+
+  /* The rationale is the product's whole argument, but twelve of them stacked
+     turned the page into a wall nobody read. Collapsed by default, one click
+     from open, and still plain text in the DOM for anyone searching the page. */
+  const why = el("details", { class: "item-why" });
+  why.appendChild(el("summary", { text: "Why this, here" }));
+  why.appendChild(el("div", { class: "item-why-body", text: item.rationale }));
+  body.appendChild(why);
   row.appendChild(body);
 
   const actions = el("div", { class: "item-actions" });
@@ -1391,18 +1632,6 @@ function renderAccount() {
       on: { click: renameAccount },
     }));
     box.appendChild(nameRow);
-
-    const recoveryRow = row(
-      "Recovery question",
-      user.has_recovery ? "set" : "not set — you could not reset your password",
-    );
-    recoveryRow.appendChild(el("button", {
-      class: "btn btn-mini btn-ghost",
-      text: user.has_recovery ? "Change" : "Set one",
-      attrs: { type: "button" },
-      on: { click: setRecoveryQuestion },
-    }));
-    box.appendChild(recoveryRow);
   }
   box.appendChild(row("Learners", `${user.learners} of ${user.max_learners}`));
   box.appendChild(row("Goals per learner", `up to ${user.max_paths_per_learner}`));
@@ -1422,8 +1651,15 @@ function renderAccount() {
    existed on the server and nothing ever called it. */
 async function renameAccount() {
   const current = state.user?.display_name || "";
-  const name = (window.prompt("Name on your account", current) || "").trim();
-  if (!name || name === current) return;
+  const answers = await askModal({
+    title: "Change your account name",
+    intro: "This is the name on the account, not on any one learner.",
+    fields: [{ name: "display_name", label: "Name", value: current, maxlength: 80,
+               autocomplete: "name", placeholder: "What should I call you?" }],
+    submitLabel: "Save name",
+  });
+  if (!answers || answers.display_name === current) return;
+  const name = answers.display_name;
   try {
     state.user = await api("/api/auth/profile", {
       method: "PATCH", body: JSON.stringify({ display_name: name }),
@@ -1431,23 +1667,6 @@ async function renameAccount() {
     renderUserChip();
     renderAccount();
     toast(`Account name changed to ${state.user.display_name}.`);
-  } catch (err) { toast(err.message, 4000); }
-}
-
-/* The only way back into an account, so it can be set after the fact too. */
-async function setRecoveryQuestion() {
-  const question = (window.prompt(
-    "A question only you can answer", "What did I call my first bike?") || "").trim();
-  if (!question) return;
-  const answer = (window.prompt("Your answer (capitals and spacing do not matter)") || "").trim();
-  if (!answer) return;
-  try {
-    await api("/api/auth/recovery", {
-      method: "PUT", body: JSON.stringify({ question, answer }),
-    });
-    await refreshUser();
-    renderAccount();
-    toast("Recovery question saved.");
   } catch (err) { toast(err.message, 4000); }
 }
 
