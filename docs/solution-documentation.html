@@ -489,19 +489,18 @@
 
     <h3>Multi-criteria scoring — explainable by construction</h3>
     <p>
-      Every candidate item is scored as a weighted sum of six components, each
+      Every candidate item is scored as a weighted sum of five components, each
       computed independently and all returned to the client.
     </p>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Component</th><th class="num">Weight</th><th>Measures</th><th style="width:22%"></th></tr></thead>
         <tbody>
-          <tr><td><code>goal_relevance</code></td><td class="num">0.35</td><td>Share of the item's value landing on skills still missing</td><td><span class="bar" style="width:100%"></span></td></tr>
-          <tr><td><code>skill_readiness</code></td><td class="num">0.20</td><td>Share of its prerequisites already held</td><td><span class="bar" style="width:57%"></span></td></tr>
-          <tr><td><code>level_fit</code></td><td class="num">0.15</td><td>Distance from the difficulty target, adjusted by feedback</td><td><span class="bar" style="width:43%"></span></td></tr>
-          <tr><td><code>interest_match</code></td><td class="num">0.15</td><td>Domain overlap with stated interests</td><td><span class="bar" style="width:43%"></span></td></tr>
+          <tr><td><code>goal_relevance</code></td><td class="num">0.37</td><td>Share of the item's value landing on skills still missing</td><td><span class="bar" style="width:100%"></span></td></tr>
+          <tr><td><code>skill_readiness</code></td><td class="num">0.21</td><td>Share of its prerequisites already held</td><td><span class="bar" style="width:57%"></span></td></tr>
+          <tr><td><code>level_fit</code></td><td class="num">0.16</td><td>Distance from the difficulty target, adjusted by feedback</td><td><span class="bar" style="width:43%"></span></td></tr>
+          <tr><td><code>interest_match</code></td><td class="num">0.16</td><td>Domain overlap with stated interests</td><td><span class="bar" style="width:43%"></span></td></tr>
           <tr><td><code>format_fit</code></td><td class="num">0.10</td><td>Format, cost, and provider preference</td><td><span class="bar" style="width:29%"></span></td></tr>
-          <tr><td><code>quality</code></td><td class="num">0.05</td><td>Rating, with popularity as a weak tiebreaker</td><td><span class="bar" style="width:14%"></span></td></tr>
         </tbody>
       </table>
     </div>
@@ -579,7 +578,7 @@
         <tbody>
           <tr><td>Conversational interface for goals in natural language</td><td>Chat tab over <code>POST /api/chat</code>; multi-turn, with clarifying questions when the goal is ambiguous</td></tr>
           <tr><td>Learner profiling engine</td><td>Interests, experience level, weekly hours, formats, declared skills, implied skills, and prior course history</td></tr>
-          <tr><td>Recommendation engine</td><td>Six-component weighted scoring across courses, projects, assessments, and reference resources</td></tr>
+          <tr><td>Recommendation engine</td><td>Five-component weighted scoring across courses, projects, assessments, and reference resources</td></tr>
           <tr><td>Path generator with prerequisites and milestones</td><td>Layered topological sort into 3–6 milestones, each capped with a project and an assessment</td></tr>
           <tr><td>Assistant that explains and answers</td><td>Per-item breakdown of every score component and its placement rationale, plus free-form Q&amp;A grounded in the learner's own path</td></tr>
           <tr><td>Dashboard of progress and next actions</td><td>Completion, hours, skills by domain, milestone timeline, pace, achievements, and the next three actions with reasons</td></tr>
@@ -700,7 +699,7 @@
     </div>
 
     <p>
-      533 tests run in about half a minute with no network, no API key, and
+      534 tests run in about half a minute with no network, no API key, and
       no tokens spent, at 90% branch coverage. The database is pinned to
       SQLite for the same reason the model is disabled: a configured
       <code>DATABASE_URL</code> must never send a test run to a real server. The load-bearing one is
@@ -770,7 +769,7 @@ python run.py                      # http://127.0.0.1:8000
 
 # tests and lint
 pip install -r requirements-dev.txt
-python -m pytest                   # 533 tests, offline
+python -m pytest                   # 534 tests, offline
 python -m ruff check .
 
 # or containerised

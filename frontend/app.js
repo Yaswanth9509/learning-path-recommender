@@ -1302,7 +1302,7 @@ async function explainItem(itemId) {
   body.appendChild(el("div", { class: "explain-block" }, [
     el("strong", { text: "How the score is built" }),
     el("div", { class: "hint", text:
-      "Each component is computed independently, then multiplied by its weight. The six contributions sum to the score above." }),
+      "Each component is computed independently, then multiplied by its weight. The five contributions sum to the score above." }),
     table,
   ]));
 

@@ -99,24 +99,25 @@ strictly forward, which means this drawing can never contradict the plan.
 
 <img src="docs/screenshot-explain.png" alt="Score breakdown showing each component, its weight, and its contribution" width="100%">
 
-Six components, each computed independently, each multiplied by its weight. The
-six contributions sum to the score at the top. Available on any item, and
+Five components, each computed independently, each multiplied by its weight.
+The five contributions sum to the score at the top. Available on any item, and
 linkable — `#explain/c-node` opens exactly this view.
 
 ### Progress, and the pace you are actually keeping
 
 <img src="docs/screenshot-dashboard.png" alt="Dashboard showing progress, observed pace, achievements, milestones and next actions" width="100%">
 
-The learner planned 12 hours a week and is averaging 5.5. The system measured
-that from the timestamps it already had, and offers to refit the whole schedule
-around the real number.
+Progress, skills mastered, hours and weeks remaining, all measured against the
+plan rather than asserted. Once there is enough history the pace panel compares
+the hours actually logged against the hours planned, and offers to refit the
+schedule around the real number.
 
 ### The rest
 
 | | |
 |---|---|
-| <img src="docs/screenshot-plan.png" alt="Week-by-week study plan" width="100%"> | **Weekly plan** — the roadmap poured into fixed-capacity weeks. "445 hours" becomes "week 3: wrap up Modern JavaScript, start Data Structures". |
-| <img src="docs/screenshot-recommendations.png" alt="Ranked recommendations with score breakdowns" width="100%"> | **Recommendations** — ranked and filterable, each with its six-component breakdown visible inline. |
+| <img src="docs/screenshot-plan.png" alt="Week-by-week study plan" width="100%"> | **Weekly plan** — the roadmap poured into fixed-capacity weeks. a total in hours becomes "week 3: finish this, start that". |
+| <img src="docs/screenshot-recommendations.png" alt="Ranked recommendations with score breakdowns" width="100%"> | **Recommendations** — ranked and filterable, each with its five-component breakdown visible inline. |
 | <img src="docs/screenshot-profile.png" alt="Profile editor with skills and prior course history" width="100%"> | **Profile** — declared skills, preferences, and the prior courses you finished before this app existed. |
 
 ---
@@ -179,12 +180,11 @@ all returned to the client:
 
 | Component | Weight | Meaning |
 |---|---:|---|
-| `goal_relevance` | 0.35 | Fraction of the item's value landing on skills you still need |
-| `skill_readiness` | 0.20 | Fraction of its prerequisites you already hold |
-| `level_fit` | 0.15 | Closeness to your difficulty target (feedback-adjusted) |
-| `interest_match` | 0.15 | Domain overlap with your stated interests |
+| `goal_relevance` | 0.37 | Fraction of the item's value landing on skills you still need |
+| `skill_readiness` | 0.21 | Fraction of its prerequisites you already hold |
+| `level_fit` | 0.16 | Closeness to your difficulty target (feedback-adjusted) |
+| `interest_match` | 0.16 | Domain overlap with your stated interests |
 | `format_fit` | 0.10 | Format, cost, and provider preferences |
-| `quality` | 0.05 | Rating, with popularity as a weak tiebreaker |
 
 The same numbers that produce the ranking generate the human-readable reasons,
 so *"why was this recommended?"* always has a precise, checkable answer.
@@ -446,7 +446,7 @@ Interactive docs at `/docs` while the server runs.
 
 ## Testing
 
-**533 tests at 90% branch coverage**, all offline and deterministic — no
+**534 tests at 90% branch coverage**, all offline and deterministic — no
 network, no API key, no tokens. The database is pinned to SQLite for the
 same reason, so a configured `DATABASE_URL` can never send a test suite to
 a real server.
@@ -541,7 +541,7 @@ backend/
   models.py  db.py  sqlstore.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               533 tests, all offline
+tests/                               534 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py

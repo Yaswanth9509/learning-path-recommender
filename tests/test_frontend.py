@@ -438,3 +438,33 @@ def test_the_documented_python_versions_are_the_tested_ones():
             assert version.split()[-1] in tested, (
                 f"{name} claims support for {version}, which CI does not test"
             )
+
+
+def test_the_documented_scoring_weights_are_the_real_ones():
+    """Both documents listed six components long after there were five.
+
+    `quality` was removed with the invented ratings it read, and the tables
+    kept advertising it at 0.05 — describing data that no longer exists. The
+    Explain modal in the app said "six" too, so users saw it as well.
+    """
+    from backend.recommender import WEIGHTS
+
+    for name, text in _docs().items():
+        for component, weight in WEIGHTS.items():
+            assert component in text, f"{name} never mentions `{component}`"
+            assert f"{weight:.2f}" in text, (
+                f"{name} does not carry {component}'s real weight {weight:.2f}"
+            )
+        assert "<code>quality</code>" not in text and "`quality`" not in text, (
+            f"{name} still documents the removed `quality` component"
+        )
+
+    #: Number words that would be wrong for the current component count.
+    WRONG = {5: "six", 6: "five"}[len(WEIGHTS)]
+    for name, text in {**_docs(), "frontend/app.js": JS}.items():
+        low = text.lower()
+        for phrase in (f"{WRONG} component", f"{WRONG} contribution",
+                       f"{WRONG}-component"):
+            assert phrase not in low, (
+                f"{name} says '{phrase}' where there are {len(WEIGHTS)}"
+            )
