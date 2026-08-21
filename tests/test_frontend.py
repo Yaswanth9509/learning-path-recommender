@@ -382,3 +382,59 @@ def test_no_hand_rolled_type_sizes_outside_the_scale():
             continue
         offenders.append(f"{selector.splitlines()[-1].strip()} -> {size}")
     assert not offenders, f"font sizes outside the token scale: {offenders}"
+
+
+# ------------------------------------------------------------ documentation
+def _docs() -> dict[str, str]:
+    return {
+        name: (ROOT / name).read_text(encoding="utf-8")
+        for name in ("README.md", "docs/solution-documentation.html")
+    }
+
+
+def test_the_documented_catalogue_size_is_the_real_one():
+    """Both documents claimed 85 skills / 139 items / 14 goals for weeks.
+
+    A number in prose has no compiler, so it only stays true if something
+    checks it.
+    """
+    from backend.catalog import get_catalog
+
+    catalog = get_catalog()
+    counts = {
+        "skills": len(catalog.skills),
+        "items": len(catalog.items),
+        "goals": len(catalog.goals),
+    }
+    for name, text in _docs().items():
+        for noun, real in counts.items():
+            claimed = {int(n) for n in re.findall(rf"(\d+)\s+{noun}\b", text)}
+            wrong = {n for n in claimed if n != real} - {1}
+            assert not wrong, (
+                f"{name} claims {wrong} {noun}; there are {real}"
+            )
+
+
+def test_the_documented_python_versions_are_the_tested_ones():
+    """The README claimed CI covered 3.10-3.12 while 3.10 was failing."""
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    matrix = re.search(r"python-version:\s*\[([^\]]+)\]", workflow)
+    assert matrix, "the CI matrix no longer declares python-version"
+    tested = sorted(re.findall(r"3\.\d+", matrix.group(1)))
+
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    floor = re.search(r'requires-python\s*=\s*">=(\d+\.\d+)"', pyproject)
+    assert floor and floor.group(1) == tested[0], (
+        f"requires-python says {floor and floor.group(1)}, CI floor is {tested[0]}"
+    )
+
+    classifiers = sorted(re.findall(r"Python :: (3\.\d+)", pyproject))
+    assert classifiers == tested, (
+        f"pyproject advertises {classifiers}, CI tests {tested}"
+    )
+
+    for name, text in _docs().items():
+        for version in re.findall(r"Python 3\.\d+", text):
+            assert version.split()[-1] in tested, (
+                f"{name} claims support for {version}, which CI does not test"
+            )

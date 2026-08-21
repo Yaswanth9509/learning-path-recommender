@@ -7,13 +7,12 @@ name = "rungs"
 version = "1.0.0"
 description = "Prerequisite-ordered, explainable learning paths generated from a goal stated in plain language."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [{ name = "Vangara Yaswanth Sai", email = "yaswanthsaivangara95@gmail.com" }]
 license = { file = "LICENSE" }
 keywords = ["learning-path", "recommender", "fastapi", "education", "llm"]
 classifiers = [
     "Framework :: FastAPI",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Education",

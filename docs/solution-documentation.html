@@ -205,6 +205,7 @@
   <header class="cover">
     <div class="eyebrow">Solution documentation</div>
     <h1>Rungs</h1>
+    <p class="lede">Live at <a href="https://rungs-2tq7.onrender.com">rungs-2tq7.onrender.com</a></p>
     <p class="lede">Prerequisite-ordered learning paths, explained.</p>
     <p class="thesis">
       Recommending relevant courses is easy, and it is not the problem. Learners
@@ -699,7 +700,7 @@
     </div>
 
     <p>
-      525 tests run in about half a minute with no network, no API key, and
+      533 tests run in about half a minute with no network, no API key, and
       no tokens spent, at 90% branch coverage. The database is pinned to
       SQLite for the same reason the model is disabled: a configured
       <code>DATABASE_URL</code> must never send a test run to a real server. The load-bearing one is
@@ -733,7 +734,7 @@
 
     <p>
       Continuous integration runs lint, catalogue validation, and the full suite
-      on Python 3.10, 3.11 and 3.12 plus Windows, then builds the Docker image
+      on Python 3.11 and 3.12 plus Windows, then builds the Docker image
       and boots it to check <code>/api/health</code>.
     </p>
   </section>
@@ -769,7 +770,7 @@ python run.py                      # http://127.0.0.1:8000
 
 # tests and lint
 pip install -r requirements-dev.txt
-python -m pytest                   # 525 tests, offline
+python -m pytest                   # 533 tests, offline
 python -m ruff check .
 
 # or containerised

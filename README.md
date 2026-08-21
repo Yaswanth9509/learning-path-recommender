@@ -7,6 +7,10 @@
 A ladder's rungs are climbed in order, and none can be reached before the
 one below it. That is the whole idea.
 
+**Live: [rungs-2tq7.onrender.com](https://rungs-2tq7.onrender.com)** — running on Render's free
+tier against Neon Postgres, so the first request after fifteen quiet minutes
+takes about fifty seconds while the instance wakes.
+
 Recommending *relevant* courses is easy, and it is not the problem. Learners get
 stuck on **sequence**. So this system generates a roadmap from a prerequisite
 graph and a topological sort — not from a similarity ranking. An item can never
@@ -442,7 +446,7 @@ Interactive docs at `/docs` while the server runs.
 
 ## Testing
 
-**500 tests at 90% branch coverage**, all offline and deterministic — no
+**533 tests at 90% branch coverage**, all offline and deterministic — no
 network, no API key, no tokens. The database is pinned to SQLite for the
 same reason, so a configured `DATABASE_URL` can never send a test suite to
 a real server.
@@ -479,7 +483,7 @@ skills it requires. It runs across all 30 goals × 3 experience levels.
 
 </details>
 
-CI runs lint, catalog validation, and the full suite on Python 3.10–3.12 plus
+CI runs lint, catalog validation, and the full suite on Python 3.11 and 3.12 plus
 Windows, then builds the Docker image and boots it to check `/api/health`.
 
 ---
@@ -515,6 +519,10 @@ against Postgres instead. The container honours `$PORT`, so it runs unchanged
 on Render, Railway, Fly, or Cloud Run, and its `HEALTHCHECK` reports
 `healthy` once the catalogue validates and the app answers.
 
+This is deployed: **[rungs-2tq7.onrender.com](https://rungs-2tq7.onrender.com)**. `GET /api/health`
+there reports `"storage":"postgres"`, which is how you tell a real deployment
+from one silently running on a SQLite file it is about to lose.
+
 **Deploying to Render:** [`render.yaml`](render.yaml) is a ready blueprint —
 *New → Blueprint → pick this repo*, then set `GEMINI_API_KEY` when prompted (or
 skip it; the rule engine needs no key). CI builds this image and boots it on
@@ -533,7 +541,7 @@ backend/
   models.py  db.py  sqlstore.py  config.py  main.py
 frontend/
   index.html  styles.css  app.js     no build step, no CDN
-tests/                               525 tests, all offline
+tests/                               533 tests, all offline
 docs/                                architecture, screenshots, solution write-up
 .github/workflows/ci.yml             lint, tests, catalog check, Docker boot
 Dockerfile  pyproject.toml  run.py  make_zip.py
