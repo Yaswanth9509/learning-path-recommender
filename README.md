@@ -329,9 +329,16 @@ could only approximate it with a decoy.
 
 Mail goes out over Brevo's HTTPS API rather than SMTP, because Render's free
 tier blocks outbound traffic to ports 25, 465 and 587 — an SMTP transport works
-on a laptop and times out once deployed. Set `BREVO_API_KEY`, `MAIL_FROM` and
-`PUBLIC_BASE_URL` to enable it; leave them unset and the endpoint reports
-itself unavailable while the rest of the app is unaffected.
+on a laptop and times out once deployed. Set `BREVO_API_KEY` and `MAIL_FROM` to
+enable it; leave them unset and the endpoint reports itself unavailable while
+the rest of the app is unaffected.
+
+The link inside the mail needs to know where the deployment answers, and that
+is never read from the request — behind a proxy the `Host` header is whatever
+the caller sent, and a reset link is the last thing that should follow someone
+else's hostname. On Render it comes from `RENDER_EXTERNAL_URL`, which is
+injected automatically, so the first deploy already mails working links. Set
+`PUBLIC_BASE_URL` only for a custom domain.
 
 ### More than one goal at a time
 

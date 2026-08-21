@@ -580,3 +580,32 @@ def test_expired_sessions_and_reset_links_are_swept(db):
     assert db.accounts.user_for_session(live) is not None
     # And the sweep itself is safe to run against a clean table.
     _sweep_expired()
+
+
+@pytest.mark.parametrize("env,expected", [
+    ({}, "http://127.0.0.1:8000"),
+    ({"RENDER_EXTERNAL_URL": "https://rungs.onrender.com"}, "https://rungs.onrender.com"),
+    ({"RENDER_EXTERNAL_URL": "https://rungs.onrender.com/"}, "https://rungs.onrender.com"),
+    ({"PUBLIC_BASE_URL": "https://learn.example.com"}, "https://learn.example.com"),
+    # An explicit setting wins: Render's value names the onrender host even
+    # when the service answers on a custom domain.
+    ({"PUBLIC_BASE_URL": "https://learn.example.com",
+      "RENDER_EXTERNAL_URL": "https://rungs.onrender.com"}, "https://learn.example.com"),
+    # Set-but-empty must not beat the fallback.
+    ({"PUBLIC_BASE_URL": "  ",
+      "RENDER_EXTERNAL_URL": "https://rungs.onrender.com"}, "https://rungs.onrender.com"),
+])
+def test_reset_links_know_where_the_deployment_answers(monkeypatch, env, expected):
+    """A first deploy used to mail links pointing at localhost.
+
+    `PUBLIC_BASE_URL` had to be set by hand, but the hostname does not exist
+    until the service has been created, so the first deploy was always wrong
+    and only a second one fixed it.
+    """
+    from backend import mailer
+
+    monkeypatch.delenv("PUBLIC_BASE_URL", raising=False)
+    monkeypatch.delenv("RENDER_EXTERNAL_URL", raising=False)
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+    assert mailer.public_base_url() == expected

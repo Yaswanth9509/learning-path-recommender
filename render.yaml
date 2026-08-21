@@ -44,8 +44,10 @@ services:
         sync: false
       - key: MAIL_FROM_NAME
         value: Rungs
-      # Used to build the link inside the mail, so it must be this service's
-      # public URL. Set it once the Render hostname is known.
+      # Optional. Reset links fall back to RENDER_EXTERNAL_URL, which Render
+      # injects with this service's own https:// address — so the first deploy
+      # already mails working links. Set this only for a custom domain, where
+      # Render's value would still name the onrender host.
       - key: PUBLIC_BASE_URL
         sync: false
       # Lock this to your own origin once the URL is known.

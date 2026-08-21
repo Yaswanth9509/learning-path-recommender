@@ -105,6 +105,12 @@ class BrevoMailer:
             raise MailError(f"could not reach Brevo: {exc.reason}") from exc
 
 
+#: Render injects this into every web service: the full https:// URL of the
+#: service. It is the onrender.com address specifically, not a custom domain,
+#: which is why an explicit setting still wins.
+RENDER_URL_VAR = "RENDER_EXTERNAL_URL"
+
+
 def public_base_url() -> str:
     """Where this deployment answers, for building links that leave the app.
 
@@ -112,8 +118,18 @@ def public_base_url() -> str:
     whatever the caller sent, so a link built from it follows the attacker's
     hostname rather than ours — and a reset link is exactly the wrong thing to
     point somewhere else.
+
+    Falling back to Render's own variable removes a genuine trap: the hostname
+    does not exist until the service has been created, so a deploy that needed
+    `PUBLIC_BASE_URL` set by hand shipped its first reset links pointing at
+    localhost, and only a second deploy fixed them. Set it explicitly for a
+    custom domain, where Render's value would still name the onrender host.
     """
-    return os.environ.get("PUBLIC_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+    for name in ("PUBLIC_BASE_URL", RENDER_URL_VAR):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value.rstrip("/")
+    return "http://127.0.0.1:8000"
 
 
 def build_mailer():
